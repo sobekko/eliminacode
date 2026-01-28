@@ -17,6 +17,7 @@ DATA_LOCK = Lock()
 def _default_config():
     return {
         "servizio": "vendite",
+        "servizi": ["vendite", "ritiro", "prioritario"],
         "operatori": [{"nome": "Operatore 1"}],
     }
 
@@ -39,6 +40,8 @@ def _read_state():
         state["config"] = _default_config()
     if "servizio" not in state["config"]:
         state["config"]["servizio"] = _default_config()["servizio"]
+    if "servizi" not in state["config"]:
+        state["config"]["servizi"] = _default_config()["servizi"]
     if "operatori" not in state["config"]:
         state["config"]["operatori"] = _default_config()["operatori"]
     return state
@@ -128,10 +131,18 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 return
             with DATA_LOCK:
                 state = _read_state()
+                servizi = state["config"].get("servizi", [])
+                servizio = str(payload.get("servizio", "")).strip()
+                if not servizio and servizi:
+                    servizio = servizi[0]
+                if servizi and servizio not in servizi:
+                    self.send_error(HTTPStatus.BAD_REQUEST, "Servizio non valido")
+                    return
                 state["ultimo"] += 1
                 ticket = {
                     "numero": state["ultimo"],
                     "nome": nome,
+                    "servizio": servizio,
                 }
                 state["turni"].append(ticket)
                 _write_state(state)
@@ -161,10 +172,20 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
 
         if parsed.path == "/api/admin":
             servizio = str(payload.get("servizio", "")).strip()
+            servizi = payload.get("servizi", [])
             operatori = payload.get("operatori", [])
             if not servizio:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Servizio richiesto")
                 return
+            if not isinstance(servizi, list) or not servizi:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Servizi non validi")
+                return
+            servizi_puliti = [str(voce).strip() for voce in servizi if str(voce).strip()]
+            if not servizi_puliti:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Servizi non validi")
+                return
+            if servizio not in servizi_puliti:
+                servizi_puliti.insert(0, servizio)
             if not isinstance(operatori, list) or not operatori:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Operatori non validi")
                 return
@@ -178,7 +199,11 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 return
             with DATA_LOCK:
                 state = _read_state()
-                state["config"] = {"servizio": servizio, "operatori": operatori_puliti}
+                state["config"] = {
+                    "servizio": servizio,
+                    "servizi": servizi_puliti,
+                    "operatori": operatori_puliti,
+                }
                 _write_state(state)
             self._send_json({"ok": True, "config": state["config"]})
             return

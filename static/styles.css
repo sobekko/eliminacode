@@ -53,6 +53,15 @@ input {
   font-size: 1rem;
 }
 
+textarea {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
 select {
   padding: 10px 14px;
   border-radius: 10px;
@@ -116,6 +125,32 @@ button.ghost {
 .config {
   display: grid;
   gap: 12px;
+}
+
+.servizi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pill {
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #111827;
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pill.active {
+  background: #1f6feb;
+  color: #fff;
+}
+
+.servizio-selezionato {
+  display: grid;
+  gap: 4px;
 }
 
 .config .label {

@@ -7,6 +7,10 @@ const corrente = document.getElementById("corrente");
 const listaAttesa = document.getElementById("lista-attesa");
 const servizioAttivo = document.getElementById("servizio-attivo");
 const listaOperatori = document.getElementById("lista-operatori");
+const serviziContainer = document.getElementById("servizi");
+const servizioSelezionato = document.getElementById("servizio-selezionato");
+
+let servizioScelto = "";
 
 function renderState(state) {
   const attesa = state.turni || [];
@@ -14,7 +18,8 @@ function renderState(state) {
   listaAttesa.innerHTML = "";
   attesa.forEach((ticket) => {
     const li = document.createElement("li");
-    li.textContent = `#${ticket.numero} - ${ticket.nome}`;
+    const servizio = ticket.servizio ? ` (${ticket.servizio})` : "";
+    li.textContent = `#${ticket.numero} - ${ticket.nome}${servizio}`;
     listaAttesa.appendChild(li);
   });
 
@@ -31,8 +36,31 @@ function renderState(state) {
     });
   }
 
+  if (serviziContainer) {
+    serviziContainer.innerHTML = "";
+    const servizi = config.servizi || [];
+    if (!servizioScelto && servizi.length) {
+      servizioScelto = servizi[0];
+    }
+    servizi.forEach((servizio) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = servizio === servizioScelto ? "pill active" : "pill";
+      button.textContent = servizio;
+      button.addEventListener("click", () => {
+        servizioScelto = servizio;
+        renderState(state);
+      });
+      serviziContainer.appendChild(button);
+    });
+    if (servizioSelezionato) {
+      servizioSelezionato.textContent = servizioScelto || "-";
+    }
+  }
+
   if (state.corrente) {
-    corrente.textContent = `#${state.corrente.numero} - ${state.corrente.nome}`;
+    const servizio = state.corrente.servizio ? ` (${state.corrente.servizio})` : "";
+    corrente.textContent = `#${state.corrente.numero} - ${state.corrente.nome}${servizio}`;
   } else {
     corrente.textContent = "Nessuno";
   }
@@ -58,7 +86,7 @@ form.addEventListener("submit", async (event) => {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ nome }),
+    body: JSON.stringify({ nome, servizio: servizioScelto }),
   });
 
   if (response.ok) {

@@ -1,5 +1,6 @@
 const form = document.getElementById("form-admin");
 const servizioInput = document.getElementById("servizio");
+const serviziInput = document.getElementById("servizi");
 const numeroOperatoriSelect = document.getElementById("numero-operatori");
 const operatoriContainer = document.getElementById("operatori-container");
 const esitoAdmin = document.getElementById("esito-admin");
@@ -28,6 +29,7 @@ async function caricaConfig() {
   }
   const config = await response.json();
   servizioInput.value = config.servizio || "";
+  serviziInput.value = (config.servizi || []).join(", ");
   const operatori = config.operatori || [];
   numeroOperatoriSelect.value = String(operatori.length || 1);
   creaOperatoriInputs(operatori.length || 1, operatori);
@@ -41,6 +43,10 @@ numeroOperatoriSelect.addEventListener("change", () => {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const servizio = servizioInput.value.trim();
+  const servizi = serviziInput.value
+    .split(",")
+    .map((voce) => voce.trim())
+    .filter(Boolean);
   const operatori = Array.from(operatoriContainer.querySelectorAll("input")).map((input) => ({
     nome: input.value.trim(),
   }));
@@ -48,7 +54,7 @@ form.addEventListener("submit", async (event) => {
   const response = await fetch("/api/admin", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ servizio, operatori }),
+    body: JSON.stringify({ servizio, servizi, operatori }),
   });
 
   if (response.ok) {

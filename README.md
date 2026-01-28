@@ -23,6 +23,7 @@ L'interfaccia di amministrazione è su `http://<ip-locale>:8000/admin`.
 ## Funzioni
 
 - Creazione ticket con nome
+- Selezione del servizio richiesto (vendite, ritiro, prioritario)
 - Chiamata prossimo turno
 - Reset completo coda
 - Configurazione operatori e servizio tramite pagina admin

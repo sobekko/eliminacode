@@ -1,0 +1,13 @@
+{
+  "turni": [],
+  "corrente": null,
+  "ultimo": 0,
+  "config": {
+    "servizio": "vendite",
+    "operatori": [
+      {
+        "nome": "Operatore 1"
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Amministrazione Eliminacode</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Amministrazione eliminacode</h1>
+        <p>Configura operatori e servizio offerto nella rete locale.</p>
+        <a class="admin-link" href="/">Torna alla coda</a>
+      </header>
+
+      <section class="card">
+        <h2>Configurazione</h2>
+        <form id="form-admin">
+          <label for="servizio">Tipo di servizio</label>
+          <input id="servizio" name="servizio" type="text" placeholder="Es. vendite" required />
+
+          <label for="numero-operatori">Numero operatori</label>
+          <select id="numero-operatori" name="numero-operatori">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+
+          <div id="operatori-container" class="operatori"></div>
+
+          <button type="submit">Salva configurazione</button>
+        </form>
+        <div id="esito-admin" class="esito" role="status"></div>
+      </section>
+    </main>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

@@ -101,6 +101,9 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
         if parsed.path == "/" or parsed.path == "":
             self._send_file(os.path.join(STATIC_DIR, "index.html"))
             return
+        if parsed.path == "/cliente":
+            self._send_file(os.path.join(STATIC_DIR, "client.html"))
+            return
         if parsed.path == "/admin":
             self._send_file(os.path.join(STATIC_DIR, "admin.html"))
             return

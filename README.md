@@ -18,6 +18,7 @@ Variabili opzionali:
 - `ELIMINACODE_PORT` (default `8000`)
 
 Apri il browser su `http://<ip-locale>:8000`.
+Pagina clienti (tablet) su `http://<ip-locale>:8000/cliente`.
 L'interfaccia di amministrazione è su `http://<ip-locale>:8000/admin`.
 
 ## Funzioni

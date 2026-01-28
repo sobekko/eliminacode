@@ -179,3 +179,47 @@ button.ghost {
   padding: 10px 12px;
   border: 1px solid #e5e7eb;
 }
+
+.ticket {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
+  background: #f9fafb;
+}
+
+.ticket-numero {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.ticket-nome {
+  font-size: 1.1rem;
+}
+
+.ticket-orario {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  header,
+  .card:not(#ticket-card),
+  #btn-stampa {
+    display: none !important;
+  }
+
+  #ticket-card {
+    box-shadow: none;
+    border-radius: 0;
+  }
+}

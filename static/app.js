@@ -9,8 +9,11 @@ const servizioAttivo = document.getElementById("servizio-attivo");
 const listaOperatori = document.getElementById("lista-operatori");
 const serviziContainer = document.getElementById("servizi");
 const servizioSelezionato = document.getElementById("servizio-selezionato");
+const ticketDettaglio = document.getElementById("ticket-dettaglio");
+const btnStampa = document.getElementById("btn-stampa");
 
 let servizioScelto = "";
+let ultimoTicket = null;
 
 function renderState(state) {
   const attesa = state.turni || [];
@@ -94,12 +97,32 @@ form.addEventListener("submit", async (event) => {
     esito.textContent = `Ticket creato: #${data.ticket.numero}`;
     esito.className = "esito ok";
     inputNome.value = "";
+    ultimoTicket = data.ticket;
+    if (ticketDettaglio) {
+      const servizio = ultimoTicket.servizio ? ` (${ultimoTicket.servizio})` : "";
+      ticketDettaglio.innerHTML = `
+        <div class="ticket-numero">#${ultimoTicket.numero}</div>
+        <div class="ticket-nome">${ultimoTicket.nome}${servizio}</div>
+        <div class="ticket-orario">${new Date().toLocaleTimeString()}</div>
+      `;
+    }
     fetchState();
   } else {
     esito.textContent = "Errore nella creazione del ticket.";
     esito.className = "esito error";
   }
 });
+
+if (btnStampa) {
+  btnStampa.addEventListener("click", () => {
+    if (!ultimoTicket) {
+      esito.textContent = "Nessun ticket da stampare.";
+      esito.className = "esito error";
+      return;
+    }
+    window.print();
+  });
+}
 
 btnNext.addEventListener("click", async () => {
   const response = await fetch("/api/turni/next", { method: "POST" });

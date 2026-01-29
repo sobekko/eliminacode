@@ -9,6 +9,11 @@
       "ritiro",
       "prioritario"
     ],
+    "priorita": {
+      "vendite": 2,
+      "ritiro": 2,
+      "prioritario": 1
+    },
     "operatori": [
       {
         "nome": "Operatore 1"

@@ -18,6 +18,7 @@ def _default_config():
     return {
         "servizio": "vendite",
         "servizi": ["vendite", "ritiro", "prioritario"],
+        "priorita": {"vendite": 2, "ritiro": 2, "prioritario": 1},
         "operatori": [{"nome": "Operatore 1"}],
     }
 
@@ -42,6 +43,8 @@ def _read_state():
         state["config"]["servizio"] = _default_config()["servizio"]
     if "servizi" not in state["config"]:
         state["config"]["servizi"] = _default_config()["servizi"]
+    if "priorita" not in state["config"]:
+        state["config"]["priorita"] = _default_config()["priorita"]
     if "operatori" not in state["config"]:
         state["config"]["operatori"] = _default_config()["operatori"]
     return state
@@ -140,8 +143,14 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 if servizi and servizio not in servizi:
                     self.send_error(HTTPStatus.BAD_REQUEST, "Servizio non valido")
                     return
+                priorita_config = state["config"].get("priorita", {})
+                priorita = int(priorita_config.get(servizio, 3))
                 state["ultimo"] += 1
-                ticket = {"numero": state["ultimo"], "servizio": servizio}
+                ticket = {
+                    "numero": state["ultimo"],
+                    "servizio": servizio,
+                    "priorita": priorita,
+                }
                 state["turni"].append(ticket)
                 _write_state(state)
             self._send_json({"ok": True, "ticket": ticket}, status=HTTPStatus.CREATED)
@@ -151,7 +160,16 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             with DATA_LOCK:
                 state = _read_state()
                 if state["turni"]:
-                    state["corrente"] = state["turni"].pop(0)
+                    priorita_min = min(ticket.get("priorita", 3) for ticket in state["turni"])
+                    indice = next(
+                        (
+                            i
+                            for i, ticket in enumerate(state["turni"])
+                            if ticket.get("priorita", 3) == priorita_min
+                        ),
+                        0,
+                    )
+                    state["corrente"] = state["turni"].pop(indice)
                 else:
                     state["corrente"] = None
                 _write_state(state)
@@ -171,6 +189,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
         if parsed.path == "/api/admin":
             servizio = str(payload.get("servizio", "")).strip()
             servizi = payload.get("servizi", [])
+            priorita = payload.get("priorita", {})
             operatori = payload.get("operatori", [])
             if not servizio:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Servizio richiesto")
@@ -184,6 +203,16 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 return
             if servizio not in servizi_puliti:
                 servizi_puliti.insert(0, servizio)
+            if not isinstance(priorita, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Priorità non valide")
+                return
+            priorita_pulita = {}
+            for voce in servizi_puliti:
+                valore = int(priorita.get(voce, 3))
+                if valore < 1 or valore > 3:
+                    self.send_error(HTTPStatus.BAD_REQUEST, "Priorità non valide")
+                    return
+                priorita_pulita[voce] = valore
             if not isinstance(operatori, list) or not operatori:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Operatori non validi")
                 return
@@ -200,6 +229,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 state["config"] = {
                     "servizio": servizio,
                     "servizi": servizi_puliti,
+                    "priorita": priorita_pulita,
                     "operatori": operatori_puliti,
                 }
                 _write_state(state)

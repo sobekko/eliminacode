@@ -26,6 +26,7 @@ L'interfaccia di amministrazione è su `http://<ip-locale>:8000/admin`.
 
 - Creazione ticket cliente dalla pagina dedicata
 - Selezione del servizio richiesto (vendite, ritiro, prioritario)
+- Priorità per servizio (1 = alta, 3 = bassa) configurabile in admin
 - Stampa del ticket cliente
 - Chiamata prossimo turno
 - Reset completo coda

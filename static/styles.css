@@ -177,6 +177,22 @@ button.ghost {
   margin-bottom: 10px;
 }
 
+.priorita {
+  display: grid;
+  gap: 10px;
+}
+
+.priorita-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
 .lista {
   list-style: none;
   padding: 0;

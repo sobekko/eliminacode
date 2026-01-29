@@ -99,6 +99,11 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     state = _read_state()
                 self._send_json(state["config"])
                 return
+            if parsed.path == "/api/display":
+                with DATA_LOCK:
+                    state = _read_state()
+                self._send_json({"corrente": state.get("corrente")})
+                return
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint non trovato")
             return
         if parsed.path == "/" or parsed.path == "":
@@ -109,6 +114,9 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/operatore":
             self._send_file(os.path.join(STATIC_DIR, "operatore.html"))
+            return
+        if parsed.path == "/display":
+            self._send_file(os.path.join(STATIC_DIR, "display.html"))
             return
         if parsed.path == "/admin":
             self._send_file(os.path.join(STATIC_DIR, "admin.html"))
@@ -159,6 +167,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
         if parsed.path == "/api/turni/next":
             with DATA_LOCK:
                 state = _read_state()
+                operatore = str(payload.get("operatore", "")).strip()
                 if state["turni"]:
                     priorita_min = min(ticket.get("priorita", 3) for ticket in state["turni"])
                     indice = next(
@@ -170,6 +179,8 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         0,
                     )
                     state["corrente"] = state["turni"].pop(indice)
+                    if operatore:
+                        state["corrente"]["operatore"] = operatore
                 else:
                     state["corrente"] = None
                 _write_state(state)

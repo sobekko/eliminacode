@@ -20,6 +20,7 @@ Variabili opzionali:
 Apri il browser su `http://<ip-locale>:8000`.
 Pagina clienti (tablet) su `http://<ip-locale>:8000/cliente`.
 Pagina operatori su `http://<ip-locale>:8000/operatore`.
+Display chiamata su `http://<ip-locale>:8000/display`.
 L'interfaccia di amministrazione è su `http://<ip-locale>:8000/admin`.
 
 ## Funzioni

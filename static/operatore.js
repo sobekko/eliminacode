@@ -24,14 +24,23 @@ async function caricaOperatori() {
 }
 
 async function chiamaProssimo() {
-  const response = await fetch("/api/turni/next", { method: "POST" });
+  const response = await fetch("/api/turni/next", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ operatore: selectOperatore.value }),
+  });
   if (!response.ok) {
     return;
   }
   const data = await response.json();
   if (data.corrente) {
     const servizio = data.corrente.servizio ? ` (${data.corrente.servizio})` : "";
-    const operatore = selectOperatore.value ? ` - ${selectOperatore.value}` : "";
+    let operatore = "";
+    if (data.corrente.operatore) {
+      operatore = ` - ${data.corrente.operatore}`;
+    } else if (selectOperatore.value) {
+      operatore = ` - ${selectOperatore.value}`;
+    }
     corrente.textContent = `#${data.corrente.numero}${servizio}${operatore}`;
   } else {
     corrente.textContent = "Nessuno";
@@ -66,6 +75,7 @@ async function aggiornaCoda() {
 
 btnNext.addEventListener("click", () => {
   chiamaProssimo();
+  aggiornaCoda();
 });
 
 caricaOperatori();

@@ -135,6 +135,11 @@ button.ghost {
   gap: 12px;
 }
 
+.queue-summary {
+  display: grid;
+  gap: 12px;
+}
+
 .servizi {
   display: flex;
   flex-wrap: wrap;

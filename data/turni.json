@@ -14,6 +14,11 @@
       "ritiro": 2,
       "prioritario": 1
     },
+    "prefissi": {
+      "vendite": "V",
+      "ritiro": "R",
+      "prioritario": "P"
+    },
     "operatori": [
       {
         "nome": "Operatore 1"

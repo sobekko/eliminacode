@@ -19,6 +19,7 @@ def _default_config():
         "servizio": "vendite",
         "servizi": ["vendite", "ritiro", "prioritario"],
         "priorita": {"vendite": 2, "ritiro": 2, "prioritario": 1},
+        "prefissi": {"vendite": "V", "ritiro": "R", "prioritario": "P"},
         "operatori": [{"nome": "Operatore 1"}],
     }
 
@@ -45,6 +46,8 @@ def _read_state():
         state["config"]["servizi"] = _default_config()["servizi"]
     if "priorita" not in state["config"]:
         state["config"]["priorita"] = _default_config()["priorita"]
+    if "prefissi" not in state["config"]:
+        state["config"]["prefissi"] = _default_config()["prefissi"]
     if "operatori" not in state["config"]:
         state["config"]["operatori"] = _default_config()["operatori"]
     return state
@@ -152,12 +155,14 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     self.send_error(HTTPStatus.BAD_REQUEST, "Servizio non valido")
                     return
                 priorita_config = state["config"].get("priorita", {})
+                prefissi = state["config"].get("prefissi", {})
                 priorita = int(priorita_config.get(servizio, 3))
                 state["ultimo"] += 1
                 ticket = {
                     "numero": state["ultimo"],
                     "servizio": servizio,
                     "priorita": priorita,
+                    "prefisso": prefissi.get(servizio, ""),
                 }
                 state["turni"].append(ticket)
                 _write_state(state)
@@ -201,6 +206,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             servizio = str(payload.get("servizio", "")).strip()
             servizi = payload.get("servizi", [])
             priorita = payload.get("priorita", {})
+            prefissi = payload.get("prefissi", {})
             operatori = payload.get("operatori", [])
             if not servizio:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Servizio richiesto")
@@ -224,6 +230,16 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     self.send_error(HTTPStatus.BAD_REQUEST, "Priorità non valide")
                     return
                 priorita_pulita[voce] = valore
+            if not isinstance(prefissi, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Prefissi non validi")
+                return
+            prefissi_puliti = {}
+            for voce in servizi_puliti:
+                valore = str(prefissi.get(voce, "")).strip().upper()
+                if len(valore) > 1:
+                    self.send_error(HTTPStatus.BAD_REQUEST, "Prefissi non validi")
+                    return
+                prefissi_puliti[voce] = valore
             if not isinstance(operatori, list) or not operatori:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Operatori non validi")
                 return
@@ -241,6 +257,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     "servizio": servizio,
                     "servizi": servizi_puliti,
                     "priorita": priorita_pulita,
+                    "prefissi": prefissi_puliti,
                     "operatori": operatori_puliti,
                 }
                 _write_state(state)

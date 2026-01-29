@@ -9,7 +9,8 @@ function renderDisplay(corrente) {
     operatoreEl.textContent = "";
     return;
   }
-  numeroEl.textContent = `#${corrente.numero}`;
+  const prefisso = corrente.prefisso ? `${corrente.prefisso}` : "";
+  numeroEl.textContent = `#${prefisso}${corrente.numero}`;
   servizioEl.textContent = corrente.servizio ? `Servizio: ${corrente.servizio}` : "Servizio: -";
   operatoreEl.textContent = corrente.operatore
     ? `Operatore: ${corrente.operatore}`

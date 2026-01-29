@@ -12,8 +12,9 @@ function renderState(state) {
   attesa.forEach((ticket) => {
     const li = document.createElement("li");
     const servizio = ticket.servizio ? ` (${ticket.servizio})` : "";
+    const prefisso = ticket.prefisso ? `${ticket.prefisso}` : "";
     const nome = ticket.nome ? ` - ${ticket.nome}` : "";
-    li.textContent = `#${ticket.numero}${nome}${servizio}`;
+    li.textContent = `#${prefisso}${ticket.numero}${nome}${servizio}`;
     listaAttesa.appendChild(li);
   });
 
@@ -32,8 +33,9 @@ function renderState(state) {
 
   if (state.corrente) {
     const servizio = state.corrente.servizio ? ` (${state.corrente.servizio})` : "";
+    const prefisso = state.corrente.prefisso ? `${state.corrente.prefisso}` : "";
     const nome = state.corrente.nome ? ` - ${state.corrente.nome}` : "";
-    corrente.textContent = `#${state.corrente.numero}${nome}${servizio}`;
+    corrente.textContent = `#${prefisso}${state.corrente.numero}${nome}${servizio}`;
   } else {
     corrente.textContent = "Nessuno";
   }

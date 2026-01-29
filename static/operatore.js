@@ -35,13 +35,14 @@ async function chiamaProssimo() {
   const data = await response.json();
   if (data.corrente) {
     const servizio = data.corrente.servizio ? ` (${data.corrente.servizio})` : "";
+    const prefisso = data.corrente.prefisso ? `${data.corrente.prefisso}` : "";
     let operatore = "";
     if (data.corrente.operatore) {
       operatore = ` - ${data.corrente.operatore}`;
     } else if (selectOperatore.value) {
       operatore = ` - ${selectOperatore.value}`;
     }
-    corrente.textContent = `#${data.corrente.numero}${servizio}${operatore}`;
+    corrente.textContent = `#${prefisso}${data.corrente.numero}${servizio}${operatore}`;
   } else {
     corrente.textContent = "Nessuno";
   }

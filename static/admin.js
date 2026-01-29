@@ -3,6 +3,10 @@ const servizioInput = document.getElementById("servizio");
 const serviziInput = document.getElementById("servizi");
 const prioritaContainer = document.getElementById("priorita-container");
 const prefissiContainer = document.getElementById("prefissi-container");
+const displayUltimi = document.getElementById("display-ultimi");
+const displayNumeroUltimi = document.getElementById("display-numero-ultimi");
+const displayLogo = document.getElementById("display-logo");
+const displayImmagini = document.getElementById("display-immagini");
 const numeroOperatoriSelect = document.getElementById("numero-operatori");
 const operatoriContainer = document.getElementById("operatori-container");
 const esitoAdmin = document.getElementById("esito-admin");
@@ -103,6 +107,11 @@ async function caricaConfig() {
   creaOperatoriInputs(operatori.length || 1, operatori);
   renderPriorita(config.servizi || [], config.priorita || {});
   renderPrefissi(config.servizi || [], config.prefissi || {});
+  const display = config.display || {};
+  displayUltimi.checked = Boolean(display.mostra_ultimi);
+  displayNumeroUltimi.value = String(display.numero_ultimi ?? 5);
+  displayLogo.value = display.logo || "";
+  displayImmagini.value = (display.immagini || []).join(", ");
 }
 
 numeroOperatoriSelect.addEventListener("change", () => {
@@ -136,6 +145,15 @@ form.addEventListener("submit", async (event) => {
   prefissiContainer.querySelectorAll("input").forEach((input) => {
     prefissi[input.dataset.servizio] = input.value.trim();
   });
+  const display = {
+    mostra_ultimi: displayUltimi.checked,
+    numero_ultimi: Number(displayNumeroUltimi.value || 5),
+    logo: displayLogo.value.trim(),
+    immagini: displayImmagini.value
+      .split(",")
+      .map((voce) => voce.trim())
+      .filter(Boolean),
+  };
   const operatori = Array.from(operatoriContainer.querySelectorAll("input")).map((input) => ({
     nome: input.value.trim(),
   }));
@@ -143,7 +161,7 @@ form.addEventListener("submit", async (event) => {
   const response = await fetch("/api/admin", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ servizio, servizi, priorita, prefissi, operatori }),
+    body: JSON.stringify({ servizio, servizi, priorita, prefissi, display, operatori }),
   });
 
   if (response.ok) {

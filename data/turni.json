@@ -2,6 +2,7 @@
   "turni": [],
   "corrente": null,
   "ultimo": 0,
+  "storico": [],
   "config": {
     "servizio": "vendite",
     "servizi": [
@@ -18,6 +19,12 @@
       "vendite": "V",
       "ritiro": "R",
       "prioritario": "P"
+    },
+    "display": {
+      "mostra_ultimi": true,
+      "numero_ultimi": 5,
+      "logo": "",
+      "immagini": []
     },
     "operatori": [
       {

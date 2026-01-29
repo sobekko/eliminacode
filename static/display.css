@@ -27,6 +27,14 @@
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
 }
 
+.display-logo {
+  max-width: 220px;
+  max-height: 120px;
+  object-fit: contain;
+  margin: 0 auto;
+  display: none;
+}
+
 .display-numero {
   font-size: 5rem;
   font-weight: 800;
@@ -35,4 +43,53 @@
 .display-servizio,
 .display-operatore {
   font-size: 1.6rem;
+}
+
+.display-extra {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  width: min(900px, 100%);
+}
+
+.display-history {
+  background: #1e293b;
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.display-history h2 {
+  margin: 0 0 12px;
+  font-size: 1.4rem;
+}
+
+.display-history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.display-history li {
+  background: #334155;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+}
+
+.display-carousel {
+  background: #1e293b;
+  border-radius: 20px;
+  padding: 20px;
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+}
+
+.display-carousel img {
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  display: none;
 }

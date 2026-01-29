@@ -29,6 +29,20 @@
           <label>Prefisso per servizio (0-1 caratteri)</label>
           <div id="prefissi-container" class="priorita"></div>
 
+          <label>Display chiamata</label>
+          <div class="display-config">
+            <label class="inline">
+              <input type="checkbox" id="display-ultimi" />
+              Mostra ultimi numeri chiamati
+            </label>
+            <label for="display-numero-ultimi">Numero ultimi</label>
+            <input id="display-numero-ultimi" type="number" min="1" max="10" value="5" />
+            <label for="display-logo">Logo (URL)</label>
+            <input id="display-logo" type="text" placeholder="https://..." />
+            <label for="display-immagini">Immagini (URL separati da virgola)</label>
+            <textarea id="display-immagini" rows="3" placeholder="https://..., https://..."></textarea>
+          </div>
+
           <label for="numero-operatori">Numero operatori</label>
           <select id="numero-operatori" name="numero-operatori">
             <option value="1">1</option>

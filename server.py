@@ -20,6 +20,12 @@ def _default_config():
         "servizi": ["vendite", "ritiro", "prioritario"],
         "priorita": {"vendite": 2, "ritiro": 2, "prioritario": 1},
         "prefissi": {"vendite": "V", "ritiro": "R", "prioritario": "P"},
+        "display": {
+            "mostra_ultimi": True,
+            "numero_ultimi": 5,
+            "logo": "",
+            "immagini": [],
+        },
         "operatori": [{"nome": "Operatore 1"}],
     }
 
@@ -29,7 +35,13 @@ def _ensure_data_file():
     if not os.path.exists(DATA_FILE):
         with open(DATA_FILE, "w", encoding="utf-8") as handle:
             json.dump(
-                {"turni": [], "corrente": None, "ultimo": 0, "config": _default_config()},
+                {
+                    "turni": [],
+                    "corrente": None,
+                    "ultimo": 0,
+                    "storico": [],
+                    "config": _default_config(),
+                },
                 handle,
             )
 
@@ -48,8 +60,12 @@ def _read_state():
         state["config"]["priorita"] = _default_config()["priorita"]
     if "prefissi" not in state["config"]:
         state["config"]["prefissi"] = _default_config()["prefissi"]
+    if "display" not in state["config"]:
+        state["config"]["display"] = _default_config()["display"]
     if "operatori" not in state["config"]:
         state["config"]["operatori"] = _default_config()["operatori"]
+    if "storico" not in state:
+        state["storico"] = []
     return state
 
 
@@ -105,7 +121,13 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             if parsed.path == "/api/display":
                 with DATA_LOCK:
                     state = _read_state()
-                self._send_json({"corrente": state.get("corrente")})
+                self._send_json(
+                    {
+                        "corrente": state.get("corrente"),
+                        "storico": state.get("storico", []),
+                        "display": state["config"].get("display", {}),
+                    }
+                )
                 return
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint non trovato")
             return
@@ -186,6 +208,16 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     state["corrente"] = state["turni"].pop(indice)
                     if operatore:
                         state["corrente"]["operatore"] = operatore
+                    storico = state.get("storico", [])
+                    storico.append(
+                        {
+                            "numero": state["corrente"]["numero"],
+                            "servizio": state["corrente"].get("servizio", ""),
+                            "prefisso": state["corrente"].get("prefisso", ""),
+                            "operatore": state["corrente"].get("operatore", ""),
+                        }
+                    )
+                    state["storico"] = storico[-20:]
                 else:
                     state["corrente"] = None
                 _write_state(state)
@@ -198,6 +230,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 state["turni"] = []
                 state["corrente"] = None
                 state["ultimo"] = 0
+                state["storico"] = []
                 _write_state(state)
             self._send_json({"ok": True, "state": state})
             return
@@ -207,6 +240,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             servizi = payload.get("servizi", [])
             priorita = payload.get("priorita", {})
             prefissi = payload.get("prefissi", {})
+            display = payload.get("display", {})
             operatori = payload.get("operatori", [])
             if not servizio:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Servizio richiesto")
@@ -240,6 +274,20 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     self.send_error(HTTPStatus.BAD_REQUEST, "Prefissi non validi")
                     return
                 prefissi_puliti[voce] = valore
+            if not isinstance(display, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            mostra_ultimi = bool(display.get("mostra_ultimi", True))
+            numero_ultimi = int(display.get("numero_ultimi", 5))
+            if numero_ultimi < 1 or numero_ultimi > 10:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            logo = str(display.get("logo", "")).strip()
+            immagini = display.get("immagini", [])
+            if not isinstance(immagini, list):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            immagini_pulite = [str(url).strip() for url in immagini if str(url).strip()]
             if not isinstance(operatori, list) or not operatori:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Operatori non validi")
                 return
@@ -258,6 +306,12 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     "servizi": servizi_puliti,
                     "priorita": priorita_pulita,
                     "prefissi": prefissi_puliti,
+                    "display": {
+                        "mostra_ultimi": mostra_ultimi,
+                        "numero_ultimi": numero_ultimi,
+                        "logo": logo,
+                        "immagini": immagini_pulite,
+                    },
                     "operatori": operatori_puliti,
                 }
                 _write_state(state)

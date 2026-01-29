@@ -84,6 +84,13 @@ label {
   display: block;
 }
 
+label.inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
 form {
   display: grid;
   gap: 12px;
@@ -192,6 +199,15 @@ button.ghost {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.display-config {
+  display: grid;
+  gap: 10px;
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid #e5e7eb;

@@ -35,6 +35,7 @@ L'interfaccia di amministrazione è su `http://<ip-locale>:8000/admin`.
 - Chiamata prossimo turno
 - Reset completo coda
 - Configurazione operatori e servizio tramite pagina admin
+- Statistiche con attesa media e riepiloghi per giorno/settimana/mese
 
 ## Note rete locale
 

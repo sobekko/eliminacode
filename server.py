@@ -2,6 +2,7 @@
 import json
 import os
 import sqlite3
+from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Lock
@@ -104,6 +105,10 @@ def _read_state():
         state["config"]["operatori"] = _default_config()["operatori"]
     if "storico" not in state:
         state["storico"] = []
+    now_iso = datetime.now(timezone.utc).isoformat()
+    for ticket in state.get("turni", []):
+        if "creato_il" not in ticket:
+            ticket["creato_il"] = now_iso
     return state
 
 
@@ -176,6 +181,16 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     totale_chiamate = conn.execute("SELECT COUNT(*) AS count FROM chiamate").fetchone()[
                         "count"
                     ]
+                    attesa_media = conn.execute(
+                        """
+                        SELECT AVG((julianday(c.chiamato_il) - julianday(t.creato_il)) * 86400.0) AS media
+                        FROM chiamate c
+                        JOIN tickets t
+                          ON t.numero = c.numero
+                         AND t.servizio = c.servizio
+                         AND t.prefisso = c.prefisso
+                        """
+                    ).fetchone()["media"]
                     per_servizio = conn.execute(
                         """
                         SELECT servizio, COUNT(*) AS count
@@ -200,10 +215,38 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         LIMIT 10
                         """
                     ).fetchall()
+                    per_giorno = conn.execute(
+                        """
+                        SELECT date(creato_il) AS periodo, COUNT(*) AS count
+                        FROM tickets
+                        GROUP BY date(creato_il)
+                        ORDER BY periodo DESC
+                        LIMIT 30
+                        """
+                    ).fetchall()
+                    per_settimana = conn.execute(
+                        """
+                        SELECT strftime('%Y-W%W', creato_il) AS periodo, COUNT(*) AS count
+                        FROM tickets
+                        GROUP BY strftime('%Y-W%W', creato_il)
+                        ORDER BY periodo DESC
+                        LIMIT 20
+                        """
+                    ).fetchall()
+                    per_mese = conn.execute(
+                        """
+                        SELECT strftime('%Y-%m', creato_il) AS periodo, COUNT(*) AS count
+                        FROM tickets
+                        GROUP BY strftime('%Y-%m', creato_il)
+                        ORDER BY periodo DESC
+                        LIMIT 12
+                        """
+                    ).fetchall()
                 self._send_json(
                     {
                         "totale_ticket": totale_ticket,
                         "totale_chiamate": totale_chiamate,
+                        "attesa_media_secondi": attesa_media,
                         "per_servizio": [
                             {"servizio": row["servizio"], "count": row["count"]}
                             for row in per_servizio
@@ -221,6 +264,18 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                                 "chiamato_il": row["chiamato_il"],
                             }
                             for row in ultimi
+                        ],
+                        "per_giorno": [
+                            {"periodo": row["periodo"], "count": row["count"]}
+                            for row in per_giorno
+                        ],
+                        "per_settimana": [
+                            {"periodo": row["periodo"], "count": row["count"]}
+                            for row in per_settimana
+                        ],
+                        "per_mese": [
+                            {"periodo": row["periodo"], "count": row["count"]}
+                            for row in per_mese
                         ],
                     }
                 )
@@ -278,12 +333,14 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 priorita_config = state["config"].get("priorita", {})
                 prefissi = state["config"].get("prefissi", {})
                 priorita = int(priorita_config.get(servizio, 3))
+                creato_il = datetime.now(timezone.utc).isoformat()
                 state["ultimo"] += 1
                 ticket = {
                     "numero": state["ultimo"],
                     "servizio": servizio,
                     "priorita": priorita,
                     "prefisso": prefissi.get(servizio, ""),
+                    "creato_il": creato_il,
                 }
                 state["turni"].append(ticket)
                 _write_state(state)

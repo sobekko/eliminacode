@@ -151,6 +151,18 @@ button.ghost {
   gap: 12px;
 }
 
+.queue-detail {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
 .servizi {
   display: flex;
   flex-wrap: wrap;

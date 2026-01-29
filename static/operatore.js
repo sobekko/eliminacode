@@ -3,6 +3,7 @@ const btnNext = document.getElementById("btn-next");
 const corrente = document.getElementById("corrente");
 const totaleCoda = document.getElementById("totale-coda");
 const codaServizi = document.getElementById("coda-servizi");
+const codaDettaglio = document.getElementById("coda-dettaglio");
 
 async function caricaOperatori() {
   const response = await fetch("/api/admin");
@@ -63,6 +64,24 @@ function renderCoda(turni) {
       li.textContent = `${servizio}: ${count}`;
       codaServizi.appendChild(li);
     });
+  codaDettaglio.innerHTML = "";
+  if (!turni.length) {
+    const li = document.createElement("li");
+    li.textContent = "Nessun cliente in attesa";
+    codaDettaglio.appendChild(li);
+    return;
+  }
+  turni.forEach((ticket) => {
+    const li = document.createElement("li");
+    const prefisso = ticket.prefisso ? ticket.prefisso : "";
+    const servizio = ticket.servizio ? ` (${ticket.servizio})` : "";
+    const creatoIl = ticket.creato_il ? new Date(ticket.creato_il).getTime() : Date.now();
+    const diff = Math.max(0, Math.floor((Date.now() - creatoIl) / 1000));
+    const minuti = Math.floor(diff / 60);
+    const secondi = diff % 60;
+    li.textContent = `#${prefisso}${ticket.numero}${servizio} - attesa ${minuti}m ${secondi}s`;
+    codaDettaglio.appendChild(li);
+  });
 }
 
 async function aggiornaCoda() {

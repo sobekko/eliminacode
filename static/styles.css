@@ -25,6 +25,10 @@ body {
   max-width: 720px;
 }
 
+.stats-page {
+  max-width: 900px;
+}
+
 header {
   display: grid;
   gap: 6px;

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Statistiche eliminacode</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container stats-page">
+      <header>
+        <h1>Statistiche eliminacode</h1>
+        <p>Dati raccolti dal database locale.</p>
+      </header>
+
+      <section class="card">
+        <h2>Totali</h2>
+        <div class="stats-grid">
+          <div>
+            <span class="label">Ticket creati</span>
+            <strong id="stat-ticket">0</strong>
+          </div>
+          <div>
+            <span class="label">Chiamate effettuate</span>
+            <strong id="stat-chiamate">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Ticket per servizio</h2>
+        <ul id="stat-servizi" class="lista"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Chiamate per operatore</h2>
+        <ul id="stat-operatori" class="lista"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Ultime chiamate</h2>
+        <ul id="stat-ultime" class="lista"></ul>
+      </section>
+    </main>
+
+    <script src="stat.js"></script>
+  </body>
+</html>

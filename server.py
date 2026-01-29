@@ -167,6 +167,64 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     }
                 )
                 return
+            if parsed.path == "/api/stats":
+                with sqlite3.connect(DB_FILE) as conn:
+                    conn.row_factory = sqlite3.Row
+                    totale_ticket = conn.execute("SELECT COUNT(*) AS count FROM tickets").fetchone()[
+                        "count"
+                    ]
+                    totale_chiamate = conn.execute("SELECT COUNT(*) AS count FROM chiamate").fetchone()[
+                        "count"
+                    ]
+                    per_servizio = conn.execute(
+                        """
+                        SELECT servizio, COUNT(*) AS count
+                        FROM tickets
+                        GROUP BY servizio
+                        ORDER BY servizio
+                        """
+                    ).fetchall()
+                    chiamate_per_operatore = conn.execute(
+                        """
+                        SELECT operatore, COUNT(*) AS count
+                        FROM chiamate
+                        GROUP BY operatore
+                        ORDER BY count DESC
+                        """
+                    ).fetchall()
+                    ultimi = conn.execute(
+                        """
+                        SELECT numero, servizio, prefisso, operatore, chiamato_il
+                        FROM chiamate
+                        ORDER BY id DESC
+                        LIMIT 10
+                        """
+                    ).fetchall()
+                self._send_json(
+                    {
+                        "totale_ticket": totale_ticket,
+                        "totale_chiamate": totale_chiamate,
+                        "per_servizio": [
+                            {"servizio": row["servizio"], "count": row["count"]}
+                            for row in per_servizio
+                        ],
+                        "chiamate_per_operatore": [
+                            {"operatore": row["operatore"], "count": row["count"]}
+                            for row in chiamate_per_operatore
+                        ],
+                        "ultime_chiamate": [
+                            {
+                                "numero": row["numero"],
+                                "servizio": row["servizio"],
+                                "prefisso": row["prefisso"],
+                                "operatore": row["operatore"],
+                                "chiamato_il": row["chiamato_il"],
+                            }
+                            for row in ultimi
+                        ],
+                    }
+                )
+                return
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint non trovato")
             return
         if parsed.path == "/" or parsed.path == "":
@@ -180,6 +238,9 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/display":
             self._send_file(os.path.join(STATIC_DIR, "display.html"))
+            return
+        if parsed.path == "/stat":
+            self._send_file(os.path.join(STATIC_DIR, "stat.html"))
             return
         if parsed.path == "/admin":
             self._send_file(os.path.join(STATIC_DIR, "admin.html"))

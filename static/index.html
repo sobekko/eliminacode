@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Eliminacode Locale</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Eliminacode locale</h1>
+        <p>Gestione turni in rete locale senza dipendenze esterne.</p>
+        <a class="admin-link" href="/admin">Apri amministrazione</a>
+      </header>
+
+      <section class="card">
+        <h2>Sportello clienti</h2>
+        <p>Per generare un ticket usa la pagina dedicata ai clienti.</p>
+        <a class="admin-link" href="/cliente">Apri pagina clienti</a>
+      </section>
+
+      <section class="card">
+        <h2>Chiamata turno</h2>
+        <div class="azioni">
+          <button id="btn-next">Chiama prossimo</button>
+          <button id="btn-reset" class="ghost">Reset</button>
+        </div>
+        <div class="corrente">
+          <span>In chiamata</span>
+          <strong id="corrente">Nessuno</strong>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Configurazione attiva</h2>
+        <div class="config">
+          <div>
+            <span class="label">Servizio</span>
+            <strong id="servizio-attivo">-</strong>
+          </div>
+          <div>
+            <span class="label">Operatori</span>
+            <ul id="lista-operatori" class="lista"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Attesa</h2>
+        <ul id="lista-attesa" class="lista"></ul>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

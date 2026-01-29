@@ -1,0 +1,233 @@
+:root {
+  color-scheme: light;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #f4f5f7;
+  color: #1b1f24;
+}
+
+body {
+  margin: 0;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+  display: grid;
+  gap: 20px;
+}
+
+.client-page {
+  max-width: 720px;
+}
+
+header {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-link {
+  color: #1f6feb;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.admin-link:hover {
+  text-decoration: underline;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+}
+
+textarea {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  background: #fff;
+}
+
+label {
+  font-weight: 600;
+  margin-top: 12px;
+  display: block;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #1f6feb;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.ghost {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.azioni {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.esito {
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.esito.ok {
+  color: #0f766e;
+}
+
+.esito.error {
+  color: #b91c1c;
+}
+
+.corrente {
+  margin-top: 16px;
+  font-size: 1.2rem;
+  display: grid;
+  gap: 4px;
+}
+
+.config {
+  display: grid;
+  gap: 12px;
+}
+
+.servizi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.servizi-kiosk {
+  justify-content: center;
+}
+
+.pill {
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #111827;
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pill.active {
+  background: #1f6feb;
+  color: #fff;
+}
+
+.servizio-selezionato {
+  display: grid;
+  gap: 4px;
+}
+
+.config .label {
+  display: block;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.operatori {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.lista li {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.ticket {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
+  background: #f9fafb;
+}
+
+.ticket-numero {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.ticket-nome {
+  font-size: 1.1rem;
+}
+
+.ticket-orario {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  header,
+  .card:not(#ticket-card),
+  #btn-stampa {
+    display: none !important;
+  }
+
+  #ticket-card {
+    box-shadow: none;
+    border-radius: 0;
+  }
+}

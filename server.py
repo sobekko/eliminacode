@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import sqlite3
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Lock
@@ -9,6 +10,7 @@ from urllib.parse import urlparse
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DATA_FILE = os.path.join(DATA_DIR, "turni.json")
+DB_FILE = os.path.join(DATA_DIR, "eliminacode.db")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 DATA_LOCK = Lock()
@@ -44,6 +46,42 @@ def _ensure_data_file():
                 },
                 handle,
             )
+
+
+def _init_db():
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS tickets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                numero INTEGER NOT NULL,
+                servizio TEXT NOT NULL,
+                prefisso TEXT NOT NULL,
+                priorita INTEGER NOT NULL,
+                creato_il TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS chiamate (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                numero INTEGER NOT NULL,
+                servizio TEXT NOT NULL,
+                prefisso TEXT NOT NULL,
+                operatore TEXT NOT NULL,
+                chiamato_il TEXT NOT NULL
+            )
+            """
+        )
+        conn.commit()
+
+
+def _db_execute(query, params):
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.execute(query, params)
+        conn.commit()
 
 
 def _read_state():
@@ -188,6 +226,10 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 }
                 state["turni"].append(ticket)
                 _write_state(state)
+            _db_execute(
+                "INSERT INTO tickets (numero, servizio, prefisso, priorita, creato_il) VALUES (?, ?, ?, ?, datetime('now'))",
+                (ticket["numero"], ticket["servizio"], ticket["prefisso"], ticket["priorita"]),
+            )
             self._send_json({"ok": True, "ticket": ticket}, status=HTTPStatus.CREATED)
             return
 
@@ -218,6 +260,15 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         }
                     )
                     state["storico"] = storico[-20:]
+                    _db_execute(
+                        "INSERT INTO chiamate (numero, servizio, prefisso, operatore, chiamato_il) VALUES (?, ?, ?, ?, datetime('now'))",
+                        (
+                            state["corrente"]["numero"],
+                            state["corrente"].get("servizio", ""),
+                            state["corrente"].get("prefisso", ""),
+                            state["corrente"].get("operatore", ""),
+                        ),
+                    )
                 else:
                     state["corrente"] = None
                 _write_state(state)
@@ -323,6 +374,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     _ensure_data_file()
+    _init_db()
     host = os.environ.get("ELIMINACODE_HOST", "0.0.0.0")
     port = int(os.environ.get("ELIMINACODE_PORT", "8000"))
     server = ThreadingHTTPServer((host, port), EliminacodeHandler)

@@ -39,3 +39,4 @@ L'interfaccia di amministrazione è su `http://<ip-locale>:8000/admin`.
 
 - Non vengono effettuate chiamate a servizi esterni.
 - Per visibilità solo LAN, limita l'accesso con firewall o bind su IP specifico.
+- Lo storico ticket/chiamate viene salvato nel database SQLite `data/eliminacode.db`.

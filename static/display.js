@@ -4,9 +4,13 @@ const operatoreEl = document.getElementById("display-operatore");
 const logoEl = document.getElementById("display-logo");
 const storicoEl = document.getElementById("display-storico");
 const immagineEl = document.getElementById("display-immagine");
+const popupEl = document.getElementById("display-popup");
+const popupNumeroEl = document.getElementById("display-popup-numero");
 
 let immagini = [];
 let indiceImmagine = 0;
+let ultimaChiamataKey = "";
+let popupTimer = null;
 
 function renderDisplay(corrente) {
   if (!corrente) {
@@ -21,6 +25,18 @@ function renderDisplay(corrente) {
   operatoreEl.textContent = corrente.operatore
     ? `Operatore: ${corrente.operatore}`
     : "Operatore: -";
+}
+
+function mostraPopup(numero, prefisso) {
+  const testo = `#${prefisso}${numero}`;
+  popupNumeroEl.textContent = testo;
+  popupEl.classList.add("is-visible");
+  if (popupTimer) {
+    clearTimeout(popupTimer);
+  }
+  popupTimer = setTimeout(() => {
+    popupEl.classList.remove("is-visible");
+  }, 4000);
 }
 
 function renderStorico(storico, numeroUltimi) {
@@ -78,6 +94,14 @@ async function aggiornaDisplay() {
   }
   const data = await response.json();
   renderDisplay(data.corrente);
+  if (data.corrente) {
+    const prefisso = data.corrente.prefisso ? `${data.corrente.prefisso}` : "";
+    const key = `${prefisso}${data.corrente.numero}`;
+    if (key && key !== ultimaChiamataKey) {
+      ultimaChiamataKey = key;
+      mostraPopup(data.corrente.numero, prefisso);
+    }
+  }
 
   const display = data.display || {};
   const mostraUltimi = display.mostra_ultimi !== false;

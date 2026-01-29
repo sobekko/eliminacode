@@ -45,6 +45,42 @@
   font-size: 1.6rem;
 }
 
+.display-popup {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.85);
+  color: #f8fafc;
+  z-index: 10;
+}
+
+.display-popup.is-visible {
+  display: flex;
+  animation: displayBlink 0.8s linear infinite;
+}
+
+.display-popup span {
+  font-size: 6rem;
+  font-weight: 800;
+  background: #f97316;
+  color: #0f172a;
+  padding: 24px 48px;
+  border-radius: 999px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.6);
+}
+
+@keyframes displayBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
 .display-extra {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

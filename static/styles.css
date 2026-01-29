@@ -21,6 +21,10 @@ body {
   max-width: 720px;
 }
 
+.operator-page {
+  max-width: 720px;
+}
+
 header {
   display: grid;
   gap: 6px;

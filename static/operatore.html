@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Operatore - Chiamata turno</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container operator-page">
+      <header>
+        <h1>Postazione operatore</h1>
+        <p>Seleziona il tuo nome e chiama il prossimo cliente.</p>
+      </header>
+
+      <section class="card">
+        <label for="operatore">Operatore</label>
+        <select id="operatore"></select>
+        <button id="btn-next">Chiama prossimo</button>
+        <div class="corrente">
+          <span>In chiamata</span>
+          <strong id="corrente">Nessuno</strong>
+        </div>
+      </section>
+    </main>
+
+    <script src="operatore.js"></script>
+  </body>
+</html>

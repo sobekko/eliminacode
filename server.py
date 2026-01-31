@@ -430,6 +430,43 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             self._send_json({"ok": True, "corrente": state["corrente"], "attesa": state["turni"]})
             return
 
+        if parsed.path == "/api/turni/recall":
+            numero = payload.get("numero")
+            servizio = str(payload.get("servizio", "")).strip()
+            prefisso = str(payload.get("prefisso", "")).strip()
+            operatore = str(payload.get("operatore", "")).strip()
+            if not isinstance(numero, int) or numero < 1:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Numero non valido")
+                return
+            if not servizio:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Servizio non valido")
+                return
+            with DATA_LOCK:
+                state = _read_state()
+                state["corrente"] = {
+                    "numero": numero,
+                    "servizio": servizio,
+                    "prefisso": prefisso,
+                    "operatore": operatore,
+                }
+                storico = state.get("storico", [])
+                storico.append(
+                    {
+                        "numero": numero,
+                        "servizio": servizio,
+                        "prefisso": prefisso,
+                        "operatore": operatore,
+                    }
+                )
+                state["storico"] = storico[-20:]
+                _write_state(state)
+            _db_execute(
+                "INSERT INTO chiamate (numero, servizio, prefisso, operatore, chiamato_il) VALUES (?, ?, ?, ?, datetime('now'))",
+                (numero, servizio, prefisso, operatore),
+            )
+            self._send_json({"ok": True, "corrente": state["corrente"]})
+            return
+
         if parsed.path == "/api/turni/reset":
             with DATA_LOCK:
                 state = _read_state()

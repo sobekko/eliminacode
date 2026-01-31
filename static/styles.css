@@ -118,6 +118,16 @@ button {
   font-weight: 600;
 }
 
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-large {
+  padding: 14px 20px;
+  font-size: 1.05rem;
+}
+
 button.ghost {
   background: #e5e7eb;
   color: #111827;

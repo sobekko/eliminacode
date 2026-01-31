@@ -1,9 +1,11 @@
 const selectOperatore = document.getElementById("operatore");
 const btnNext = document.getElementById("btn-next");
+const btnRecall = document.getElementById("btn-recall");
 const corrente = document.getElementById("corrente");
 const totaleCoda = document.getElementById("totale-coda");
 const codaServizi = document.getElementById("coda-servizi");
 const codaDettaglio = document.getElementById("coda-dettaglio");
+let ultimaChiamata = null;
 
 async function caricaOperatori() {
   const response = await fetch("/api/admin");
@@ -35,6 +37,8 @@ async function chiamaProssimo() {
   }
   const data = await response.json();
   if (data.corrente) {
+    ultimaChiamata = data.corrente;
+    btnRecall.disabled = false;
     const servizio = data.corrente.servizio ? ` (${data.corrente.servizio})` : "";
     const prefisso = data.corrente.prefisso ? `${data.corrente.prefisso}` : "";
     let operatore = "";
@@ -46,6 +50,36 @@ async function chiamaProssimo() {
     corrente.textContent = `#${prefisso}${data.corrente.numero}${servizio}${operatore}`;
   } else {
     corrente.textContent = "Nessuno";
+    if (!ultimaChiamata) {
+      btnRecall.disabled = true;
+    }
+  }
+}
+
+async function richiamaUltimo() {
+  if (!ultimaChiamata) {
+    return;
+  }
+  const response = await fetch("/api/turni/recall", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      numero: ultimaChiamata.numero,
+      servizio: ultimaChiamata.servizio,
+      prefisso: ultimaChiamata.prefisso,
+      operatore: selectOperatore.value,
+    }),
+  });
+  if (!response.ok) {
+    return;
+  }
+  const data = await response.json();
+  if (data.corrente) {
+    ultimaChiamata = data.corrente;
+    const servizio = data.corrente.servizio ? ` (${data.corrente.servizio})` : "";
+    const prefisso = data.corrente.prefisso ? `${data.corrente.prefisso}` : "";
+    const operatore = data.corrente.operatore ? ` - ${data.corrente.operatore}` : "";
+    corrente.textContent = `#${prefisso}${data.corrente.numero}${servizio}${operatore}`;
   }
 }
 
@@ -91,11 +125,19 @@ async function aggiornaCoda() {
   }
   const data = await response.json();
   renderCoda(data.turni || []);
+  if (data.corrente) {
+    ultimaChiamata = data.corrente;
+    btnRecall.disabled = false;
+  }
 }
 
 btnNext.addEventListener("click", () => {
   chiamaProssimo();
   aggiornaCoda();
+});
+
+btnRecall.addEventListener("click", () => {
+  richiamaUltimo();
 });
 
 caricaOperatori();

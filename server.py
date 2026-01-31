@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import cgi
 import json
 import mimetypes
 import os
@@ -174,6 +173,50 @@ def _safe_join(root, relative_path):
     if os.path.commonpath([root_abs, joined]) != root_abs:
         return None
     return joined
+
+
+def _parse_multipart_file(content_type, body):
+    if "boundary=" not in content_type:
+        return None, None
+    boundary = content_type.split("boundary=", 1)[1].strip().strip('"')
+    if not boundary:
+        return None, None
+    delimiter = f"--{boundary}".encode("utf-8")
+    parts = body.split(delimiter)
+    for part in parts:
+        if not part or part in (b"--\r\n", b"--"):
+            continue
+        if part.startswith(b"\r\n"):
+            part = part[2:]
+        if part.endswith(b"\r\n"):
+            part = part[:-2]
+        if part.endswith(b"--"):
+            part = part[:-2]
+        if b"\r\n\r\n" not in part:
+            continue
+        header_bytes, content = part.split(b"\r\n\r\n", 1)
+        headers = {}
+        for line in header_bytes.split(b"\r\n"):
+            if b":" not in line:
+                continue
+            key, value = line.split(b":", 1)
+            headers[key.decode("utf-8").lower()] = value.decode("utf-8").strip()
+        disposition = headers.get("content-disposition", "")
+        if "name=" not in disposition:
+            continue
+        name = ""
+        filename = ""
+        for chunk in disposition.split(";"):
+            chunk = chunk.strip()
+            if chunk.startswith("name="):
+                name = chunk.split("=", 1)[1].strip().strip('"')
+            elif chunk.startswith("filename="):
+                filename = chunk.split("=", 1)[1].strip().strip('"')
+        if name == "file" and filename:
+            if content.endswith(b"\r\n"):
+                content = content[:-2]
+            return filename, content
+    return None, None
 
 
 class EliminacodeHandler(BaseHTTPRequestHandler):
@@ -401,12 +444,18 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint non trovato")
             return
         length = int(self.headers.get("Content-Length", "0"))
-        body = self.rfile.read(length).decode("utf-8") if length else "{}"
-        try:
-            payload = json.loads(body) if body else {}
-        except json.JSONDecodeError:
-            self.send_error(HTTPStatus.BAD_REQUEST, "JSON non valido")
-            return
+        body_bytes = self.rfile.read(length) if length else b""
+        content_type = self.headers.get("Content-Type", "")
+        payload = {}
+        if content_type.startswith("multipart/form-data"):
+            payload = None
+        else:
+            body = body_bytes.decode("utf-8") if body_bytes else "{}"
+            try:
+                payload = json.loads(body) if body else {}
+            except json.JSONDecodeError:
+                self.send_error(HTTPStatus.BAD_REQUEST, "JSON non valido")
+                return
 
         if parsed.path == "/api/turni":
             with DATA_LOCK:
@@ -548,24 +597,14 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             else:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Tipo non valido")
                 return
-            content_type = self.headers.get("Content-Type", "")
             if not content_type.startswith("multipart/form-data"):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Formato non valido")
                 return
-            form = cgi.FieldStorage(
-                fp=self.rfile,
-                headers=self.headers,
-                environ={
-                    "REQUEST_METHOD": "POST",
-                    "CONTENT_TYPE": content_type,
-                    "CONTENT_LENGTH": self.headers.get("Content-Length", "0"),
-                },
-            )
-            file_item = form["file"] if "file" in form else None
-            if not file_item or not getattr(file_item, "filename", ""):
+            filename, content = _parse_multipart_file(content_type, body_bytes)
+            if not filename or content is None:
                 self.send_error(HTTPStatus.BAD_REQUEST, "File mancante")
                 return
-            filename = os.path.basename(file_item.filename)
+            filename = os.path.basename(filename)
             if not filename:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Nome file non valido")
                 return
@@ -575,7 +614,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Nome file non valido")
                 return
             with open(destination, "wb") as handle:
-                handle.write(file_item.file.read())
+                handle.write(content)
             self._send_json({"ok": True, "name": filename, "url": f"{base_url}/{filename}"})
             return
 

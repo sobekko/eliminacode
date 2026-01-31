@@ -11,6 +11,8 @@ let immagini = [];
 let indiceImmagine = 0;
 let ultimaChiamataKey = "";
 let popupTimer = null;
+let audioConfig = { abilita: false, url: "", volume: 1 };
+let audioPlayer = null;
 
 function applyDisplayTheme(display) {
   const tema = display.tema || {};
@@ -51,6 +53,17 @@ function mostraPopup(numero, prefisso) {
   popupEl.classList.add("is-visible");
   if (popupTimer) {
     clearTimeout(popupTimer);
+  }
+  if (audioConfig.abilita && audioConfig.url) {
+    if (!audioPlayer) {
+      audioPlayer = new Audio();
+    }
+    if (audioPlayer.src !== audioConfig.url) {
+      audioPlayer.src = audioConfig.url;
+    }
+    audioPlayer.volume = audioConfig.volume;
+    audioPlayer.currentTime = 0;
+    audioPlayer.play().catch(() => {});
   }
   popupTimer = setTimeout(() => {
     popupEl.classList.remove("is-visible");
@@ -146,6 +159,12 @@ async function aggiornaDisplay() {
 
   const display = data.display || {};
   applyDisplayTheme(display);
+  const newAudio = display.audio || {};
+  audioConfig = {
+    abilita: Boolean(newAudio.abilita),
+    url: newAudio.url || "",
+    volume: typeof newAudio.volume === "number" ? newAudio.volume : 1,
+  };
   const mostraUltimi = display.mostra_ultimi !== false;
   const numeroUltimi = display.numero_ultimi || 5;
   if (mostraUltimi) {

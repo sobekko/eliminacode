@@ -18,6 +18,9 @@ const displaySfondoImg = document.getElementById("display-sfondo-img");
 const displaySfondoFile = document.getElementById("display-sfondo-file");
 const displayImmagini = document.getElementById("display-immagini");
 const displayImmaginiFile = document.getElementById("display-immagini-file");
+const displayAudioEnabled = document.getElementById("display-audio-enabled");
+const displayAudioUrl = document.getElementById("display-audio-url");
+const displayAudioVolume = document.getElementById("display-audio-volume");
 const kioskSfondo = document.getElementById("kiosk-sfondo");
 const kioskTesto = document.getElementById("kiosk-testo");
 const kioskBottone = document.getElementById("kiosk-bottone");
@@ -193,6 +196,10 @@ async function caricaConfig() {
   displaySfondoImg.value = temaDisplay.immagine_sfondo || "";
   displayLogo.value = display.logo || "";
   displayImmagini.value = (display.immagini || []).join(", ");
+  const audioDisplay = display.audio || {};
+  displayAudioEnabled.checked = Boolean(audioDisplay.abilita);
+  displayAudioUrl.value = audioDisplay.url || "";
+  displayAudioVolume.value = String(audioDisplay.volume ?? 1);
   const kiosk = config.kiosk || {};
   const temaKiosk = kiosk.tema || {};
   kioskSfondo.value = temaKiosk.sfondo || "#f4f5f7";
@@ -249,6 +256,11 @@ form.addEventListener("submit", async (event) => {
       numero: displayNumeroSize.value.trim() || "5rem",
       card: displayCardSize.value.trim() || "1fr",
       extra: displayExtraSize.value.trim() || "1fr",
+    },
+    audio: {
+      abilita: displayAudioEnabled.checked,
+      url: displayAudioUrl.value.trim(),
+      volume: Number(displayAudioVolume.value || 1),
     },
     tema: {
       sfondo: displaySfondo.value,

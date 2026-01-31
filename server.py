@@ -34,6 +34,11 @@ def _default_config():
                 "card": "1fr",
                 "extra": "1fr",
             },
+            "audio": {
+                "abilita": False,
+                "url": "",
+                "volume": 1.0,
+            },
             "tema": {
                 "sfondo": "#0f172a",
                 "testo": "#f8fafc",
@@ -129,6 +134,8 @@ def _read_state():
         state["config"]["display"] = _default_config()["display"]
     elif "dimensioni" not in state["config"]["display"]:
         state["config"]["display"]["dimensioni"] = _default_config()["display"]["dimensioni"]
+    if "audio" not in state["config"]["display"]:
+        state["config"]["display"]["audio"] = _default_config()["display"]["audio"]
     if "kiosk" not in state["config"]:
         state["config"]["kiosk"] = _default_config()["kiosk"]
     elif "dimensioni" not in state["config"]["kiosk"]:
@@ -550,6 +557,20 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "card": str(dimensioni_display.get("card", "1fr")).strip(),
                 "extra": str(dimensioni_display.get("extra", "1fr")).strip(),
             }
+            display_audio = display.get("audio", {})
+            if not isinstance(display_audio, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            audio_abilita = bool(display_audio.get("abilita", False))
+            audio_url = str(display_audio.get("url", "")).strip()
+            try:
+                audio_volume = float(display_audio.get("volume", 1.0))
+            except (TypeError, ValueError):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            if audio_volume < 0 or audio_volume > 1:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
             tema_display = display.get("tema", {})
             if not isinstance(tema_display, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
@@ -603,12 +624,17 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     "display": {
                         "mostra_ultimi": mostra_ultimi,
                         "numero_ultimi": numero_ultimi,
-                        "logo": logo,
-                        "immagini": immagini_pulite,
-                        "layout": layout,
-                        "dimensioni": display_dimensioni,
-                        "tema": display_tema,
+                    "logo": logo,
+                    "immagini": immagini_pulite,
+                    "layout": layout,
+                    "dimensioni": display_dimensioni,
+                    "audio": {
+                        "abilita": audio_abilita,
+                        "url": audio_url,
+                        "volume": audio_volume,
                     },
+                    "tema": display_tema,
+                },
                     "kiosk": {"tema": kiosk_tema, "dimensioni": kiosk_dim},
                     "operatori": operatori_puliti,
                 }

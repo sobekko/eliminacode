@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
+import cgi
 import json
+import mimetypes
 import os
 import sqlite3
 from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Lock
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DATA_FILE = os.path.join(DATA_DIR, "turni.json")
 DB_FILE = os.path.join(DATA_DIR, "eliminacode.db")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+UPLOAD_DIR = os.path.join(BASE_DIR, "upload")
+AUDIO_DIR = os.path.join(UPLOAD_DIR, "audio")
+IMAGE_DIR = os.path.join(UPLOAD_DIR, "image")
 
 DATA_LOCK = Lock()
 
@@ -78,6 +83,11 @@ def _ensure_data_file():
                 },
                 handle,
             )
+
+
+def _ensure_upload_dirs():
+    os.makedirs(AUDIO_DIR, exist_ok=True)
+    os.makedirs(IMAGE_DIR, exist_ok=True)
 
 
 def _init_db():
@@ -158,6 +168,14 @@ def _write_state(state):
         json.dump(state, handle, ensure_ascii=False, indent=2)
 
 
+def _safe_join(root, relative_path):
+    root_abs = os.path.abspath(root)
+    joined = os.path.abspath(os.path.join(root_abs, relative_path))
+    if os.path.commonpath([root_abs, joined]) != root_abs:
+        return None
+    return joined
+
+
 class EliminacodeHandler(BaseHTTPRequestHandler):
     server_version = "Eliminacode/0.1"
 
@@ -175,12 +193,11 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             return
         with open(path, "rb") as handle:
             content = handle.read()
-        if path.endswith(".html"):
-            content_type = "text/html; charset=utf-8"
-        elif path.endswith(".css"):
-            content_type = "text/css; charset=utf-8"
-        elif path.endswith(".js"):
-            content_type = "application/javascript; charset=utf-8"
+        guessed_type, _ = mimetypes.guess_type(path)
+        if guessed_type:
+            content_type = guessed_type
+            if guessed_type.startswith("text/") and "charset" not in guessed_type:
+                content_type = f"{guessed_type}; charset=utf-8"
         else:
             content_type = "application/octet-stream"
         self.send_response(HTTPStatus.OK)
@@ -212,6 +229,26 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         "display": state["config"].get("display", {}),
                     }
                 )
+                return
+            if parsed.path == "/api/uploads":
+                query = parse_qs(parsed.query)
+                tipo = (query.get("type") or [""])[0]
+                if tipo == "audio":
+                    base_dir = AUDIO_DIR
+                    base_url = "/upload/audio"
+                elif tipo == "image":
+                    base_dir = IMAGE_DIR
+                    base_url = "/upload/image"
+                else:
+                    self.send_error(HTTPStatus.BAD_REQUEST, "Tipo non valido")
+                    return
+                _ensure_upload_dirs()
+                files = []
+                for name in sorted(os.listdir(base_dir)):
+                    file_path = os.path.join(base_dir, name)
+                    if os.path.isfile(file_path):
+                        files.append({"name": name, "url": f"{base_url}/{name}"})
+                self._send_json({"files": files})
                 return
             if parsed.path == "/api/stats":
                 with sqlite3.connect(DB_FILE) as conn:
@@ -340,6 +377,15 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/admin":
             self._send_file(os.path.join(STATIC_DIR, "admin.html"))
+            return
+        if parsed.path.startswith("/upload/"):
+            _ensure_upload_dirs()
+            safe_path = os.path.normpath(parsed.path.lstrip("/"))
+            file_path = _safe_join(BASE_DIR, safe_path)
+            if not file_path:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Percorso non valido")
+                return
+            self._send_file(file_path)
             return
         safe_path = os.path.normpath(parsed.path.lstrip("/"))
         static_root = os.path.abspath(STATIC_DIR)
@@ -488,6 +534,49 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 state["storico"] = []
                 _write_state(state)
             self._send_json({"ok": True, "state": state})
+            return
+
+        if parsed.path == "/api/upload":
+            query = parse_qs(parsed.query)
+            tipo = (query.get("type") or [""])[0]
+            if tipo == "audio":
+                base_dir = AUDIO_DIR
+                base_url = "/upload/audio"
+            elif tipo == "image":
+                base_dir = IMAGE_DIR
+                base_url = "/upload/image"
+            else:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Tipo non valido")
+                return
+            content_type = self.headers.get("Content-Type", "")
+            if not content_type.startswith("multipart/form-data"):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Formato non valido")
+                return
+            form = cgi.FieldStorage(
+                fp=self.rfile,
+                headers=self.headers,
+                environ={
+                    "REQUEST_METHOD": "POST",
+                    "CONTENT_TYPE": content_type,
+                    "CONTENT_LENGTH": self.headers.get("Content-Length", "0"),
+                },
+            )
+            file_item = form["file"] if "file" in form else None
+            if not file_item or not getattr(file_item, "filename", ""):
+                self.send_error(HTTPStatus.BAD_REQUEST, "File mancante")
+                return
+            filename = os.path.basename(file_item.filename)
+            if not filename:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Nome file non valido")
+                return
+            _ensure_upload_dirs()
+            destination = _safe_join(base_dir, filename)
+            if not destination:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Nome file non valido")
+                return
+            with open(destination, "wb") as handle:
+                handle.write(file_item.file.read())
+            self._send_json({"ok": True, "name": filename, "url": f"{base_url}/{filename}"})
             return
 
         if parsed.path == "/api/admin":
@@ -647,6 +736,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     _ensure_data_file()
+    _ensure_upload_dirs()
     _init_db()
     host = os.environ.get("ELIMINACODE_HOST", "0.0.0.0")
     port = int(os.environ.get("ELIMINACODE_PORT", "8000"))

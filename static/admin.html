@@ -63,12 +63,36 @@
             <label for="display-immagini">Immagini (URL separati da virgola)</label>
             <textarea id="display-immagini" rows="3" placeholder="https://..., https://..."></textarea>
             <input id="display-immagini-file" type="file" accept="image/*" multiple />
+            <label for="display-image-upload">Carica immagini (server)</label>
+            <input id="display-image-upload" type="file" accept="image/*" multiple />
+            <label for="display-image-library">Immagini caricate</label>
+            <div class="row">
+              <select id="display-image-library"></select>
+              <button type="button" id="display-image-add" class="ghost">Aggiungi a lista</button>
+            </div>
+            <label for="display-logo-library">Logo da archivio</label>
+            <div class="row">
+              <select id="display-logo-library"></select>
+              <button type="button" id="display-logo-apply" class="ghost">Usa come logo</button>
+            </div>
+            <label for="display-bg-library">Sfondo da archivio</label>
+            <div class="row">
+              <select id="display-bg-library"></select>
+              <button type="button" id="display-bg-apply" class="ghost">Usa come sfondo</button>
+            </div>
             <label class="inline">
               <input type="checkbox" id="display-audio-enabled" />
               Abilita avviso audio
             </label>
             <label for="display-audio-url">Audio chiamata (URL)</label>
             <input id="display-audio-url" type="text" placeholder="https://..." />
+            <label for="display-audio-upload">Carica audio (server)</label>
+            <input id="display-audio-upload" type="file" accept="audio/*" />
+            <label for="display-audio-library">Audio caricati</label>
+            <div class="row">
+              <select id="display-audio-library"></select>
+              <button type="button" id="display-audio-apply" class="ghost">Usa audio</button>
+            </div>
             <label for="display-audio-volume">Volume audio (0-1)</label>
             <input id="display-audio-volume" type="number" step="0.1" min="0" max="1" value="1" />
           </div>

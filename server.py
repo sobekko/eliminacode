@@ -335,8 +335,9 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             self._send_file(os.path.join(STATIC_DIR, "admin.html"))
             return
         safe_path = os.path.normpath(parsed.path.lstrip("/"))
-        file_path = os.path.join(STATIC_DIR, safe_path)
-        if not file_path.startswith(STATIC_DIR):
+        static_root = os.path.abspath(STATIC_DIR)
+        file_path = os.path.abspath(os.path.join(static_root, safe_path))
+        if os.path.commonpath([static_root, file_path]) != static_root:
             self.send_error(HTTPStatus.BAD_REQUEST, "Percorso non valido")
             return
         self._send_file(file_path)

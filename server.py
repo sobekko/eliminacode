@@ -28,6 +28,22 @@ def _default_config():
             "numero_ultimi": 5,
             "logo": "",
             "immagini": [],
+            "layout": "split",
+            "tema": {
+                "sfondo": "#0f172a",
+                "testo": "#f8fafc",
+                "card": "#1e293b",
+                "immagine_sfondo": "",
+            },
+        },
+        "kiosk": {
+            "tema": {
+                "sfondo": "#f4f5f7",
+                "testo": "#1b1f24",
+                "bottone": "#1f6feb",
+                "testo_bottone": "#ffffff",
+                "immagine_sfondo": "",
+            }
         },
         "operatori": [{"nome": "Operatore 1"}],
     }
@@ -101,6 +117,8 @@ def _read_state():
         state["config"]["prefissi"] = _default_config()["prefissi"]
     if "display" not in state["config"]:
         state["config"]["display"] = _default_config()["display"]
+    if "kiosk" not in state["config"]:
+        state["config"]["kiosk"] = _default_config()["kiosk"]
     if "operatori" not in state["config"]:
         state["config"]["operatori"] = _default_config()["operatori"]
     if "storico" not in state:
@@ -410,6 +428,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             priorita = payload.get("priorita", {})
             prefissi = payload.get("prefissi", {})
             display = payload.get("display", {})
+            kiosk = payload.get("kiosk", {})
             operatori = payload.get("operatori", [])
             if not servizio:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Servizio richiesto")
@@ -457,6 +476,34 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
             immagini_pulite = [str(url).strip() for url in immagini if str(url).strip()]
+            layout = str(display.get("layout", "split")).strip()
+            if layout not in {"split", "stacked"}:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            tema_display = display.get("tema", {})
+            if not isinstance(tema_display, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            display_tema = {
+                "sfondo": str(tema_display.get("sfondo", "#0f172a")).strip(),
+                "testo": str(tema_display.get("testo", "#f8fafc")).strip(),
+                "card": str(tema_display.get("card", "#1e293b")).strip(),
+                "immagine_sfondo": str(tema_display.get("immagine_sfondo", "")).strip(),
+            }
+            if not isinstance(kiosk, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            tema_kiosk = kiosk.get("tema", {})
+            if not isinstance(tema_kiosk, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            kiosk_tema = {
+                "sfondo": str(tema_kiosk.get("sfondo", "#f4f5f7")).strip(),
+                "testo": str(tema_kiosk.get("testo", "#1b1f24")).strip(),
+                "bottone": str(tema_kiosk.get("bottone", "#1f6feb")).strip(),
+                "testo_bottone": str(tema_kiosk.get("testo_bottone", "#ffffff")).strip(),
+                "immagine_sfondo": str(tema_kiosk.get("immagine_sfondo", "")).strip(),
+            }
             if not isinstance(operatori, list) or not operatori:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Operatori non validi")
                 return
@@ -480,7 +527,10 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         "numero_ultimi": numero_ultimi,
                         "logo": logo,
                         "immagini": immagini_pulite,
+                        "layout": layout,
+                        "tema": display_tema,
                     },
+                    "kiosk": {"tema": kiosk_tema},
                     "operatori": operatori_puliti,
                 }
                 _write_state(state)

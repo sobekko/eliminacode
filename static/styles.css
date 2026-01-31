@@ -9,6 +9,14 @@ body {
   margin: 0;
 }
 
+.kiosk {
+  background: var(--kiosk-bg, #f4f5f7);
+  color: var(--kiosk-text, #1b1f24);
+  background-image: var(--kiosk-bg-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 .container {
   max-width: 960px;
   margin: 0 auto;
@@ -175,8 +183,8 @@ button.ghost {
 
 .pill {
   border-radius: 999px;
-  background: #e5e7eb;
-  color: #111827;
+  background: var(--kiosk-button, #e5e7eb);
+  color: var(--kiosk-button-text, #111827);
   border: none;
   padding: 8px 14px;
   cursor: pointer;

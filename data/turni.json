@@ -24,7 +24,23 @@
       "mostra_ultimi": true,
       "numero_ultimi": 5,
       "logo": "",
-      "immagini": []
+      "immagini": [],
+      "layout": "split",
+      "tema": {
+        "sfondo": "#0f172a",
+        "testo": "#f8fafc",
+        "card": "#1e293b",
+        "immagine_sfondo": ""
+      }
+    },
+    "kiosk": {
+      "tema": {
+        "sfondo": "#f4f5f7",
+        "testo": "#1b1f24",
+        "bottone": "#1f6feb",
+        "testo_bottone": "#ffffff",
+        "immagine_sfondo": ""
+      }
     },
     "operatori": [
       {

@@ -1,6 +1,20 @@
 const esito = document.getElementById("esito");
 const serviziContainer = document.getElementById("servizi");
 
+function applyKioskTheme(kiosk) {
+  const tema = (kiosk && kiosk.tema) || {};
+  const root = document.documentElement;
+  root.style.setProperty("--kiosk-bg", tema.sfondo || "#f4f5f7");
+  root.style.setProperty("--kiosk-text", tema.testo || "#1b1f24");
+  root.style.setProperty("--kiosk-button", tema.bottone || "#1f6feb");
+  root.style.setProperty("--kiosk-button-text", tema.testo_bottone || "#ffffff");
+  if (tema.immagine_sfondo) {
+    root.style.setProperty("--kiosk-bg-image", `url('${tema.immagine_sfondo}')`);
+  } else {
+    root.style.setProperty("--kiosk-bg-image", "none");
+  }
+}
+
 async function creaTicket(servizio) {
   const response = await fetch("/api/turni", {
     method: "POST",
@@ -42,6 +56,7 @@ async function fetchConfig() {
   }
   const config = await response.json();
   renderServizi(config);
+  applyKioskTheme(config.kiosk);
 }
 
 fetchConfig();

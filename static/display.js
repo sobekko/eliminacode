@@ -12,6 +12,20 @@ let indiceImmagine = 0;
 let ultimaChiamataKey = "";
 let popupTimer = null;
 
+function applyDisplayTheme(display) {
+  const tema = display.tema || {};
+  const root = document.documentElement;
+  root.style.setProperty("--display-bg", tema.sfondo || "#0f172a");
+  root.style.setProperty("--display-text", tema.testo || "#f8fafc");
+  root.style.setProperty("--display-card", tema.card || "#1e293b");
+  if (tema.immagine_sfondo) {
+    root.style.setProperty("--display-bg-image", `url('${tema.immagine_sfondo}')`);
+  } else {
+    root.style.setProperty("--display-bg-image", "none");
+  }
+  document.body.classList.toggle("layout-stacked", display.layout === "stacked");
+}
+
 function renderDisplay(corrente) {
   if (!corrente) {
     numeroEl.textContent = "—";
@@ -104,6 +118,7 @@ async function aggiornaDisplay() {
   }
 
   const display = data.display || {};
+  applyDisplayTheme(display);
   const mostraUltimi = display.mostra_ultimi !== false;
   const numeroUltimi = display.numero_ultimi || 5;
   const storico = data.storico || [];

@@ -5,8 +5,22 @@ const prioritaContainer = document.getElementById("priorita-container");
 const prefissiContainer = document.getElementById("prefissi-container");
 const displayUltimi = document.getElementById("display-ultimi");
 const displayNumeroUltimi = document.getElementById("display-numero-ultimi");
+const displayLayout = document.getElementById("display-layout");
+const displaySfondo = document.getElementById("display-sfondo");
+const displayTesto = document.getElementById("display-testo");
+const displayCard = document.getElementById("display-card");
 const displayLogo = document.getElementById("display-logo");
+const displayLogoFile = document.getElementById("display-logo-file");
+const displaySfondoImg = document.getElementById("display-sfondo-img");
+const displaySfondoFile = document.getElementById("display-sfondo-file");
 const displayImmagini = document.getElementById("display-immagini");
+const displayImmaginiFile = document.getElementById("display-immagini-file");
+const kioskSfondo = document.getElementById("kiosk-sfondo");
+const kioskTesto = document.getElementById("kiosk-testo");
+const kioskBottone = document.getElementById("kiosk-bottone");
+const kioskTestoBottone = document.getElementById("kiosk-testo-bottone");
+const kioskSfondoImg = document.getElementById("kiosk-sfondo-img");
+const kioskSfondoFile = document.getElementById("kiosk-sfondo-file");
 const numeroOperatoriSelect = document.getElementById("numero-operatori");
 const operatoriContainer = document.getElementById("operatori-container");
 const esitoAdmin = document.getElementById("esito-admin");
@@ -94,6 +108,58 @@ function parseServizi() {
     .filter(Boolean);
 }
 
+function readFileAsDataUrl(file, callback) {
+  const reader = new FileReader();
+  reader.onload = () => callback(reader.result);
+  reader.readAsDataURL(file);
+}
+
+displayLogoFile.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    return;
+  }
+  readFileAsDataUrl(file, (dataUrl) => {
+    displayLogo.value = dataUrl;
+  });
+});
+
+displaySfondoFile.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    return;
+  }
+  readFileAsDataUrl(file, (dataUrl) => {
+    displaySfondoImg.value = dataUrl;
+  });
+});
+
+displayImmaginiFile.addEventListener("change", (event) => {
+  const files = Array.from(event.target.files);
+  if (!files.length) {
+    return;
+  }
+  const results = [];
+  files.forEach((file) => {
+    readFileAsDataUrl(file, (dataUrl) => {
+      results.push(dataUrl);
+      if (results.length === files.length) {
+        displayImmagini.value = results.join(", ");
+      }
+    });
+  });
+});
+
+kioskSfondoFile.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    return;
+  }
+  readFileAsDataUrl(file, (dataUrl) => {
+    kioskSfondoImg.value = dataUrl;
+  });
+});
+
 async function caricaConfig() {
   const response = await fetch("/api/admin");
   if (!response.ok) {
@@ -110,8 +176,21 @@ async function caricaConfig() {
   const display = config.display || {};
   displayUltimi.checked = Boolean(display.mostra_ultimi);
   displayNumeroUltimi.value = String(display.numero_ultimi ?? 5);
+  displayLayout.value = display.layout || "split";
+  const temaDisplay = display.tema || {};
+  displaySfondo.value = temaDisplay.sfondo || "#0f172a";
+  displayTesto.value = temaDisplay.testo || "#f8fafc";
+  displayCard.value = temaDisplay.card || "#1e293b";
+  displaySfondoImg.value = temaDisplay.immagine_sfondo || "";
   displayLogo.value = display.logo || "";
   displayImmagini.value = (display.immagini || []).join(", ");
+  const kiosk = config.kiosk || {};
+  const temaKiosk = kiosk.tema || {};
+  kioskSfondo.value = temaKiosk.sfondo || "#f4f5f7";
+  kioskTesto.value = temaKiosk.testo || "#1b1f24";
+  kioskBottone.value = temaKiosk.bottone || "#1f6feb";
+  kioskTestoBottone.value = temaKiosk.testo_bottone || "#ffffff";
+  kioskSfondoImg.value = temaKiosk.immagine_sfondo || "";
 }
 
 numeroOperatoriSelect.addEventListener("change", () => {
@@ -148,11 +227,27 @@ form.addEventListener("submit", async (event) => {
   const display = {
     mostra_ultimi: displayUltimi.checked,
     numero_ultimi: Number(displayNumeroUltimi.value || 5),
+    layout: displayLayout.value,
     logo: displayLogo.value.trim(),
     immagini: displayImmagini.value
       .split(",")
       .map((voce) => voce.trim())
       .filter(Boolean),
+    tema: {
+      sfondo: displaySfondo.value,
+      testo: displayTesto.value,
+      card: displayCard.value,
+      immagine_sfondo: displaySfondoImg.value.trim(),
+    },
+  };
+  const kiosk = {
+    tema: {
+      sfondo: kioskSfondo.value,
+      testo: kioskTesto.value,
+      bottone: kioskBottone.value,
+      testo_bottone: kioskTestoBottone.value,
+      immagine_sfondo: kioskSfondoImg.value.trim(),
+    },
   };
   const operatori = Array.from(operatoriContainer.querySelectorAll("input")).map((input) => ({
     nome: input.value.trim(),
@@ -161,7 +256,7 @@ form.addEventListener("submit", async (event) => {
   const response = await fetch("/api/admin", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ servizio, servizi, priorita, prefissi, display, operatori }),
+    body: JSON.stringify({ servizio, servizi, priorita, prefissi, display, kiosk, operatori }),
   });
 
   if (response.ok) {

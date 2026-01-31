@@ -37,10 +37,41 @@
             </label>
             <label for="display-numero-ultimi">Numero ultimi</label>
             <input id="display-numero-ultimi" type="number" min="1" max="10" value="5" />
+            <label for="display-layout">Layout display</label>
+            <select id="display-layout">
+              <option value="split">Affiancato</option>
+              <option value="stacked">Impilato</option>
+            </select>
+            <label for="display-sfondo">Colore sfondo</label>
+            <input id="display-sfondo" type="color" value="#0f172a" />
+            <label for="display-testo">Colore testo</label>
+            <input id="display-testo" type="color" value="#f8fafc" />
+            <label for="display-card">Colore riquadri</label>
+            <input id="display-card" type="color" value="#1e293b" />
             <label for="display-logo">Logo (URL)</label>
             <input id="display-logo" type="text" placeholder="https://..." />
+            <input id="display-logo-file" type="file" accept="image/*" />
+            <label for="display-sfondo-img">Sfondo display (URL)</label>
+            <input id="display-sfondo-img" type="text" placeholder="https://..." />
+            <input id="display-sfondo-file" type="file" accept="image/*" />
             <label for="display-immagini">Immagini (URL separati da virgola)</label>
             <textarea id="display-immagini" rows="3" placeholder="https://..., https://..."></textarea>
+            <input id="display-immagini-file" type="file" accept="image/*" multiple />
+          </div>
+
+          <label>Kiosk clienti</label>
+          <div class="display-config">
+            <label for="kiosk-sfondo">Colore sfondo</label>
+            <input id="kiosk-sfondo" type="color" value="#f4f5f7" />
+            <label for="kiosk-testo">Colore testo</label>
+            <input id="kiosk-testo" type="color" value="#1b1f24" />
+            <label for="kiosk-bottone">Colore pulsanti</label>
+            <input id="kiosk-bottone" type="color" value="#1f6feb" />
+            <label for="kiosk-testo-bottone">Colore testo pulsanti</label>
+            <input id="kiosk-testo-bottone" type="color" value="#ffffff" />
+            <label for="kiosk-sfondo-img">Sfondo kiosk (URL)</label>
+            <input id="kiosk-sfondo-img" type="text" placeholder="https://..." />
+            <input id="kiosk-sfondo-file" type="file" accept="image/*" />
           </div>
 
           <label for="numero-operatori">Numero operatori</label>

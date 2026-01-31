@@ -6,6 +6,9 @@ const prefissiContainer = document.getElementById("prefissi-container");
 const displayUltimi = document.getElementById("display-ultimi");
 const displayNumeroUltimi = document.getElementById("display-numero-ultimi");
 const displayLayout = document.getElementById("display-layout");
+const displayNumeroSize = document.getElementById("display-numero-size");
+const displayCardSize = document.getElementById("display-card-size");
+const displayExtraSize = document.getElementById("display-extra-size");
 const displaySfondo = document.getElementById("display-sfondo");
 const displayTesto = document.getElementById("display-testo");
 const displayCard = document.getElementById("display-card");
@@ -19,6 +22,8 @@ const kioskSfondo = document.getElementById("kiosk-sfondo");
 const kioskTesto = document.getElementById("kiosk-testo");
 const kioskBottone = document.getElementById("kiosk-bottone");
 const kioskTestoBottone = document.getElementById("kiosk-testo-bottone");
+const kioskBottoneSize = document.getElementById("kiosk-bottone-size");
+const kioskBottonePadding = document.getElementById("kiosk-bottone-padding");
 const kioskSfondoImg = document.getElementById("kiosk-sfondo-img");
 const kioskSfondoFile = document.getElementById("kiosk-sfondo-file");
 const numeroOperatoriSelect = document.getElementById("numero-operatori");
@@ -177,6 +182,10 @@ async function caricaConfig() {
   displayUltimi.checked = Boolean(display.mostra_ultimi);
   displayNumeroUltimi.value = String(display.numero_ultimi ?? 5);
   displayLayout.value = display.layout || "split";
+  const dimensioniDisplay = display.dimensioni || {};
+  displayNumeroSize.value = dimensioniDisplay.numero || "5rem";
+  displayCardSize.value = dimensioniDisplay.card || "1fr";
+  displayExtraSize.value = dimensioniDisplay.extra || "1fr";
   const temaDisplay = display.tema || {};
   displaySfondo.value = temaDisplay.sfondo || "#0f172a";
   displayTesto.value = temaDisplay.testo || "#f8fafc";
@@ -191,6 +200,9 @@ async function caricaConfig() {
   kioskBottone.value = temaKiosk.bottone || "#1f6feb";
   kioskTestoBottone.value = temaKiosk.testo_bottone || "#ffffff";
   kioskSfondoImg.value = temaKiosk.immagine_sfondo || "";
+  const dimensioniKiosk = kiosk.dimensioni || {};
+  kioskBottoneSize.value = dimensioniKiosk.bottone || "1rem";
+  kioskBottonePadding.value = dimensioniKiosk.bottone_padding || "8px 14px";
 }
 
 numeroOperatoriSelect.addEventListener("change", () => {
@@ -233,6 +245,11 @@ form.addEventListener("submit", async (event) => {
       .split(",")
       .map((voce) => voce.trim())
       .filter(Boolean),
+    dimensioni: {
+      numero: displayNumeroSize.value.trim() || "5rem",
+      card: displayCardSize.value.trim() || "1fr",
+      extra: displayExtraSize.value.trim() || "1fr",
+    },
     tema: {
       sfondo: displaySfondo.value,
       testo: displayTesto.value,
@@ -247,6 +264,10 @@ form.addEventListener("submit", async (event) => {
       bottone: kioskBottone.value,
       testo_bottone: kioskTestoBottone.value,
       immagine_sfondo: kioskSfondoImg.value.trim(),
+    },
+    dimensioni: {
+      bottone: kioskBottoneSize.value.trim() || "1rem",
+      bottone_padding: kioskBottonePadding.value.trim() || "8px 14px",
     },
   };
   const operatori = Array.from(operatoriContainer.querySelectorAll("input")).map((input) => ({

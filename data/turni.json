@@ -26,6 +26,11 @@
       "logo": "",
       "immagini": [],
       "layout": "split",
+      "dimensioni": {
+        "numero": "5rem",
+        "card": "1fr",
+        "extra": "1fr"
+      },
       "tema": {
         "sfondo": "#0f172a",
         "testo": "#f8fafc",
@@ -40,6 +45,10 @@
         "bottone": "#1f6feb",
         "testo_bottone": "#ffffff",
         "immagine_sfondo": ""
+      },
+      "dimensioni": {
+        "bottone": "1rem",
+        "bottone_padding": "8px 14px"
       }
     },
     "operatori": [

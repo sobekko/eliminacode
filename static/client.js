@@ -8,6 +8,9 @@ function applyKioskTheme(kiosk) {
   root.style.setProperty("--kiosk-text", tema.testo || "#1b1f24");
   root.style.setProperty("--kiosk-button", tema.bottone || "#1f6feb");
   root.style.setProperty("--kiosk-button-text", tema.testo_bottone || "#ffffff");
+  const dimensioni = (kiosk && kiosk.dimensioni) || {};
+  root.style.setProperty("--kiosk-button-size", dimensioni.bottone || "1rem");
+  root.style.setProperty("--kiosk-button-padding", dimensioni.bottone_padding || "8px 14px");
   if (tema.immagine_sfondo) {
     root.style.setProperty("--kiosk-bg-image", `url('${tema.immagine_sfondo}')`);
   } else {

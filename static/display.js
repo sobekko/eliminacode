@@ -18,6 +18,10 @@ function applyDisplayTheme(display) {
   root.style.setProperty("--display-bg", tema.sfondo || "#0f172a");
   root.style.setProperty("--display-text", tema.testo || "#f8fafc");
   root.style.setProperty("--display-card", tema.card || "#1e293b");
+  const dimensioni = display.dimensioni || {};
+  root.style.setProperty("--display-numero-size", dimensioni.numero || "5rem");
+  root.style.setProperty("--display-card-size", dimensioni.card || "1fr");
+  root.style.setProperty("--display-extra-size", dimensioni.extra || "1fr");
   if (tema.immagine_sfondo) {
     root.style.setProperty("--display-bg-image", `url('${tema.immagine_sfondo}')`);
   } else {

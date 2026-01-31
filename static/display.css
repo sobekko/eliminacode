@@ -26,7 +26,9 @@
   padding: 40px 60px;
   display: grid;
   gap: 16px;
-  min-width: 420px;
+  width: min(90vw, 100%);
+  max-width: 900px;
+  flex: 0 0 auto;
   text-align: center;
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
 }
@@ -40,7 +42,7 @@
 }
 
 .display-numero {
-  font-size: 5rem;
+  font-size: var(--display-numero-size, 5rem);
   font-weight: 800;
 }
 
@@ -87,7 +89,7 @@
 
 .display-extra {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: var(--display-card-size, 1fr) var(--display-extra-size, 1fr);
   gap: 24px;
   width: min(900px, 100%);
 }

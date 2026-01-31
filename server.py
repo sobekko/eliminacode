@@ -29,6 +29,11 @@ def _default_config():
             "logo": "",
             "immagini": [],
             "layout": "split",
+            "dimensioni": {
+                "numero": "5rem",
+                "card": "1fr",
+                "extra": "1fr",
+            },
             "tema": {
                 "sfondo": "#0f172a",
                 "testo": "#f8fafc",
@@ -43,7 +48,11 @@ def _default_config():
                 "bottone": "#1f6feb",
                 "testo_bottone": "#ffffff",
                 "immagine_sfondo": "",
-            }
+            },
+            "dimensioni": {
+                "bottone": "1rem",
+                "bottone_padding": "8px 14px",
+            },
         },
         "operatori": [{"nome": "Operatore 1"}],
     }
@@ -117,8 +126,12 @@ def _read_state():
         state["config"]["prefissi"] = _default_config()["prefissi"]
     if "display" not in state["config"]:
         state["config"]["display"] = _default_config()["display"]
+    elif "dimensioni" not in state["config"]["display"]:
+        state["config"]["display"]["dimensioni"] = _default_config()["display"]["dimensioni"]
     if "kiosk" not in state["config"]:
         state["config"]["kiosk"] = _default_config()["kiosk"]
+    elif "dimensioni" not in state["config"]["kiosk"]:
+        state["config"]["kiosk"]["dimensioni"] = _default_config()["kiosk"]["dimensioni"]
     if "operatori" not in state["config"]:
         state["config"]["operatori"] = _default_config()["operatori"]
     if "storico" not in state:
@@ -480,6 +493,15 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             if layout not in {"split", "stacked"}:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
+            dimensioni_display = display.get("dimensioni", {})
+            if not isinstance(dimensioni_display, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            display_dimensioni = {
+                "numero": str(dimensioni_display.get("numero", "5rem")).strip(),
+                "card": str(dimensioni_display.get("card", "1fr")).strip(),
+                "extra": str(dimensioni_display.get("extra", "1fr")).strip(),
+            }
             tema_display = display.get("tema", {})
             if not isinstance(tema_display, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
@@ -503,6 +525,14 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "bottone": str(tema_kiosk.get("bottone", "#1f6feb")).strip(),
                 "testo_bottone": str(tema_kiosk.get("testo_bottone", "#ffffff")).strip(),
                 "immagine_sfondo": str(tema_kiosk.get("immagine_sfondo", "")).strip(),
+            }
+            kiosk_dimensioni = kiosk.get("dimensioni", {})
+            if not isinstance(kiosk_dimensioni, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            kiosk_dim = {
+                "bottone": str(kiosk_dimensioni.get("bottone", "1rem")).strip(),
+                "bottone_padding": str(kiosk_dimensioni.get("bottone_padding", "8px 14px")).strip(),
             }
             if not isinstance(operatori, list) or not operatori:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Operatori non validi")
@@ -528,9 +558,10 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         "logo": logo,
                         "immagini": immagini_pulite,
                         "layout": layout,
+                        "dimensioni": display_dimensioni,
                         "tema": display_tema,
                     },
-                    "kiosk": {"tema": kiosk_tema},
+                    "kiosk": {"tema": kiosk_tema, "dimensioni": kiosk_dim},
                     "operatori": operatori_puliti,
                 }
                 _write_state(state)

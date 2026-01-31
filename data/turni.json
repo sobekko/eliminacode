@@ -2,6 +2,7 @@
   "turni": [],
   "corrente": null,
   "ultimo": 0,
+  "contatori": {},
   "storico": [],
   "config": {
     "servizio": "vendite",

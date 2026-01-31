@@ -67,6 +67,7 @@ def _ensure_data_file():
                     "turni": [],
                     "corrente": None,
                     "ultimo": 0,
+                    "contatori": {},
                     "storico": [],
                     "config": _default_config(),
                 },
@@ -136,6 +137,8 @@ def _read_state():
         state["config"]["operatori"] = _default_config()["operatori"]
     if "storico" not in state:
         state["storico"] = []
+    if "contatori" not in state:
+        state["contatori"] = {}
     now_iso = datetime.now(timezone.utc).isoformat()
     for ticket in state.get("turni", []):
         if "creato_il" not in ticket:
@@ -365,9 +368,11 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 prefissi = state["config"].get("prefissi", {})
                 priorita = int(priorita_config.get(servizio, 3))
                 creato_il = datetime.now(timezone.utc).isoformat()
-                state["ultimo"] += 1
+                contatori = state.get("contatori", {})
+                contatori[servizio] = contatori.get(servizio, 0) + 1
+                state["contatori"] = contatori
                 ticket = {
-                    "numero": state["ultimo"],
+                    "numero": contatori[servizio],
                     "servizio": servizio,
                     "priorita": priorita,
                     "prefisso": prefissi.get(servizio, ""),
@@ -430,6 +435,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 state["turni"] = []
                 state["corrente"] = None
                 state["ultimo"] = 0
+                state["contatori"] = {}
                 state["storico"] = []
                 _write_state(state)
             self._send_json({"ok": True, "state": state})

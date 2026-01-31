@@ -30,6 +30,7 @@ L'interfaccia di amministrazione è su `http://<ip-locale>:8000/admin`.
 - Selezione del servizio richiesto (vendite, ritiro, prioritario)
 - Priorità per servizio (1 = alta, 3 = bassa) configurabile in admin
 - Prefisso per servizio (0-1 caratteri) per differenziare la coda
+- Numerazione separata per servizio (es. V1, P1, R1)
 - Personalizzazione display e kiosk (layout, colori, sfondo, logo, immagini e dimensioni) da admin
 - Stampa del ticket cliente
 - Chiamata prossimo turno

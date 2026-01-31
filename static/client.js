@@ -26,7 +26,8 @@ async function creaTicket(servizio) {
 
   if (response.ok) {
     const data = await response.json();
-    esito.textContent = `Ticket creato: #${data.ticket.numero}`;
+    const prefisso = data.ticket.prefisso ? `${data.ticket.prefisso}` : "";
+    esito.textContent = `Ticket creato: ${prefisso}${data.ticket.numero}`;
     esito.className = "esito ok";
   } else {
     esito.textContent = "Errore nella creazione del ticket.";

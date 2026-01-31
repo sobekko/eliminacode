@@ -402,6 +402,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         ),
                         0,
                     )
+                    chiamato_il = datetime.now(timezone.utc).isoformat()
                     state["corrente"] = state["turni"].pop(indice)
                     if operatore:
                         state["corrente"]["operatore"] = operatore
@@ -412,6 +413,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                             "servizio": state["corrente"].get("servizio", ""),
                             "prefisso": state["corrente"].get("prefisso", ""),
                             "operatore": state["corrente"].get("operatore", ""),
+                            "chiamato_il": chiamato_il,
                         }
                     )
                     state["storico"] = storico[-20:]
@@ -443,6 +445,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 return
             with DATA_LOCK:
                 state = _read_state()
+                chiamato_il = datetime.now(timezone.utc).isoformat()
                 state["corrente"] = {
                     "numero": numero,
                     "servizio": servizio,
@@ -456,6 +459,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         "servizio": servizio,
                         "prefisso": prefisso,
                         "operatore": operatore,
+                        "chiamato_il": chiamato_il,
                     }
                 )
                 state["storico"] = storico[-20:]

@@ -57,6 +57,19 @@ function mostraPopup(numero, prefisso) {
   }, 4000);
 }
 
+function buildStoricoKey(item, index, total) {
+  if (!item) {
+    return "";
+  }
+  if (item.chiamato_il) {
+    return item.chiamato_il;
+  }
+  const prefisso = item.prefisso ? `${item.prefisso}` : "";
+  const numero = item.numero ? `${item.numero}` : "";
+  const operatore = item.operatore ? `${item.operatore}` : "";
+  return `${total}-${index}-${prefisso}${numero}-${operatore}`;
+}
+
 function renderStorico(storico, numeroUltimi) {
   storicoEl.innerHTML = "";
   const ultimi = storico.slice(-numeroUltimi).reverse();
@@ -112,7 +125,17 @@ async function aggiornaDisplay() {
   }
   const data = await response.json();
   renderDisplay(data.corrente);
-  if (data.corrente) {
+  const storico = data.storico || [];
+  const lastIndex = storico.length - 1;
+  const lastItem = lastIndex >= 0 ? storico[lastIndex] : null;
+  if (lastItem && lastItem.numero) {
+    const prefisso = lastItem.prefisso ? `${lastItem.prefisso}` : "";
+    const key = buildStoricoKey(lastItem, lastIndex, storico.length);
+    if (key && key !== ultimaChiamataKey) {
+      ultimaChiamataKey = key;
+      mostraPopup(lastItem.numero, prefisso);
+    }
+  } else if (data.corrente) {
     const prefisso = data.corrente.prefisso ? `${data.corrente.prefisso}` : "";
     const key = `${prefisso}${data.corrente.numero}`;
     if (key && key !== ultimaChiamataKey) {
@@ -125,7 +148,6 @@ async function aggiornaDisplay() {
   applyDisplayTheme(display);
   const mostraUltimi = display.mostra_ultimi !== false;
   const numeroUltimi = display.numero_ultimi || 5;
-  const storico = data.storico || [];
   if (mostraUltimi) {
     storicoEl.closest(".display-history").style.display = "block";
     renderStorico(storico, numeroUltimi);

@@ -29,6 +29,25 @@ body {
   max-width: 720px;
 }
 
+.kiosk-client {
+  min-height: 100vh;
+  align-content: start;
+  gap: 24px;
+  padding: 32px 20px 60px;
+}
+
+.kiosk-client header {
+  text-align: center;
+}
+
+.kiosk-client header h1 {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.kiosk-client header p {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+}
+
 .operator-page {
   max-width: 720px;
 }
@@ -209,6 +228,10 @@ button.ghost {
 
 .servizi-kiosk {
   justify-content: center;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .pill {
@@ -220,6 +243,32 @@ button.ghost {
   cursor: pointer;
   font-weight: 600;
   font-size: var(--kiosk-button-size, 1rem);
+}
+
+.kiosk-client .pill {
+  border-radius: 18px;
+  padding: clamp(14px, 2vw, 22px) clamp(18px, 4vw, 28px);
+  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  min-height: 64px;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+}
+
+.kiosk-client .card {
+  padding: clamp(18px, 3vw, 28px);
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  .kiosk-client {
+    padding: 24px 16px 50px;
+  }
+
+  .servizi-kiosk {
+    grid-template-columns: 1fr;
+  }
+
+  .kiosk-client .pill {
+    min-height: 70px;
+  }
 }
 
 .pill.active {

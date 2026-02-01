@@ -1,5 +1,15 @@
 const esito = document.getElementById("esito");
 const serviziContainer = document.getElementById("servizi");
+const kioskTextTop = document.getElementById("kiosk-text-top");
+const kioskTextBottom = document.getElementById("kiosk-text-bottom");
+const kioskLogo = document.getElementById("kiosk-logo");
+
+function setElementVisibility(element, shouldShow) {
+  if (!element) {
+    return;
+  }
+  element.hidden = !shouldShow;
+}
 
 function applyKioskTheme(kiosk) {
   const tema = (kiosk && kiosk.tema) || {};
@@ -15,6 +25,29 @@ function applyKioskTheme(kiosk) {
     root.style.setProperty("--kiosk-bg-image", `url('${tema.immagine_sfondo}')`);
   } else {
     root.style.setProperty("--kiosk-bg-image", "none");
+  }
+}
+
+function renderKioskContent(kiosk) {
+  const contenuti = (kiosk && kiosk.contenuti) || {};
+  const testo = (contenuti.testo || "").trim();
+  const posizione = contenuti.posizione_testo || "sopra";
+  const logo = (contenuti.logo || "").trim();
+
+  const showText = Boolean(testo);
+  const showLogo = Boolean(logo);
+
+  if (kioskTextTop) {
+    kioskTextTop.textContent = posizione === "sopra" || posizione === "entrambi" ? testo : "";
+    setElementVisibility(kioskTextTop, showText && kioskTextTop.textContent);
+  }
+  if (kioskTextBottom) {
+    kioskTextBottom.textContent = posizione === "sotto" || posizione === "entrambi" ? testo : "";
+    setElementVisibility(kioskTextBottom, showText && kioskTextBottom.textContent);
+  }
+  if (kioskLogo) {
+    kioskLogo.src = logo;
+    setElementVisibility(kioskLogo, showLogo);
   }
 }
 
@@ -61,6 +94,7 @@ async function fetchConfig() {
   const config = await response.json();
   renderServizi(config);
   applyKioskTheme(config.kiosk);
+  renderKioskContent(config.kiosk);
 }
 
 fetchConfig();

@@ -51,6 +51,11 @@ def _default_config():
             },
         },
         "kiosk": {
+            "contenuti": {
+                "testo": "Prendi il tuo ticket",
+                "logo": "",
+                "posizione_testo": "sopra",
+            },
             "tema": {
                 "sfondo": "#f4f5f7",
                 "testo": "#1b1f24",
@@ -149,6 +154,8 @@ def _read_state():
         state["config"]["kiosk"] = _default_config()["kiosk"]
     elif "dimensioni" not in state["config"]["kiosk"]:
         state["config"]["kiosk"]["dimensioni"] = _default_config()["kiosk"]["dimensioni"]
+    if "contenuti" not in state["config"]["kiosk"]:
+        state["config"]["kiosk"]["contenuti"] = _default_config()["kiosk"]["contenuti"]
     if "operatori" not in state["config"]:
         state["config"]["operatori"] = _default_config()["operatori"]
     if "storico" not in state:
@@ -718,6 +725,21 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             if not isinstance(kiosk, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
                 return
+            contenuti_kiosk = kiosk.get("contenuti", {})
+            if contenuti_kiosk is None:
+                contenuti_kiosk = {}
+            if not isinstance(contenuti_kiosk, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            posizione_testo = str(contenuti_kiosk.get("posizione_testo", "sopra")).strip().lower()
+            if posizione_testo not in {"sopra", "sotto", "entrambi"}:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            kiosk_contenuti = {
+                "testo": str(contenuti_kiosk.get("testo", "")).strip(),
+                "logo": str(contenuti_kiosk.get("logo", "")).strip(),
+                "posizione_testo": posizione_testo,
+            }
             tema_kiosk = kiosk.get("tema", {})
             if not isinstance(tema_kiosk, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
@@ -769,7 +791,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     },
                     "tema": display_tema,
                 },
-                    "kiosk": {"tema": kiosk_tema, "dimensioni": kiosk_dim},
+                    "kiosk": {"contenuti": kiosk_contenuti, "tema": kiosk_tema, "dimensioni": kiosk_dim},
                     "operatori": operatori_puliti,
                 }
                 _write_state(state)

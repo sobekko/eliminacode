@@ -48,6 +48,24 @@ body {
   font-size: clamp(1rem, 2vw, 1.3rem);
 }
 
+.kiosk-content {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+
+.kiosk-text {
+  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+  font-weight: 600;
+  white-space: pre-line;
+}
+
+.kiosk-logo {
+  max-width: min(60vw, 280px);
+  max-height: 160px;
+  object-fit: contain;
+}
+
 .operator-page {
   max-width: 720px;
 }
@@ -260,6 +278,10 @@ button.ghost {
 @media (max-width: 900px) and (orientation: portrait) {
   .kiosk-client {
     padding: 24px 16px 50px;
+  }
+
+  .kiosk-logo {
+    max-width: min(70vw, 240px);
   }
 
   .servizi-kiosk {

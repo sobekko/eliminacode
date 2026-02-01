@@ -119,6 +119,11 @@ function ensureDisplayDefaults(display = {}) {
 
 function ensureKioskDefaults(kiosk = {}) {
   return {
+    contenuti: {
+      testo: kiosk.contenuti?.testo || "Prendi il tuo ticket",
+      logo: kiosk.contenuti?.logo || "",
+      posizione_testo: kiosk.contenuti?.posizione_testo || "sopra",
+    },
     tema: {
       sfondo: kiosk.tema?.sfondo || "#f4f5f7",
       testo: kiosk.tema?.testo || "#1b1f24",

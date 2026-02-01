@@ -1,6 +1,10 @@
 const form = document.getElementById("form-kiosk");
+const kioskIntroText = document.getElementById("kiosk-intro-text");
+const kioskLogo = document.getElementById("kiosk-logo");
+const kioskLogoFile = document.getElementById("kiosk-logo-file");
+const kioskTestoPosizione = document.getElementById("kiosk-testo-posizione");
 const kioskSfondo = document.getElementById("kiosk-sfondo");
-const kioskTesto = document.getElementById("kiosk-testo");
+const kioskTextColor = document.getElementById("kiosk-text-color");
 const kioskBottone = document.getElementById("kiosk-bottone");
 const kioskTestoBottone = document.getElementById("kiosk-testo-bottone");
 const kioskBottoneSize = document.getElementById("kiosk-bottone-size");
@@ -18,6 +22,11 @@ function readFileAsDataUrl(file, callback) {
 
 function ensureKioskDefaults(kiosk = {}) {
   return {
+    contenuti: {
+      testo: kiosk.contenuti?.testo || "Prendi il tuo ticket",
+      logo: kiosk.contenuti?.logo || "",
+      posizione_testo: kiosk.contenuti?.posizione_testo || "sopra",
+    },
     tema: {
       sfondo: kiosk.tema?.sfondo || "#f4f5f7",
       testo: kiosk.tema?.testo || "#1b1f24",
@@ -45,8 +54,11 @@ async function caricaConfig() {
   const config = await response.json();
   configData = config;
   const kiosk = ensureKioskDefaults(config.kiosk || {});
+  kioskIntroText.value = kiosk.contenuti.testo || "";
+  kioskLogo.value = kiosk.contenuti.logo || "";
+  kioskTestoPosizione.value = kiosk.contenuti.posizione_testo || "sopra";
   kioskSfondo.value = kiosk.tema.sfondo || "#f4f5f7";
-  kioskTesto.value = kiosk.tema.testo || "#1b1f24";
+  kioskTextColor.value = kiosk.tema.testo || "#1b1f24";
   kioskBottone.value = kiosk.tema.bottone || "#1f6feb";
   kioskTestoBottone.value = kiosk.tema.testo_bottone || "#ffffff";
   kioskSfondoImg.value = kiosk.tema.immagine_sfondo || "";
@@ -64,6 +76,16 @@ kioskSfondoFile.addEventListener("change", (event) => {
   });
 });
 
+kioskLogoFile.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    return;
+  }
+  readFileAsDataUrl(file, (dataUrl) => {
+    kioskLogo.value = dataUrl;
+  });
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!configData?.servizio || !configData?.servizi?.length || !configData?.operatori?.length) {
@@ -71,9 +93,14 @@ form.addEventListener("submit", async (event) => {
     return;
   }
   const kiosk = {
+    contenuti: {
+      testo: kioskIntroText.value.trim(),
+      logo: kioskLogo.value.trim(),
+      posizione_testo: kioskTestoPosizione.value,
+    },
     tema: {
       sfondo: kioskSfondo.value,
-      testo: kioskTesto.value,
+      testo: kioskTextColor.value,
       bottone: kioskBottone.value,
       testo_bottone: kioskTestoBottone.value,
       immagine_sfondo: kioskSfondoImg.value.trim(),

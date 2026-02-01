@@ -3,45 +3,10 @@ const servizioInput = document.getElementById("servizio");
 const serviziInput = document.getElementById("servizi");
 const prioritaContainer = document.getElementById("priorita-container");
 const prefissiContainer = document.getElementById("prefissi-container");
-const displayUltimi = document.getElementById("display-ultimi");
-const displayNumeroUltimi = document.getElementById("display-numero-ultimi");
-const displayLayout = document.getElementById("display-layout");
-const displayNumeroSize = document.getElementById("display-numero-size");
-const displayCardSize = document.getElementById("display-card-size");
-const displayExtraSize = document.getElementById("display-extra-size");
-const displaySfondo = document.getElementById("display-sfondo");
-const displayTesto = document.getElementById("display-testo");
-const displayCard = document.getElementById("display-card");
-const displayLogo = document.getElementById("display-logo");
-const displayLogoFile = document.getElementById("display-logo-file");
-const displaySfondoImg = document.getElementById("display-sfondo-img");
-const displaySfondoFile = document.getElementById("display-sfondo-file");
-const displayImmagini = document.getElementById("display-immagini");
-const displayImmaginiFile = document.getElementById("display-immagini-file");
-const displayImageUpload = document.getElementById("display-image-upload");
-const displayImageLibrary = document.getElementById("display-image-library");
-const displayImageAdd = document.getElementById("display-image-add");
-const displayLogoLibrary = document.getElementById("display-logo-library");
-const displayLogoApply = document.getElementById("display-logo-apply");
-const displayBgLibrary = document.getElementById("display-bg-library");
-const displayBgApply = document.getElementById("display-bg-apply");
-const displayAudioEnabled = document.getElementById("display-audio-enabled");
-const displayAudioUrl = document.getElementById("display-audio-url");
-const displayAudioVolume = document.getElementById("display-audio-volume");
-const displayAudioUpload = document.getElementById("display-audio-upload");
-const displayAudioLibrary = document.getElementById("display-audio-library");
-const displayAudioApply = document.getElementById("display-audio-apply");
-const kioskSfondo = document.getElementById("kiosk-sfondo");
-const kioskTesto = document.getElementById("kiosk-testo");
-const kioskBottone = document.getElementById("kiosk-bottone");
-const kioskTestoBottone = document.getElementById("kiosk-testo-bottone");
-const kioskBottoneSize = document.getElementById("kiosk-bottone-size");
-const kioskBottonePadding = document.getElementById("kiosk-bottone-padding");
-const kioskSfondoImg = document.getElementById("kiosk-sfondo-img");
-const kioskSfondoFile = document.getElementById("kiosk-sfondo-file");
 const numeroOperatoriSelect = document.getElementById("numero-operatori");
 const operatoriContainer = document.getElementById("operatori-container");
 const esitoAdmin = document.getElementById("esito-admin");
+let configData = null;
 
 function creaOperatoriInputs(numero, valori = []) {
   operatoriContainer.innerHTML = "";
@@ -126,160 +91,47 @@ function parseServizi() {
     .filter(Boolean);
 }
 
-function readFileAsDataUrl(file, callback) {
-  const reader = new FileReader();
-  reader.onload = () => callback(reader.result);
-  reader.readAsDataURL(file);
+function ensureDisplayDefaults(display = {}) {
+  return {
+    mostra_ultimi: display.mostra_ultimi ?? true,
+    numero_ultimi: display.numero_ultimi ?? 5,
+    layout: display.layout || "split",
+    logo: display.logo || "",
+    immagini: display.immagini || [],
+    dimensioni: {
+      numero: display.dimensioni?.numero || "5rem",
+      card: display.dimensioni?.card || "1fr",
+      extra: display.dimensioni?.extra || "1fr",
+    },
+    audio: {
+      abilita: display.audio?.abilita ?? false,
+      url: display.audio?.url || "",
+      volume: display.audio?.volume ?? 1,
+    },
+    tema: {
+      sfondo: display.tema?.sfondo || "#0f172a",
+      testo: display.tema?.testo || "#f8fafc",
+      card: display.tema?.card || "#1e293b",
+      immagine_sfondo: display.tema?.immagine_sfondo || "",
+    },
+  };
 }
 
-async function uploadFile(file, tipo) {
-  const formData = new FormData();
-  formData.append("file", file);
-  const response = await fetch(`/api/upload?type=${tipo}`, {
-    method: "POST",
-    body: formData,
-  });
-  if (!response.ok) {
-    throw new Error("Upload fallito");
-  }
-  return response.json();
+function ensureKioskDefaults(kiosk = {}) {
+  return {
+    tema: {
+      sfondo: kiosk.tema?.sfondo || "#f4f5f7",
+      testo: kiosk.tema?.testo || "#1b1f24",
+      bottone: kiosk.tema?.bottone || "#1f6feb",
+      testo_bottone: kiosk.tema?.testo_bottone || "#ffffff",
+      immagine_sfondo: kiosk.tema?.immagine_sfondo || "",
+    },
+    dimensioni: {
+      bottone: kiosk.dimensioni?.bottone || "1rem",
+      bottone_padding: kiosk.dimensioni?.bottone_padding || "8px 14px",
+    },
+  };
 }
-
-function fillSelect(select, files) {
-  select.innerHTML = "";
-  const empty = document.createElement("option");
-  empty.value = "";
-  empty.textContent = "Seleziona...";
-  select.appendChild(empty);
-  files.forEach((file) => {
-    const option = document.createElement("option");
-    option.value = file.url;
-    option.textContent = file.name;
-    select.appendChild(option);
-  });
-}
-
-async function caricaUpload(tipo) {
-  const response = await fetch(`/api/uploads?type=${tipo}`);
-  if (!response.ok) {
-    return [];
-  }
-  const data = await response.json();
-  return data.files || [];
-}
-
-displayLogoFile.addEventListener("change", (event) => {
-  const file = event.target.files[0];
-  if (!file) {
-    return;
-  }
-  readFileAsDataUrl(file, (dataUrl) => {
-    displayLogo.value = dataUrl;
-  });
-});
-
-displaySfondoFile.addEventListener("change", (event) => {
-  const file = event.target.files[0];
-  if (!file) {
-    return;
-  }
-  readFileAsDataUrl(file, (dataUrl) => {
-    displaySfondoImg.value = dataUrl;
-  });
-});
-
-displayImmaginiFile.addEventListener("change", (event) => {
-  const files = Array.from(event.target.files);
-  if (!files.length) {
-    return;
-  }
-  const results = [];
-  files.forEach((file) => {
-    readFileAsDataUrl(file, (dataUrl) => {
-      results.push(dataUrl);
-      if (results.length === files.length) {
-        displayImmagini.value = results.join(", ");
-      }
-    });
-  });
-});
-
-kioskSfondoFile.addEventListener("change", (event) => {
-  const file = event.target.files[0];
-  if (!file) {
-    return;
-  }
-  readFileAsDataUrl(file, (dataUrl) => {
-    kioskSfondoImg.value = dataUrl;
-  });
-});
-
-displayImageUpload.addEventListener("change", async (event) => {
-  const files = Array.from(event.target.files);
-  if (!files.length) {
-    return;
-  }
-  for (const file of files) {
-    try {
-      await uploadFile(file, "image");
-    } catch (error) {
-      esitoAdmin.textContent = "Errore upload immagini.";
-      esitoAdmin.className = "esito error";
-      return;
-    }
-  }
-  await aggiornaLibrerie();
-});
-
-displayAudioUpload.addEventListener("change", async (event) => {
-  const file = event.target.files[0];
-  if (!file) {
-    return;
-  }
-  try {
-    await uploadFile(file, "audio");
-  } catch (error) {
-    esitoAdmin.textContent = "Errore upload audio.";
-    esitoAdmin.className = "esito error";
-    return;
-  }
-  await aggiornaLibrerie();
-});
-
-displayImageAdd.addEventListener("click", () => {
-  if (!displayImageLibrary.value) {
-    return;
-  }
-  const current = displayImmagini.value
-    .split(",")
-    .map((voce) => voce.trim())
-    .filter(Boolean);
-  if (!current.includes(displayImageLibrary.value)) {
-    current.push(displayImageLibrary.value);
-  }
-  displayImmagini.value = current.join(", ");
-});
-
-displayLogoApply.addEventListener("click", () => {
-  if (!displayLogoLibrary.value) {
-    return;
-  }
-  displayLogo.value = displayLogoLibrary.value;
-});
-
-displayBgApply.addEventListener("click", () => {
-  if (!displayBgLibrary.value) {
-    return;
-  }
-  displaySfondoImg.value = displayBgLibrary.value;
-});
-
-displayAudioApply.addEventListener("click", () => {
-  if (!displayAudioLibrary.value) {
-    return;
-  }
-  displayAudioUrl.value = displayAudioLibrary.value;
-});
 
 async function caricaConfig() {
   const response = await fetch("/api/admin");
@@ -287,6 +139,7 @@ async function caricaConfig() {
     return;
   }
   const config = await response.json();
+  configData = config;
   servizioInput.value = config.servizio || "";
   serviziInput.value = (config.servizi || []).join(", ");
   const operatori = config.operatori || [];
@@ -294,44 +147,6 @@ async function caricaConfig() {
   creaOperatoriInputs(operatori.length || 1, operatori);
   renderPriorita(config.servizi || [], config.priorita || {});
   renderPrefissi(config.servizi || [], config.prefissi || {});
-  const display = config.display || {};
-  displayUltimi.checked = Boolean(display.mostra_ultimi);
-  displayNumeroUltimi.value = String(display.numero_ultimi ?? 5);
-  displayLayout.value = display.layout || "split";
-  const dimensioniDisplay = display.dimensioni || {};
-  displayNumeroSize.value = dimensioniDisplay.numero || "5rem";
-  displayCardSize.value = dimensioniDisplay.card || "1fr";
-  displayExtraSize.value = dimensioniDisplay.extra || "1fr";
-  const temaDisplay = display.tema || {};
-  displaySfondo.value = temaDisplay.sfondo || "#0f172a";
-  displayTesto.value = temaDisplay.testo || "#f8fafc";
-  displayCard.value = temaDisplay.card || "#1e293b";
-  displaySfondoImg.value = temaDisplay.immagine_sfondo || "";
-  displayLogo.value = display.logo || "";
-  displayImmagini.value = (display.immagini || []).join(", ");
-  const audioDisplay = display.audio || {};
-  displayAudioEnabled.checked = Boolean(audioDisplay.abilita);
-  displayAudioUrl.value = audioDisplay.url || "";
-  displayAudioVolume.value = String(audioDisplay.volume ?? 1);
-  const kiosk = config.kiosk || {};
-  const temaKiosk = kiosk.tema || {};
-  kioskSfondo.value = temaKiosk.sfondo || "#f4f5f7";
-  kioskTesto.value = temaKiosk.testo || "#1b1f24";
-  kioskBottone.value = temaKiosk.bottone || "#1f6feb";
-  kioskTestoBottone.value = temaKiosk.testo_bottone || "#ffffff";
-  kioskSfondoImg.value = temaKiosk.immagine_sfondo || "";
-  const dimensioniKiosk = kiosk.dimensioni || {};
-  kioskBottoneSize.value = dimensioniKiosk.bottone || "1rem";
-  kioskBottonePadding.value = dimensioniKiosk.bottone_padding || "8px 14px";
-}
-
-async function aggiornaLibrerie() {
-  const immagini = await caricaUpload("image");
-  fillSelect(displayImageLibrary, immagini);
-  fillSelect(displayLogoLibrary, immagini);
-  fillSelect(displayBgLibrary, immagini);
-  const audio = await caricaUpload("audio");
-  fillSelect(displayAudioLibrary, audio);
 }
 
 numeroOperatoriSelect.addEventListener("change", () => {
@@ -365,45 +180,8 @@ form.addEventListener("submit", async (event) => {
   prefissiContainer.querySelectorAll("input").forEach((input) => {
     prefissi[input.dataset.servizio] = input.value.trim();
   });
-  const display = {
-    mostra_ultimi: displayUltimi.checked,
-    numero_ultimi: Number(displayNumeroUltimi.value || 5),
-    layout: displayLayout.value,
-    logo: displayLogo.value.trim(),
-    immagini: displayImmagini.value
-      .split(",")
-      .map((voce) => voce.trim())
-      .filter(Boolean),
-    dimensioni: {
-      numero: displayNumeroSize.value.trim() || "5rem",
-      card: displayCardSize.value.trim() || "1fr",
-      extra: displayExtraSize.value.trim() || "1fr",
-    },
-    audio: {
-      abilita: displayAudioEnabled.checked,
-      url: displayAudioUrl.value.trim(),
-      volume: Number(displayAudioVolume.value || 1),
-    },
-    tema: {
-      sfondo: displaySfondo.value,
-      testo: displayTesto.value,
-      card: displayCard.value,
-      immagine_sfondo: displaySfondoImg.value.trim(),
-    },
-  };
-  const kiosk = {
-    tema: {
-      sfondo: kioskSfondo.value,
-      testo: kioskTesto.value,
-      bottone: kioskBottone.value,
-      testo_bottone: kioskTestoBottone.value,
-      immagine_sfondo: kioskSfondoImg.value.trim(),
-    },
-    dimensioni: {
-      bottone: kioskBottoneSize.value.trim() || "1rem",
-      bottone_padding: kioskBottonePadding.value.trim() || "8px 14px",
-    },
-  };
+  const display = ensureDisplayDefaults(configData?.display || {});
+  const kiosk = ensureKioskDefaults(configData?.kiosk || {});
   const operatori = Array.from(operatoriContainer.querySelectorAll("input")).map((input) => ({
     nome: input.value.trim(),
   }));
@@ -415,8 +193,10 @@ form.addEventListener("submit", async (event) => {
   });
 
   if (response.ok) {
+    const data = await response.json();
     esitoAdmin.textContent = "Configurazione salvata.";
     esitoAdmin.className = "esito ok";
+    configData = data.config;
   } else {
     esitoAdmin.textContent = "Errore nel salvataggio.";
     esitoAdmin.className = "esito error";
@@ -424,4 +204,3 @@ form.addEventListener("submit", async (event) => {
 });
 
 caricaConfig();
-aggiornaLibrerie();

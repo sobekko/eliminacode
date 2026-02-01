@@ -421,6 +421,12 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
         if parsed.path == "/admin":
             self._send_file(os.path.join(STATIC_DIR, "admin.html"))
             return
+        if parsed.path == "/admin_display":
+            self._send_file(os.path.join(STATIC_DIR, "admin_display.html"))
+            return
+        if parsed.path == "/admin_kiosk":
+            self._send_file(os.path.join(STATIC_DIR, "admin_kiosk.html"))
+            return
         if parsed.path.startswith("/upload/"):
             _ensure_upload_dirs()
             safe_path = os.path.normpath(parsed.path.lstrip("/"))

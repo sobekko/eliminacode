@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin kiosk - Eliminacode</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Kiosk clienti</h1>
+        <p>Gestisci l'aspetto del totem per la stampa dei biglietti.</p>
+        <div class="admin-nav">
+          <a class="admin-link" href="/admin">Torna all'admin</a>
+          <a class="admin-link" href="/admin_display">Vai al display</a>
+        </div>
+      </header>
+
+      <section class="card">
+        <h2>Configurazione kiosk</h2>
+        <form id="form-kiosk">
+          <label for="kiosk-sfondo">Colore sfondo</label>
+          <input id="kiosk-sfondo" type="color" value="#f4f5f7" />
+          <label for="kiosk-testo">Colore testo</label>
+          <input id="kiosk-testo" type="color" value="#1b1f24" />
+          <label for="kiosk-bottone">Colore pulsanti</label>
+          <input id="kiosk-bottone" type="color" value="#1f6feb" />
+          <label for="kiosk-testo-bottone">Colore testo pulsanti</label>
+          <input id="kiosk-testo-bottone" type="color" value="#ffffff" />
+          <label for="kiosk-bottone-size">Dimensione testo pulsanti</label>
+          <input id="kiosk-bottone-size" type="text" placeholder="es. 1rem" />
+          <label for="kiosk-bottone-padding">Padding pulsanti</label>
+          <input id="kiosk-bottone-padding" type="text" placeholder="es. 8px 14px" />
+          <label for="kiosk-sfondo-img">Sfondo kiosk (URL)</label>
+          <input id="kiosk-sfondo-img" type="text" placeholder="https://..." />
+          <input id="kiosk-sfondo-file" type="file" accept="image/*" />
+
+          <button type="submit">Salva configurazione kiosk</button>
+        </form>
+        <div id="esito-kiosk" class="esito" role="status"></div>
+      </section>
+    </main>
+
+    <script src="admin_kiosk.js"></script>
+  </body>
+</html>

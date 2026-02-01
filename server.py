@@ -54,6 +54,7 @@ def _default_config():
             "contenuti": {
                 "testo": "Prendi il tuo ticket",
                 "logo": "",
+                "descrizione_servizi": "Seleziona un servizio per stampare il ticket.",
                 "posizione_testo": "sopra",
             },
             "tema": {
@@ -738,6 +739,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             kiosk_contenuti = {
                 "testo": str(contenuti_kiosk.get("testo", "")).strip(),
                 "logo": str(contenuti_kiosk.get("logo", "")).strip(),
+                "descrizione_servizi": str(contenuti_kiosk.get("descrizione_servizi", "")).strip(),
                 "posizione_testo": posizione_testo,
             }
             tema_kiosk = kiosk.get("tema", {})

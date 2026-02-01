@@ -16,6 +16,7 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  overflow: hidden;
 }
 .container {
   max-width: 960px;
@@ -64,6 +65,14 @@ body {
   max-width: min(60vw, 280px);
   max-height: 160px;
   object-fit: contain;
+}
+
+.kiosk-servizi-desc {
+  margin: 12px auto 0;
+  text-align: center;
+  font-size: clamp(0.95rem, 2vw, 1.2rem);
+  color: inherit;
+  max-width: 420px;
 }
 
 .operator-page {

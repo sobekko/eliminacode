@@ -2,6 +2,7 @@ const form = document.getElementById("form-kiosk");
 const kioskIntroText = document.getElementById("kiosk-intro-text");
 const kioskLogo = document.getElementById("kiosk-logo");
 const kioskLogoFile = document.getElementById("kiosk-logo-file");
+const kioskServiziDesc = document.getElementById("kiosk-servizi-desc");
 const kioskTestoPosizione = document.getElementById("kiosk-testo-posizione");
 const kioskSfondo = document.getElementById("kiosk-sfondo");
 const kioskTextColor = document.getElementById("kiosk-text-color");
@@ -25,6 +26,8 @@ function ensureKioskDefaults(kiosk = {}) {
     contenuti: {
       testo: kiosk.contenuti?.testo || "Prendi il tuo ticket",
       logo: kiosk.contenuti?.logo || "",
+      descrizione_servizi:
+        kiosk.contenuti?.descrizione_servizi || "Seleziona un servizio per stampare il ticket.",
       posizione_testo: kiosk.contenuti?.posizione_testo || "sopra",
     },
     tema: {
@@ -56,6 +59,7 @@ async function caricaConfig() {
   const kiosk = ensureKioskDefaults(config.kiosk || {});
   kioskIntroText.value = kiosk.contenuti.testo || "";
   kioskLogo.value = kiosk.contenuti.logo || "";
+  kioskServiziDesc.value = kiosk.contenuti.descrizione_servizi || "";
   kioskTestoPosizione.value = kiosk.contenuti.posizione_testo || "sopra";
   kioskSfondo.value = kiosk.tema.sfondo || "#f4f5f7";
   kioskTextColor.value = kiosk.tema.testo || "#1b1f24";
@@ -96,6 +100,7 @@ form.addEventListener("submit", async (event) => {
     contenuti: {
       testo: kioskIntroText.value.trim(),
       logo: kioskLogo.value.trim(),
+      descrizione_servizi: kioskServiziDesc.value.trim(),
       posizione_testo: kioskTestoPosizione.value,
     },
     tema: {

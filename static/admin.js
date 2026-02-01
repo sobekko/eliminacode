@@ -122,6 +122,8 @@ function ensureKioskDefaults(kiosk = {}) {
     contenuti: {
       testo: kiosk.contenuti?.testo || "Prendi il tuo ticket",
       logo: kiosk.contenuti?.logo || "",
+      descrizione_servizi:
+        kiosk.contenuti?.descrizione_servizi || "Seleziona un servizio per stampare il ticket.",
       posizione_testo: kiosk.contenuti?.posizione_testo || "sopra",
     },
     tema: {

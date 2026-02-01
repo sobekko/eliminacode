@@ -3,6 +3,7 @@ const serviziContainer = document.getElementById("servizi");
 const kioskTextTop = document.getElementById("kiosk-text-top");
 const kioskTextBottom = document.getElementById("kiosk-text-bottom");
 const kioskLogo = document.getElementById("kiosk-logo");
+const kioskServiziDesc = document.getElementById("kiosk-servizi-desc");
 
 function setElementVisibility(element, shouldShow) {
   if (!element) {
@@ -33,6 +34,7 @@ function renderKioskContent(kiosk) {
   const testo = (contenuti.testo || "").trim();
   const posizione = contenuti.posizione_testo || "sopra";
   const logo = (contenuti.logo || "").trim();
+  const descrizioneServizi = (contenuti.descrizione_servizi || "").trim();
 
   const showText = Boolean(testo);
   const showLogo = Boolean(logo);
@@ -48,6 +50,10 @@ function renderKioskContent(kiosk) {
   if (kioskLogo) {
     kioskLogo.src = logo;
     setElementVisibility(kioskLogo, showLogo);
+  }
+  if (kioskServiziDesc) {
+    kioskServiziDesc.textContent = descrizioneServizi;
+    setElementVisibility(kioskServiziDesc, Boolean(descrizioneServizi));
   }
 }
 

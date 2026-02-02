@@ -10,7 +10,8 @@
   <body>
     <main class="display">
       <header>
-        <h1>Chiamata in corso</h1>
+        <h1 id="display-title">Chiamata in corso</h1>
+        <p id="display-subtitle" class="display-subtitle"></p>
       </header>
 
       <div id="display-popup" class="display-popup" aria-live="assertive">
@@ -18,21 +19,14 @@
       </div>
 
       <section class="display-card">
+        <div id="display-card-title" class="display-card-title"></div>
         <img id="display-logo" class="display-logo" alt="Logo" />
         <div class="display-numero" id="display-numero">—</div>
         <div class="display-servizio" id="display-servizio">—</div>
         <div class="display-operatore" id="display-operatore">—</div>
       </section>
 
-      <section class="display-extra">
-        <div class="display-history">
-          <h2>Ultimi chiamati</h2>
-          <ul id="display-storico"></ul>
-        </div>
-        <div class="display-carousel">
-          <img id="display-immagine" alt="Slide" />
-        </div>
-      </section>
+      <section class="display-extra" id="display-extra"></section>
     </main>
 
     <script src="display.js"></script>

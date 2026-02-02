@@ -2,8 +2,10 @@ const numeroEl = document.getElementById("display-numero");
 const servizioEl = document.getElementById("display-servizio");
 const operatoreEl = document.getElementById("display-operatore");
 const logoEl = document.getElementById("display-logo");
-const storicoEl = document.getElementById("display-storico");
-const immagineEl = document.getElementById("display-immagine");
+const titleEl = document.getElementById("display-title");
+const subtitleEl = document.getElementById("display-subtitle");
+const cardTitleEl = document.getElementById("display-card-title");
+const extraContainer = document.getElementById("display-extra");
 const popupEl = document.getElementById("display-popup");
 const popupNumeroEl = document.getElementById("display-popup-numero");
 
@@ -13,6 +15,9 @@ let ultimaChiamataKey = "";
 let popupTimer = null;
 let audioConfig = { abilita: false, url: "", volume: 1 };
 let audioPlayer = null;
+let lastPanelsSignature = "";
+let storicoEl = null;
+let immagineEl = null;
 
 function applyDisplayTheme(display) {
   const tema = display.tema || {};
@@ -24,6 +29,17 @@ function applyDisplayTheme(display) {
   root.style.setProperty("--display-numero-size", dimensioni.numero || "5rem");
   root.style.setProperty("--display-card-size", dimensioni.card || "1fr");
   root.style.setProperty("--display-extra-size", dimensioni.extra || "1fr");
+  const colonne = display.colonne_extra || 2;
+  root.style.setProperty("--display-extra-columns", String(colonne));
+  if (extraContainer) {
+    if (colonne === 2) {
+      extraContainer.style.gridTemplateColumns = `${dimensioni.card || "1fr"} ${
+        dimensioni.extra || "1fr"
+      }`;
+    } else {
+      extraContainer.style.gridTemplateColumns = `repeat(${colonne}, minmax(0, 1fr))`;
+    }
+  }
   if (tema.immagine_sfondo) {
     root.style.setProperty("--display-bg-image", `url('${tema.immagine_sfondo}')`);
   } else {
@@ -84,6 +100,9 @@ function buildStoricoKey(item, index, total) {
 }
 
 function renderStorico(storico, numeroUltimi) {
+  if (!storicoEl) {
+    return;
+  }
   storicoEl.innerHTML = "";
   const ultimi = storico.slice(-numeroUltimi).reverse();
   if (!ultimi.length) {
@@ -112,8 +131,10 @@ function renderLogo(url) {
 }
 
 function renderImmagine() {
-  if (!immagini.length) {
-    immagineEl.style.display = "none";
+  if (!immagini.length || !immagineEl) {
+    if (immagineEl) {
+      immagineEl.style.display = "none";
+    }
     return;
   }
   if (indiceImmagine >= immagini.length) {
@@ -129,6 +150,63 @@ function aggiornaImmagine() {
   }
   indiceImmagine = (indiceImmagine + 1) % immagini.length;
   renderImmagine();
+}
+
+function createPanelTitle(title) {
+  const heading = document.createElement("h2");
+  heading.textContent = title;
+  return heading;
+}
+
+function renderPanels(display, storico) {
+  const panels = Array.isArray(display.finestre) ? display.finestre : [];
+  const signature = JSON.stringify(panels);
+  if (signature === lastPanelsSignature && extraContainer.children.length) {
+    return;
+  }
+  lastPanelsSignature = signature;
+  extraContainer.innerHTML = "";
+  storicoEl = null;
+  immagineEl = null;
+
+  panels.forEach((panel) => {
+    const tipo = panel.tipo || "storico";
+    if (tipo === "storico") {
+      const section = document.createElement("div");
+      section.className = "display-history";
+      section.appendChild(createPanelTitle(panel.titolo || "Ultimi chiamati"));
+      const list = document.createElement("ul");
+      list.id = "display-storico";
+      section.appendChild(list);
+      extraContainer.appendChild(section);
+      storicoEl = list;
+      renderStorico(storico, display.numero_ultimi || 5);
+    } else if (tipo === "carousel") {
+      const section = document.createElement("div");
+      section.className = "display-carousel";
+      if (panel.titolo) {
+        section.appendChild(createPanelTitle(panel.titolo));
+      }
+      const image = document.createElement("img");
+      image.id = "display-immagine";
+      image.alt = panel.titolo || "Slide";
+      section.appendChild(image);
+      extraContainer.appendChild(section);
+      immagineEl = image;
+      renderImmagine();
+    } else if (tipo === "testo") {
+      const section = document.createElement("div");
+      section.className = "display-text-panel";
+      if (panel.titolo) {
+        section.appendChild(createPanelTitle(panel.titolo));
+      }
+      const body = document.createElement("p");
+      body.textContent = panel.testo || "";
+      section.appendChild(body);
+      extraContainer.appendChild(section);
+    }
+  });
+  extraContainer.style.display = panels.length ? "grid" : "none";
 }
 
 async function aggiornaDisplay() {
@@ -167,16 +245,24 @@ async function aggiornaDisplay() {
   };
   const mostraUltimi = display.mostra_ultimi !== false;
   const numeroUltimi = display.numero_ultimi || 5;
-  if (mostraUltimi) {
-    storicoEl.closest(".display-history").style.display = "block";
-    renderStorico(storico, numeroUltimi);
-  } else {
-    storicoEl.closest(".display-history").style.display = "none";
+  if (!mostraUltimi && Array.isArray(display.finestre)) {
+    display.finestre = display.finestre.filter((panel) => panel.tipo !== "storico");
   }
+  renderPanels(display, storico);
+  renderStorico(storico, numeroUltimi);
 
   renderLogo(display.logo || "");
   immagini = display.immagini || [];
   renderImmagine();
+
+  const contenuti = display.contenuti || {};
+  titleEl.textContent = contenuti.titolo || "Chiamata in corso";
+  subtitleEl.textContent = contenuti.sottotitolo || "";
+  subtitleEl.style.display = contenuti.sottotitolo ? "block" : "none";
+  cardTitleEl.textContent = contenuti.titolo_card || "";
+  cardTitleEl.style.display = contenuti.titolo_card ? "block" : "none";
+  servizioEl.style.display = contenuti.mostra_servizio === false ? "none" : "block";
+  operatoreEl.style.display = contenuti.mostra_operatore === false ? "none" : "block";
 }
 
 aggiornaDisplay();

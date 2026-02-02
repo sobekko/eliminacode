@@ -20,6 +20,21 @@
       <section class="card">
         <h2>Configurazione display</h2>
         <form id="form-display">
+          <label for="display-title">Titolo display</label>
+          <input id="display-title" type="text" placeholder="Es. Chiamata in corso" />
+          <label for="display-subtitle">Sottotitolo display</label>
+          <input id="display-subtitle" type="text" placeholder="Es. Benvenuti" />
+          <label for="display-card-title">Titolo riquadro principale</label>
+          <input id="display-card-title" type="text" placeholder="Es. Numero chiamato" />
+          <label class="inline">
+            <input type="checkbox" id="display-show-servizio" />
+            Mostra testo servizio
+          </label>
+          <label class="inline">
+            <input type="checkbox" id="display-show-operatore" />
+            Mostra testo operatore
+          </label>
+
           <label class="inline">
             <input type="checkbox" id="display-ultimi" />
             Mostra ultimi numeri chiamati
@@ -31,6 +46,20 @@
             <option value="split">Affiancato</option>
             <option value="stacked">Impilato</option>
           </select>
+          <label for="display-extra-columns">Colonne area extra</label>
+          <select id="display-extra-columns">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+          <label for="display-panels-count">Numero finestre extra</label>
+          <select id="display-panels-count">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+          <div id="display-panels" class="display-config"></div>
           <label for="display-numero-size">Dimensione numero chiamata</label>
           <input id="display-numero-size" type="text" placeholder="es. 5rem" />
           <label for="display-card-size">Larghezza card principale</label>

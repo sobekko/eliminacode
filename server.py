@@ -34,6 +34,18 @@ def _default_config():
             "logo": "",
             "immagini": [],
             "layout": "split",
+            "colonne_extra": 2,
+            "contenuti": {
+                "titolo": "Chiamata in corso",
+                "sottotitolo": "",
+                "titolo_card": "",
+                "mostra_servizio": True,
+                "mostra_operatore": True,
+            },
+            "finestre": [
+                {"tipo": "storico", "titolo": "Ultimi chiamati"},
+                {"tipo": "carousel", "titolo": ""},
+            ],
             "dimensioni": {
                 "numero": "5rem",
                 "card": "1fr",
@@ -152,6 +164,12 @@ def _read_state():
         state["config"]["display"] = _default_config()["display"]
     elif "dimensioni" not in state["config"]["display"]:
         state["config"]["display"]["dimensioni"] = _default_config()["display"]["dimensioni"]
+    if "contenuti" not in state["config"]["display"]:
+        state["config"]["display"]["contenuti"] = _default_config()["display"]["contenuti"]
+    if "finestre" not in state["config"]["display"]:
+        state["config"]["display"]["finestre"] = _default_config()["display"]["finestre"]
+    if "colonne_extra" not in state["config"]["display"]:
+        state["config"]["display"]["colonne_extra"] = _default_config()["display"]["colonne_extra"]
     if "audio" not in state["config"]["display"]:
         state["config"]["display"]["audio"] = _default_config()["display"]["audio"]
     if "kiosk" not in state["config"]:
@@ -701,6 +719,47 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             if layout not in {"split", "stacked"}:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
+            try:
+                colonne_extra = int(display.get("colonne_extra", 2))
+            except (TypeError, ValueError):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            if colonne_extra < 1 or colonne_extra > 3:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            contenuti_display = display.get("contenuti", {})
+            if contenuti_display is None:
+                contenuti_display = {}
+            if not isinstance(contenuti_display, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            display_contenuti = {
+                "titolo": str(contenuti_display.get("titolo", "Chiamata in corso")).strip(),
+                "sottotitolo": str(contenuti_display.get("sottotitolo", "")).strip(),
+                "titolo_card": str(contenuti_display.get("titolo_card", "")).strip(),
+                "mostra_servizio": bool(contenuti_display.get("mostra_servizio", True)),
+                "mostra_operatore": bool(contenuti_display.get("mostra_operatore", True)),
+            }
+            finestre = display.get("finestre", [])
+            if not isinstance(finestre, list):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            finestre_pulite = []
+            for finestra in finestre:
+                if not isinstance(finestra, dict):
+                    continue
+                tipo = str(finestra.get("tipo", "")).strip()
+                if tipo not in {"storico", "carousel", "testo"}:
+                    continue
+                item = {"tipo": tipo}
+                titolo = str(finestra.get("titolo", "")).strip()
+                if titolo:
+                    item["titolo"] = titolo
+                if tipo == "testo":
+                    item["testo"] = str(finestra.get("testo", "")).strip()
+                finestre_pulite.append(item)
+                if len(finestre_pulite) >= 3:
+                    break
             dimensioni_display = display.get("dimensioni", {})
             if not isinstance(dimensioni_display, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
@@ -797,6 +856,9 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     "logo": logo,
                     "immagini": immagini_pulite,
                     "layout": layout,
+                    "colonne_extra": colonne_extra,
+                    "contenuti": display_contenuti,
+                    "finestre": finestre_pulite,
                     "dimensioni": display_dimensioni,
                     "audio": {
                         "abilita": audio_abilita,

@@ -1,7 +1,15 @@
 const form = document.getElementById("form-display");
+const displayTitle = document.getElementById("display-title");
+const displaySubtitle = document.getElementById("display-subtitle");
+const displayCardTitle = document.getElementById("display-card-title");
+const displayShowServizio = document.getElementById("display-show-servizio");
+const displayShowOperatore = document.getElementById("display-show-operatore");
 const displayUltimi = document.getElementById("display-ultimi");
 const displayNumeroUltimi = document.getElementById("display-numero-ultimi");
 const displayLayout = document.getElementById("display-layout");
+const displayExtraColumns = document.getElementById("display-extra-columns");
+const displayPanelsCount = document.getElementById("display-panels-count");
+const displayPanelsContainer = document.getElementById("display-panels");
 const displayNumeroSize = document.getElementById("display-numero-size");
 const displayCardSize = document.getElementById("display-card-size");
 const displayExtraSize = document.getElementById("display-extra-size");
@@ -77,8 +85,22 @@ function ensureDisplayDefaults(display = {}) {
     mostra_ultimi: display.mostra_ultimi ?? true,
     numero_ultimi: display.numero_ultimi ?? 5,
     layout: display.layout || "split",
+    colonne_extra: display.colonne_extra ?? 2,
     logo: display.logo || "",
     immagini: display.immagini || [],
+    contenuti: {
+      titolo: display.contenuti?.titolo || "Chiamata in corso",
+      sottotitolo: display.contenuti?.sottotitolo || "",
+      titolo_card: display.contenuti?.titolo_card || "",
+      mostra_servizio: display.contenuti?.mostra_servizio ?? true,
+      mostra_operatore: display.contenuti?.mostra_operatore ?? true,
+    },
+    finestre: Array.isArray(display.finestre)
+      ? display.finestre
+      : [
+          { tipo: "storico", titolo: "Ultimi chiamati" },
+          { tipo: "carousel", titolo: "" },
+        ],
     dimensioni: {
       numero: display.dimensioni?.numero || "5rem",
       card: display.dimensioni?.card || "1fr",
@@ -98,6 +120,79 @@ function ensureDisplayDefaults(display = {}) {
   };
 }
 
+function renderPanels(panels) {
+  displayPanelsContainer.innerHTML = "";
+  panels.forEach((panel, index) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "priorita-row";
+
+    const label = document.createElement("span");
+    label.textContent = `Finestra ${index + 1}`;
+
+    const typeSelect = document.createElement("select");
+    typeSelect.dataset.index = String(index);
+    [
+      { value: "storico", label: "Storico chiamate" },
+      { value: "carousel", label: "Carousel immagini" },
+      { value: "testo", label: "Testo libero" },
+    ].forEach((optionData) => {
+      const option = document.createElement("option");
+      option.value = optionData.value;
+      option.textContent = optionData.label;
+      if (optionData.value === panel.tipo) {
+        option.selected = true;
+      }
+      typeSelect.appendChild(option);
+    });
+
+    const titleInput = document.createElement("input");
+    titleInput.type = "text";
+    titleInput.dataset.index = String(index);
+    titleInput.dataset.field = "titolo";
+    titleInput.placeholder = "Titolo finestra";
+    titleInput.value = panel.titolo || "";
+
+    const textArea = document.createElement("textarea");
+    textArea.rows = 2;
+    textArea.dataset.index = String(index);
+    textArea.dataset.field = "testo";
+    textArea.placeholder = "Testo mostrato nella finestra";
+    textArea.value = panel.testo || "";
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(typeSelect);
+    wrapper.appendChild(titleInput);
+    wrapper.appendChild(textArea);
+
+    displayPanelsContainer.appendChild(wrapper);
+
+    const updateVisibility = () => {
+      textArea.style.display = typeSelect.value === "testo" ? "block" : "none";
+    };
+    typeSelect.addEventListener("change", updateVisibility);
+    updateVisibility();
+  });
+}
+
+function collectPanels() {
+  const panels = [];
+  const rows = displayPanelsContainer.querySelectorAll(".priorita-row");
+  rows.forEach((row) => {
+    const typeSelect = row.querySelector("select");
+    const titleInput = row.querySelector("input[data-field='titolo']");
+    const textArea = row.querySelector("textarea[data-field='testo']");
+    const panel = {
+      tipo: typeSelect?.value || "storico",
+      titolo: titleInput?.value.trim() || "",
+    };
+    if (panel.tipo === "testo") {
+      panel.testo = textArea?.value.trim() || "";
+    }
+    panels.push(panel);
+  });
+  return panels;
+}
+
 function setEsito(message, status) {
   esitoDisplay.textContent = message;
   esitoDisplay.className = `esito ${status}`;
@@ -111,9 +206,18 @@ async function caricaConfig() {
   const config = await response.json();
   configData = config;
   const display = ensureDisplayDefaults(config.display || {});
+  const finestre = display.finestre.slice(0, 3);
+  displayTitle.value = display.contenuti.titolo || "";
+  displaySubtitle.value = display.contenuti.sottotitolo || "";
+  displayCardTitle.value = display.contenuti.titolo_card || "";
+  displayShowServizio.checked = Boolean(display.contenuti.mostra_servizio);
+  displayShowOperatore.checked = Boolean(display.contenuti.mostra_operatore);
   displayUltimi.checked = Boolean(display.mostra_ultimi);
   displayNumeroUltimi.value = String(display.numero_ultimi ?? 5);
   displayLayout.value = display.layout || "split";
+  displayExtraColumns.value = String(display.colonne_extra ?? 2);
+  displayPanelsCount.value = String(finestre.length);
+  renderPanels(finestre);
   displayNumeroSize.value = display.dimensioni.numero || "5rem";
   displayCardSize.value = display.dimensioni.card || "1fr";
   displayExtraSize.value = display.dimensioni.extra || "1fr";
@@ -238,6 +342,16 @@ displayAudioApply.addEventListener("click", () => {
   displayAudioUrl.value = displayAudioLibrary.value;
 });
 
+displayPanelsCount.addEventListener("change", () => {
+  const count = Number(displayPanelsCount.value || 0);
+  const panels = collectPanels();
+  while (panels.length < count) {
+    panels.push({ tipo: "storico", titolo: "" });
+  }
+  panels.length = count;
+  renderPanels(panels);
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!configData?.servizio || !configData?.servizi?.length || !configData?.operatori?.length) {
@@ -245,14 +359,23 @@ form.addEventListener("submit", async (event) => {
     return;
   }
   const display = {
+    contenuti: {
+      titolo: displayTitle.value.trim(),
+      sottotitolo: displaySubtitle.value.trim(),
+      titolo_card: displayCardTitle.value.trim(),
+      mostra_servizio: displayShowServizio.checked,
+      mostra_operatore: displayShowOperatore.checked,
+    },
     mostra_ultimi: displayUltimi.checked,
     numero_ultimi: Number(displayNumeroUltimi.value || 5),
     layout: displayLayout.value,
+    colonne_extra: Number(displayExtraColumns.value || 2),
     logo: displayLogo.value.trim(),
     immagini: displayImmagini.value
       .split(",")
       .map((voce) => voce.trim())
       .filter(Boolean),
+    finestre: collectPanels(),
     dimensioni: {
       numero: displayNumeroSize.value.trim() || "5rem",
       card: displayCardSize.value.trim() || "1fr",

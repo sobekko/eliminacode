@@ -3,6 +3,7 @@ const servizioInput = document.getElementById("servizio");
 const serviziInput = document.getElementById("servizi");
 const prioritaContainer = document.getElementById("priorita-container");
 const prefissiContainer = document.getElementById("prefissi-container");
+const descrizioniContainer = document.getElementById("descrizioni-container");
 const numeroOperatoriSelect = document.getElementById("numero-operatori");
 const operatoriContainer = document.getElementById("operatori-container");
 const esitoAdmin = document.getElementById("esito-admin");
@@ -84,6 +85,32 @@ function renderPrefissi(servizi, prefissi) {
   });
 }
 
+function creaDescrizioneRow(servizio, valore) {
+  const row = document.createElement("div");
+  row.className = "priorita-row";
+
+  const label = document.createElement("span");
+  label.textContent = servizio;
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.dataset.servizio = servizio;
+  input.value = valore || "";
+  input.placeholder = "Descrizione opzionale";
+
+  row.appendChild(label);
+  row.appendChild(input);
+  return row;
+}
+
+function renderDescrizioni(servizi, descrizioni) {
+  descrizioniContainer.innerHTML = "";
+  servizi.forEach((servizio) => {
+    const valore = descrizioni[servizio] || "";
+    descrizioniContainer.appendChild(creaDescrizioneRow(servizio, valore));
+  });
+}
+
 function parseServizi() {
   return serviziInput.value
     .split(",")
@@ -154,6 +181,7 @@ async function caricaConfig() {
   creaOperatoriInputs(operatori.length || 1, operatori);
   renderPriorita(config.servizi || [], config.priorita || {});
   renderPrefissi(config.servizi || [], config.prefissi || {});
+  renderDescrizioni(config.servizi || [], config.descrizioni || {});
 }
 
 numeroOperatoriSelect.addEventListener("change", () => {
@@ -173,6 +201,11 @@ serviziInput.addEventListener("input", () => {
     prefissi[input.dataset.servizio] = input.value.trim();
   });
   renderPrefissi(servizi, prefissi);
+  const descrizioni = {};
+  descrizioniContainer.querySelectorAll("input").forEach((input) => {
+    descrizioni[input.dataset.servizio] = input.value.trim();
+  });
+  renderDescrizioni(servizi, descrizioni);
 });
 
 form.addEventListener("submit", async (event) => {
@@ -187,6 +220,10 @@ form.addEventListener("submit", async (event) => {
   prefissiContainer.querySelectorAll("input").forEach((input) => {
     prefissi[input.dataset.servizio] = input.value.trim();
   });
+  const descrizioni = {};
+  descrizioniContainer.querySelectorAll("input").forEach((input) => {
+    descrizioni[input.dataset.servizio] = input.value.trim();
+  });
   const display = ensureDisplayDefaults(configData?.display || {});
   const kiosk = ensureKioskDefaults(configData?.kiosk || {});
   const operatori = Array.from(operatoriContainer.querySelectorAll("input")).map((input) => ({
@@ -196,7 +233,16 @@ form.addEventListener("submit", async (event) => {
   const response = await fetch("/api/admin", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ servizio, servizi, priorita, prefissi, display, kiosk, operatori }),
+    body: JSON.stringify({
+      servizio,
+      servizi,
+      priorita,
+      prefissi,
+      descrizioni,
+      display,
+      kiosk,
+      operatori,
+    }),
   });
 
   if (response.ok) {

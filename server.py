@@ -27,6 +27,7 @@ def _default_config():
         "servizi": ["vendite", "ritiro", "prioritario"],
         "priorita": {"vendite": 2, "ritiro": 2, "prioritario": 1},
         "prefissi": {"vendite": "V", "ritiro": "R", "prioritario": "P"},
+        "descrizioni": {"vendite": "", "ritiro": "", "prioritario": ""},
         "display": {
             "mostra_ultimi": True,
             "numero_ultimi": 5,
@@ -145,6 +146,8 @@ def _read_state():
         state["config"]["priorita"] = _default_config()["priorita"]
     if "prefissi" not in state["config"]:
         state["config"]["prefissi"] = _default_config()["prefissi"]
+    if "descrizioni" not in state["config"]:
+        state["config"]["descrizioni"] = _default_config()["descrizioni"]
     if "display" not in state["config"]:
         state["config"]["display"] = _default_config()["display"]
     elif "dimensioni" not in state["config"]["display"]:
@@ -637,6 +640,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             servizi = payload.get("servizi", [])
             priorita = payload.get("priorita", {})
             prefissi = payload.get("prefissi", {})
+            descrizioni = payload.get("descrizioni", {})
             display = payload.get("display", {})
             kiosk = payload.get("kiosk", {})
             operatori = payload.get("operatori", [])
@@ -672,6 +676,13 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     self.send_error(HTTPStatus.BAD_REQUEST, "Prefissi non validi")
                     return
                 prefissi_puliti[voce] = valore
+            if not isinstance(descrizioni, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Descrizioni non valide")
+                return
+            descrizioni_pulite = {}
+            for voce in servizi_puliti:
+                valore = str(descrizioni.get(voce, "")).strip()
+                descrizioni_pulite[voce] = valore
             if not isinstance(display, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
@@ -779,6 +790,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     "servizi": servizi_puliti,
                     "priorita": priorita_pulita,
                     "prefissi": prefissi_puliti,
+                    "descrizioni": descrizioni_pulite,
                     "display": {
                         "mostra_ultimi": mostra_ultimi,
                         "numero_ultimi": numero_ultimi,

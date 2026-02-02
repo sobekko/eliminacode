@@ -80,11 +80,22 @@ async function creaTicket(servizio) {
 function renderServizi(config) {
   serviziContainer.innerHTML = "";
   const servizi = config.servizi || [];
+  const descrizioni = config.descrizioni || {};
   servizi.forEach((servizio) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "pill";
-    button.textContent = servizio;
+    const title = document.createElement("span");
+    title.className = "pill-title";
+    title.textContent = servizio;
+    button.appendChild(title);
+    const descrizione = String(descrizioni[servizio] || "").trim();
+    if (descrizione) {
+      const subtitle = document.createElement("span");
+      subtitle.className = "pill-desc";
+      subtitle.textContent = descrizione;
+      button.appendChild(subtitle);
+    }
     button.addEventListener("click", () => {
       creaTicket(servizio);
     });

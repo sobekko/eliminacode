@@ -270,6 +270,7 @@ button.ghost {
   cursor: pointer;
   font-weight: 600;
   font-size: var(--kiosk-button-size, 1rem);
+  text-align: center;
 }
 
 .kiosk-client .pill {
@@ -278,6 +279,8 @@ button.ghost {
   font-size: clamp(1.1rem, 2.4vw, 1.6rem);
   min-height: 64px;
   box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+  display: grid;
+  gap: 6px;
 }
 
 .kiosk-client .card {
@@ -305,6 +308,16 @@ button.ghost {
 .pill.active {
   background: #1f6feb;
   color: #fff;
+}
+
+.pill-title {
+  font-weight: 700;
+}
+
+.pill-desc {
+  font-size: 0.85em;
+  font-weight: 500;
+  opacity: 0.85;
 }
 
 .servizio-selezionato {

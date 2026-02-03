@@ -198,7 +198,6 @@
   padding: clamp(16px, 3vw, 20px);
   display: grid;
   place-items: center;
-  min-height: clamp(160px, 30vw, 220px);
 }
 
 .display-carousel img {

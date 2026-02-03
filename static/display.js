@@ -195,7 +195,17 @@ function createPanelTitle(title) {
 }
 
 function renderPanels(display, storico, corrente) {
-  const panels = Array.isArray(display.finestre) ? display.finestre : [];
+  const panels = Array.isArray(display.finestre) ? display.finestre.slice() : [];
+  const posizioneNumero = display.contenuti?.posizione_numero || "card";
+  if (posizioneNumero.startsWith("slot-")) {
+    const slotIndex = Number(posizioneNumero.split("-")[1] || 0) - 1;
+    if (slotIndex >= 0) {
+      while (panels.length <= slotIndex) {
+        panels.push({ tipo: "testo", titolo: "", testo: "" });
+      }
+      panels[slotIndex] = { ...panels[slotIndex], tipo: "corrente" };
+    }
+  }
   const signature = JSON.stringify(panels);
   if (signature === lastPanelsSignature && extraContainer.children.length) {
     return;
@@ -331,7 +341,7 @@ async function aggiornaDisplay() {
   servizioEl.style.display = contenuti.mostra_servizio === false ? "none" : "block";
   operatoreEl.style.display = contenuti.mostra_operatore === false ? "none" : "block";
   const mostraCard = contenuti.mostra_card !== false && contenuti.posizione_numero === "card";
-  cardEl.style.display = mostraCard ? "grid" : "none";
+  cardEl.classList.toggle("is-hidden", !mostraCard);
 }
 
 aggiornaDisplay();

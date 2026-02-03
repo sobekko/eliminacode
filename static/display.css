@@ -60,6 +60,10 @@
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
 }
 
+.display-card.is-hidden {
+  display: none;
+}
+
 .display-card-title {
   font-size: 1.3rem;
   letter-spacing: 0.05em;

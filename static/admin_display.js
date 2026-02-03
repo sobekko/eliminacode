@@ -409,7 +409,7 @@ form.addEventListener("submit", async (event) => {
       titolo_card: displayCardTitle.value.trim(),
       mostra_servizio: displayShowServizio.checked,
       mostra_operatore: displayShowOperatore.checked,
-      mostra_card: displayShowCard.checked && displayNumberPosition.value === "card",
+      mostra_card: displayShowCard.checked,
       posizione_numero: displayNumberPosition.value,
     },
     mostra_ultimi: displayUltimi.checked,

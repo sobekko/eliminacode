@@ -1,9 +1,62 @@
 {
-  "turni": [],
-  "corrente": null,
+  "turni": [
+    {
+      "numero": 5,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-03T20:24:06.724149+00:00"
+    },
+    {
+      "numero": 6,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-03T20:24:06.880883+00:00"
+    }
+  ],
+  "corrente": {
+    "numero": 4,
+    "servizio": "vendite",
+    "priorita": 2,
+    "prefisso": "V",
+    "creato_il": "2026-02-03T20:24:06.536484+00:00",
+    "operatore": "Marika"
+  },
   "ultimo": 0,
-  "contatori": {},
-  "storico": [],
+  "contatori": {
+    "vendite": 6
+  },
+  "storico": [
+    {
+      "numero": 1,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-03T20:18:41.247950+00:00"
+    },
+    {
+      "numero": 2,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-03T20:19:18.199425+00:00"
+    },
+    {
+      "numero": 3,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Marika",
+      "chiamato_il": "2026-02-03T20:24:10.275238+00:00"
+    },
+    {
+      "numero": 4,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Marika",
+      "chiamato_il": "2026-02-03T20:25:31.058238+00:00"
+    }
+  ],
   "config": {
     "servizio": "vendite",
     "servizi": [
@@ -30,50 +83,49 @@
       "mostra_ultimi": true,
       "numero_ultimi": 5,
       "logo": "",
-      "immagini": [],
+      "immagini": [
+        "/upload/image/Erika.jpg"
+      ],
       "layout": "split",
       "colonne_extra": 2,
       "contenuti": {
-        "titolo": "c",
+        "titolo": "",
         "sottotitolo": "",
         "titolo_card": "",
-        "mostra_servizio": true,
+        "mostra_servizio": false,
         "mostra_operatore": true,
         "mostra_card": true,
         "posizione_numero": "slot-2"
       },
       "finestre": [
         {
-          "tipo": "carousel",
-          "titolo": "Ultimi chiamati"
+          "tipo": "carousel"
         },
         {
           "tipo": "corrente"
         },
         {
-          "tipo": "storico",
-          "titolo": "Info"
+          "tipo": "storico"
         },
         {
-          "tipo": "testo",
-          "titolo": "Messaggi",
+          "tipo": "ticker",
           "testo": ""
         }
       ],
       "dimensioni": {
-        "numero": "5rem",
-        "card": "1fr",
+        "numero": "8rem",
+        "card": "3fr",
         "extra": "1fr"
       },
       "audio": {
-        "abilita": false,
-        "url": "",
+        "abilita": true,
+        "url": "/upload/audio/new-notification-022-370046.mp3",
         "volume": 1.0
       },
       "tema": {
-        "sfondo": "#0f172a",
+        "sfondo": "#f2ca75",
         "testo": "#f8fafc",
-        "card": "#1e293b",
+        "card": "#b86d3d",
         "immagine_sfondo": ""
       }
     },
@@ -98,7 +150,13 @@
     },
     "operatori": [
       {
-        "nome": "Operatore 1"
+        "nome": "Marika"
+      },
+      {
+        "nome": "Edoardo"
+      },
+      {
+        "nome": "Erika"
       }
     ]
   }

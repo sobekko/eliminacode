@@ -5,6 +5,7 @@ const displayCardTitle = document.getElementById("display-card-title");
 const displayShowServizio = document.getElementById("display-show-servizio");
 const displayShowOperatore = document.getElementById("display-show-operatore");
 const displayShowCard = document.getElementById("display-show-card");
+const displayNumberPosition = document.getElementById("display-number-position");
 const displayUltimi = document.getElementById("display-ultimi");
 const displayNumeroUltimi = document.getElementById("display-numero-ultimi");
 const displayLayout = document.getElementById("display-layout");
@@ -96,6 +97,7 @@ function ensureDisplayDefaults(display = {}) {
       mostra_servizio: display.contenuti?.mostra_servizio ?? true,
       mostra_operatore: display.contenuti?.mostra_operatore ?? true,
       mostra_card: display.contenuti?.mostra_card ?? true,
+      posizione_numero: display.contenuti?.posizione_numero || "card",
     },
     finestre: Array.isArray(display.finestre)
       ? display.finestre
@@ -213,6 +215,21 @@ function collectPanels() {
   return panels;
 }
 
+function applyNumeroPosition(panels) {
+  const posizione = displayNumberPosition.value || "card";
+  if (posizione === "card") {
+    return panels;
+  }
+  const slotIndex = Number(posizione.split("-")[1] || 0) - 1;
+  if (slotIndex < 0 || slotIndex >= panels.length) {
+    return panels;
+  }
+  const updated = panels.map((panel, index) =>
+    index === slotIndex ? { ...panel, tipo: "corrente" } : panel
+  );
+  return updated;
+}
+
 function setEsito(message, status) {
   esitoDisplay.textContent = message;
   esitoDisplay.className = `esito ${status}`;
@@ -227,12 +244,18 @@ async function caricaConfig() {
   configData = config;
   const display = ensureDisplayDefaults(config.display || {});
   const finestre = display.finestre.slice(0, 4);
+  let posizioneNumero = display.contenuti.posizione_numero || "card";
+  const correnteIndex = finestre.findIndex((panel) => panel.tipo === "corrente");
+  if (correnteIndex >= 0 && posizioneNumero === "card") {
+    posizioneNumero = `slot-${correnteIndex + 1}`;
+  }
   displayTitle.value = display.contenuti.titolo || "";
   displaySubtitle.value = display.contenuti.sottotitolo || "";
   displayCardTitle.value = display.contenuti.titolo_card || "";
   displayShowServizio.checked = Boolean(display.contenuti.mostra_servizio);
   displayShowOperatore.checked = Boolean(display.contenuti.mostra_operatore);
   displayShowCard.checked = Boolean(display.contenuti.mostra_card);
+  displayNumberPosition.value = posizioneNumero;
   displayUltimi.checked = Boolean(display.mostra_ultimi);
   displayNumeroUltimi.value = String(display.numero_ultimi ?? 5);
   displayLayout.value = display.layout || "split";
@@ -386,7 +409,8 @@ form.addEventListener("submit", async (event) => {
       titolo_card: displayCardTitle.value.trim(),
       mostra_servizio: displayShowServizio.checked,
       mostra_operatore: displayShowOperatore.checked,
-      mostra_card: displayShowCard.checked,
+      mostra_card: displayShowCard.checked && displayNumberPosition.value === "card",
+      posizione_numero: displayNumberPosition.value,
     },
     mostra_ultimi: displayUltimi.checked,
     numero_ultimi: Number(displayNumeroUltimi.value || 5),
@@ -397,7 +421,7 @@ form.addEventListener("submit", async (event) => {
       .split(",")
       .map((voce) => voce.trim())
       .filter(Boolean),
-    finestre: collectPanels(),
+    finestre: applyNumeroPosition(collectPanels()),
     dimensioni: {
       numero: displayNumeroSize.value.trim() || "5rem",
       card: displayCardSize.value.trim() || "1fr",

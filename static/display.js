@@ -330,7 +330,8 @@ async function aggiornaDisplay() {
   cardTitleEl.style.display = contenuti.titolo_card ? "block" : "none";
   servizioEl.style.display = contenuti.mostra_servizio === false ? "none" : "block";
   operatoreEl.style.display = contenuti.mostra_operatore === false ? "none" : "block";
-  cardEl.style.display = contenuti.mostra_card === false ? "none" : "grid";
+  const mostraCard = contenuti.mostra_card !== false && contenuti.posizione_numero === "card";
+  cardEl.style.display = mostraCard ? "grid" : "none";
 }
 
 aggiornaDisplay();

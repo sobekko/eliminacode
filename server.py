@@ -42,6 +42,7 @@ def _default_config():
                 "mostra_servizio": True,
                 "mostra_operatore": True,
                 "mostra_card": True,
+                "posizione_numero": "card",
             },
             "finestre": [
                 {"tipo": "storico", "titolo": "Ultimi chiamati"},
@@ -169,6 +170,10 @@ def _read_state():
         state["config"]["display"]["dimensioni"] = _default_config()["display"]["dimensioni"]
     if "contenuti" not in state["config"]["display"]:
         state["config"]["display"]["contenuti"] = _default_config()["display"]["contenuti"]
+    elif "posizione_numero" not in state["config"]["display"]["contenuti"]:
+        state["config"]["display"]["contenuti"]["posizione_numero"] = _default_config()["display"][
+            "contenuti"
+        ]["posizione_numero"]
     if "finestre" not in state["config"]["display"]:
         state["config"]["display"]["finestre"] = _default_config()["display"]["finestre"]
     if "colonne_extra" not in state["config"]["display"]:
@@ -743,7 +748,17 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "mostra_servizio": bool(contenuti_display.get("mostra_servizio", True)),
                 "mostra_operatore": bool(contenuti_display.get("mostra_operatore", True)),
                 "mostra_card": bool(contenuti_display.get("mostra_card", True)),
+                "posizione_numero": str(contenuti_display.get("posizione_numero", "card")).strip(),
             }
+            if display_contenuti["posizione_numero"] not in {
+                "card",
+                "slot-1",
+                "slot-2",
+                "slot-3",
+                "slot-4",
+            }:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
             finestre = display.get("finestre", [])
             if not isinstance(finestre, list):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")

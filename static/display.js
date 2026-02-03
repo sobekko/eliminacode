@@ -333,8 +333,9 @@ async function aggiornaDisplay() {
   renderImmagine();
 
   const contenuti = display.contenuti || {};
-  titleEl.textContent = contenuti.titolo || "Chiamata in corso";
-  subtitleEl.textContent = contenuti.sottotitolo || "";
+  titleEl.textContent = contenuti.titolo ?? "";
+  titleEl.style.display = contenuti.titolo ? "block" : "none";
+  subtitleEl.textContent = contenuti.sottotitolo ?? "";
   subtitleEl.style.display = contenuti.sottotitolo ? "block" : "none";
   cardTitleEl.textContent = contenuti.titolo_card || "";
   cardTitleEl.style.display = contenuti.titolo_card ? "block" : "none";

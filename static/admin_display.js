@@ -4,6 +4,7 @@ const displaySubtitle = document.getElementById("display-subtitle");
 const displayCardTitle = document.getElementById("display-card-title");
 const displayShowServizio = document.getElementById("display-show-servizio");
 const displayShowOperatore = document.getElementById("display-show-operatore");
+const displayShowCard = document.getElementById("display-show-card");
 const displayUltimi = document.getElementById("display-ultimi");
 const displayNumeroUltimi = document.getElementById("display-numero-ultimi");
 const displayLayout = document.getElementById("display-layout");
@@ -94,6 +95,7 @@ function ensureDisplayDefaults(display = {}) {
       titolo_card: display.contenuti?.titolo_card || "",
       mostra_servizio: display.contenuti?.mostra_servizio ?? true,
       mostra_operatore: display.contenuti?.mostra_operatore ?? true,
+      mostra_card: display.contenuti?.mostra_card ?? true,
     },
     finestre: Array.isArray(display.finestre)
       ? display.finestre
@@ -137,6 +139,8 @@ function renderPanels(panels) {
       { value: "storico", label: "Storico chiamate" },
       { value: "carousel", label: "Carousel immagini" },
       { value: "testo", label: "Testo libero" },
+      { value: "ticker", label: "Testo scorrevole" },
+      { value: "corrente", label: "Numero chiamato" },
       { value: "custom", label: "HTML personalizzato" },
     ].forEach((optionData) => {
       const option = document.createElement("option");
@@ -178,7 +182,7 @@ function renderPanels(panels) {
     displayPanelsContainer.appendChild(wrapper);
 
     const updateVisibility = () => {
-      textArea.style.display = typeSelect.value === "testo" ? "block" : "none";
+      textArea.style.display = ["testo", "ticker"].includes(typeSelect.value) ? "block" : "none";
       htmlArea.style.display = typeSelect.value === "custom" ? "block" : "none";
     };
     typeSelect.addEventListener("change", updateVisibility);
@@ -198,7 +202,7 @@ function collectPanels() {
       tipo: typeSelect?.value || "storico",
       titolo: titleInput?.value.trim() || "",
     };
-    if (panel.tipo === "testo") {
+    if (panel.tipo === "testo" || panel.tipo === "ticker") {
       panel.testo = textArea?.value.trim() || "";
     }
     if (panel.tipo === "custom") {
@@ -228,6 +232,7 @@ async function caricaConfig() {
   displayCardTitle.value = display.contenuti.titolo_card || "";
   displayShowServizio.checked = Boolean(display.contenuti.mostra_servizio);
   displayShowOperatore.checked = Boolean(display.contenuti.mostra_operatore);
+  displayShowCard.checked = Boolean(display.contenuti.mostra_card);
   displayUltimi.checked = Boolean(display.mostra_ultimi);
   displayNumeroUltimi.value = String(display.numero_ultimi ?? 5);
   displayLayout.value = display.layout || "split";
@@ -381,6 +386,7 @@ form.addEventListener("submit", async (event) => {
       titolo_card: displayCardTitle.value.trim(),
       mostra_servizio: displayShowServizio.checked,
       mostra_operatore: displayShowOperatore.checked,
+      mostra_card: displayShowCard.checked,
     },
     mostra_ultimi: displayUltimi.checked,
     numero_ultimi: Number(displayNumeroUltimi.value || 5),

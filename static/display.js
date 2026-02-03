@@ -2,6 +2,7 @@ const numeroEl = document.getElementById("display-numero");
 const servizioEl = document.getElementById("display-servizio");
 const operatoreEl = document.getElementById("display-operatore");
 const logoEl = document.getElementById("display-logo");
+const cardEl = document.querySelector(".display-card");
 const titleEl = document.getElementById("display-title");
 const subtitleEl = document.getElementById("display-subtitle");
 const cardTitleEl = document.getElementById("display-card-title");
@@ -61,6 +62,41 @@ function renderDisplay(corrente) {
   operatoreEl.textContent = corrente.operatore
     ? `Operatore: ${corrente.operatore}`
     : "Operatore: -";
+}
+
+function renderCurrentPanel(panel, corrente) {
+  const section = document.createElement("div");
+  section.className = "display-current-panel";
+  if (panel.titolo) {
+    section.appendChild(createPanelTitle(panel.titolo));
+  }
+  const number = document.createElement("div");
+  number.className = "display-numero";
+  if (corrente) {
+    const prefisso = corrente.prefisso ? `${corrente.prefisso}` : "";
+    number.textContent = `#${prefisso}${corrente.numero}`;
+  } else {
+    number.textContent = "—";
+  }
+  section.appendChild(number);
+  const service = document.createElement("div");
+  service.className = "display-servizio";
+  const operator = document.createElement("div");
+  operator.className = "display-operatore";
+  if (corrente) {
+    service.textContent = corrente.servizio ? `Servizio: ${corrente.servizio}` : "Servizio: -";
+    operator.textContent = corrente.operatore
+      ? `Operatore: ${corrente.operatore}`
+      : "Operatore: -";
+  } else {
+    service.textContent = "In attesa di chiamata";
+    operator.textContent = "";
+  }
+  service.style.display = servizioEl.style.display;
+  operator.style.display = operatoreEl.style.display;
+  section.appendChild(service);
+  section.appendChild(operator);
+  return section;
 }
 
 function mostraPopup(numero, prefisso) {
@@ -158,7 +194,7 @@ function createPanelTitle(title) {
   return heading;
 }
 
-function renderPanels(display, storico) {
+function renderPanels(display, storico, corrente) {
   const panels = Array.isArray(display.finestre) ? display.finestre : [];
   const signature = JSON.stringify(panels);
   if (signature === lastPanelsSignature && extraContainer.children.length) {
@@ -205,6 +241,24 @@ function renderPanels(display, storico) {
       const body = document.createElement("p");
       body.textContent = panel.testo || "";
       section.appendChild(body);
+      extraContainer.appendChild(section);
+    } else if (tipo === "ticker") {
+      const section = document.createElement("div");
+      section.className = `display-ticker-panel ${slotClass}`;
+      if (panel.titolo) {
+        section.appendChild(createPanelTitle(panel.titolo));
+      }
+      const ticker = document.createElement("div");
+      ticker.className = "display-ticker";
+      const tickerText = document.createElement("div");
+      tickerText.className = "display-ticker-text";
+      tickerText.textContent = panel.testo || "";
+      ticker.appendChild(tickerText);
+      section.appendChild(ticker);
+      extraContainer.appendChild(section);
+    } else if (tipo === "corrente") {
+      const section = renderCurrentPanel(panel, corrente);
+      section.className += ` ${slotClass}`;
       extraContainer.appendChild(section);
     } else if (tipo === "custom") {
       const section = document.createElement("div");
@@ -261,7 +315,7 @@ async function aggiornaDisplay() {
   if (!mostraUltimi && Array.isArray(display.finestre)) {
     display.finestre = display.finestre.filter((panel) => panel.tipo !== "storico");
   }
-  renderPanels(display, storico);
+  renderPanels(display, storico, data.corrente);
   renderStorico(storico, numeroUltimi);
 
   renderLogo(display.logo || "");
@@ -276,6 +330,7 @@ async function aggiornaDisplay() {
   cardTitleEl.style.display = contenuti.titolo_card ? "block" : "none";
   servizioEl.style.display = contenuti.mostra_servizio === false ? "none" : "block";
   operatoreEl.style.display = contenuti.mostra_operatore === false ? "none" : "block";
+  cardEl.style.display = contenuti.mostra_card === false ? "none" : "grid";
 }
 
 aggiornaDisplay();

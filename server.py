@@ -41,6 +41,7 @@ def _default_config():
                 "titolo_card": "",
                 "mostra_servizio": True,
                 "mostra_operatore": True,
+                "mostra_card": True,
             },
             "finestre": [
                 {"tipo": "storico", "titolo": "Ultimi chiamati"},
@@ -741,6 +742,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "titolo_card": str(contenuti_display.get("titolo_card", "")).strip(),
                 "mostra_servizio": bool(contenuti_display.get("mostra_servizio", True)),
                 "mostra_operatore": bool(contenuti_display.get("mostra_operatore", True)),
+                "mostra_card": bool(contenuti_display.get("mostra_card", True)),
             }
             finestre = display.get("finestre", [])
             if not isinstance(finestre, list):
@@ -751,13 +753,15 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 if not isinstance(finestra, dict):
                     continue
                 tipo = str(finestra.get("tipo", "")).strip()
-                if tipo not in {"storico", "carousel", "testo", "custom"}:
+                if tipo not in {"storico", "carousel", "testo", "custom", "corrente", "ticker"}:
                     continue
                 item = {"tipo": tipo}
                 titolo = str(finestra.get("titolo", "")).strip()
                 if titolo:
                     item["titolo"] = titolo
                 if tipo == "testo":
+                    item["testo"] = str(finestra.get("testo", "")).strip()
+                if tipo == "ticker":
                     item["testo"] = str(finestra.get("testo", "")).strip()
                 if tipo == "custom":
                     item["html"] = str(finestra.get("html", "")).strip()

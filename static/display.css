@@ -1,5 +1,6 @@
 .display {
   min-height: 100vh;
+  height: 100vh;
   background: var(--display-bg, #0f172a);
   color: var(--display-text, #f8fafc);
   background-image: var(--display-bg-image, none);
@@ -7,8 +8,9 @@
   background-position: center;
   background-repeat: no-repeat;
   display: grid;
-  align-content: center;
+  align-content: stretch;
   justify-items: center;
+  grid-template-rows: auto auto minmax(0, 1fr);
   gap: clamp(16px, 3vw, 24px);
   padding: clamp(16px, 4vw, 40px);
 }
@@ -128,8 +130,12 @@
 .display-extra {
   display: grid;
   grid-template-columns: repeat(var(--display-extra-columns, 2), minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  align-content: stretch;
   gap: clamp(16px, 3vw, 24px);
   width: 100%;
+  min-height: 0;
+  height: 100%;
 }
 
 .layout-stacked .display-extra {

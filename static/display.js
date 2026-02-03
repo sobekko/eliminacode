@@ -194,15 +194,29 @@ function createPanelTitle(title) {
   return heading;
 }
 
+function normalizeSizeValue(value) {
+  if (!value) {
+    return "";
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+  if (/^\d+(\.\d+)?$/.test(trimmed)) {
+    return `${trimmed}px`;
+  }
+  return trimmed;
+}
+
 function applyPanelSize(panel, section) {
   if (!panel || !section) {
     return;
   }
   if (panel.larghezza) {
-    section.style.width = panel.larghezza;
+    section.style.width = normalizeSizeValue(panel.larghezza);
   }
   if (panel.altezza) {
-    section.style.height = panel.altezza;
+    section.style.height = normalizeSizeValue(panel.altezza);
   }
 }
 

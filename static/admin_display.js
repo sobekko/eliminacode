@@ -211,6 +211,16 @@ function renderPanels(panels) {
 function collectPanels() {
   const panels = [];
   const rows = displayPanelsContainer.querySelectorAll(".priorita-row");
+  const normalizeSizeValue = (value) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return "";
+    }
+    if (/^\d+(\.\d+)?$/.test(trimmed)) {
+      return `${trimmed}px`;
+    }
+    return trimmed;
+  };
   rows.forEach((row) => {
     const typeSelect = row.querySelector("select");
     const titleInput = row.querySelector("input[data-field='titolo']");
@@ -228,8 +238,8 @@ function collectPanels() {
     if (panel.tipo === "custom") {
       panel.html = htmlArea?.value.trim() || "";
     }
-    const larghezza = widthInput?.value.trim() || "";
-    const altezza = heightInput?.value.trim() || "";
+    const larghezza = normalizeSizeValue(widthInput?.value || "");
+    const altezza = normalizeSizeValue(heightInput?.value || "");
     if (larghezza) {
       panel.larghezza = larghezza;
     }

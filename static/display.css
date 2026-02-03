@@ -9,8 +9,8 @@
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 24px;
-  padding: 40px;
+  gap: clamp(16px, 3vw, 24px);
+  padding: clamp(16px, 4vw, 40px);
 }
 
 @media (min-width: 1280px) and (min-aspect-ratio: 16/9) {
@@ -36,7 +36,7 @@
 }
 
 .display header h1 {
-  font-size: 2.5rem;
+  font-size: clamp(1.6rem, 3.2vw, 2.5rem);
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -44,7 +44,7 @@
 
 .display-subtitle {
   margin: 8px 0 0;
-  font-size: 1.2rem;
+  font-size: clamp(0.95rem, 2.3vw, 1.2rem);
   text-align: center;
   opacity: 0.85;
 }
@@ -52,10 +52,10 @@
 .display-card {
   background: var(--display-card, #1e293b);
   border-radius: 24px;
-  padding: 40px 60px;
+  padding: clamp(20px, 4vw, 40px) clamp(24px, 6vw, 60px);
   display: grid;
-  gap: 16px;
-  width: min(90vw, 100%);
+  gap: clamp(12px, 2vw, 16px);
+  width: min(100%, 90vw);
   max-width: 900px;
   flex: 0 0 auto;
   text-align: center;
@@ -67,7 +67,7 @@
 }
 
 .display-card-title {
-  font-size: 1.3rem;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   opacity: 0.8;
@@ -82,13 +82,13 @@
 }
 
 .display-numero {
-  font-size: var(--display-numero-size, 5rem);
+  font-size: clamp(2.4rem, 6vw, var(--display-numero-size, 5rem));
   font-weight: 800;
 }
 
 .display-servizio,
 .display-operatore {
-  font-size: 1.6rem;
+  font-size: clamp(1rem, 2.8vw, 1.6rem);
 }
 
 .display-popup {
@@ -108,11 +108,11 @@
 }
 
 .display-popup span {
-  font-size: 6rem;
+  font-size: clamp(2.5rem, 8vw, 6rem);
   font-weight: 800;
   background: #f97316;
   color: #0f172a;
-  padding: 24px 48px;
+  padding: clamp(16px, 4vw, 24px) clamp(24px, 6vw, 48px);
   border-radius: 999px;
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.6);
 }
@@ -130,8 +130,8 @@
 .display-extra {
   display: grid;
   grid-template-columns: repeat(var(--display-extra-columns, 2), minmax(0, 1fr));
-  gap: 24px;
-  width: min(900px, 100%);
+  gap: clamp(16px, 3vw, 24px);
+  width: min(100%, 900px);
 }
 
 .layout-stacked .display-extra {
@@ -166,7 +166,7 @@
 .display-history {
   background: var(--display-card, #1e293b);
   border-radius: 20px;
-  padding: 20px;
+  padding: clamp(16px, 3vw, 20px);
 }
 
 .display-history h2,
@@ -176,7 +176,7 @@
 .display-current-panel h2,
 .display-ticker-panel h2 {
   margin: 0 0 12px;
-  font-size: 1.4rem;
+  font-size: clamp(1rem, 2.6vw, 1.4rem);
 }
 
 .display-history ul {
@@ -189,23 +189,23 @@
 
 .display-history li {
   background: rgba(51, 65, 85, 0.9);
-  padding: 10px 12px;
+  padding: clamp(8px, 2vw, 10px) clamp(10px, 2.5vw, 12px);
   border-radius: 12px;
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 2.4vw, 1.1rem);
 }
 
 .display-carousel {
   background: var(--display-card, #1e293b);
   border-radius: 20px;
-  padding: 20px;
+  padding: clamp(16px, 3vw, 20px);
   display: grid;
   place-items: center;
-  min-height: 220px;
+  min-height: clamp(160px, 30vw, 220px);
 }
 
 .display-carousel img {
   max-width: 100%;
-  max-height: 220px;
+  max-height: clamp(160px, 30vw, 220px);
   object-fit: contain;
   display: none;
 }
@@ -213,21 +213,21 @@
 .display-text-panel {
   background: var(--display-card, #1e293b);
   border-radius: 20px;
-  padding: 20px;
+  padding: clamp(16px, 3vw, 20px);
   display: grid;
   gap: 12px;
 }
 
 .display-text-panel p {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 2.4vw, 1.1rem);
   line-height: 1.5;
 }
 
 .display-current-panel {
   background: var(--display-card, #1e293b);
   border-radius: 20px;
-  padding: 20px;
+  padding: clamp(16px, 3vw, 20px);
   display: grid;
   gap: 12px;
   text-align: center;
@@ -236,7 +236,7 @@
 .display-ticker-panel {
   background: var(--display-card, #1e293b);
   border-radius: 20px;
-  padding: 12px 20px;
+  padding: clamp(10px, 2.5vw, 12px) clamp(16px, 3vw, 20px);
   display: grid;
   gap: 8px;
 }
@@ -250,7 +250,7 @@
   display: inline-block;
   padding-left: 100%;
   animation: tickerScroll 14s linear infinite;
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 2.4vw, 1.1rem);
 }
 
 @keyframes tickerScroll {
@@ -265,11 +265,25 @@
 .display-custom-panel {
   background: var(--display-card, #1e293b);
   border-radius: 20px;
-  padding: 20px;
+  padding: clamp(16px, 3vw, 20px);
   display: grid;
   gap: 12px;
 }
 
 .display-custom-body {
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 2.4vw, 1.1rem);
+}
+
+@media (max-width: 900px) {
+  .display {
+    align-content: flex-start;
+  }
+
+  .display-card {
+    max-width: 100%;
+  }
+
+  .display-extra {
+    grid-template-columns: 1fr;
+  }
 }

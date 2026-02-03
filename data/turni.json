@@ -21,16 +21,54 @@
       "ritiro": "R",
       "prioritario": "P"
     },
+    "descrizioni": {
+      "vendite": "",
+      "ritiro": "",
+      "prioritario": ""
+    },
     "display": {
       "mostra_ultimi": true,
       "numero_ultimi": 5,
       "logo": "",
       "immagini": [],
       "layout": "split",
+      "colonne_extra": 2,
+      "contenuti": {
+        "titolo": "c",
+        "sottotitolo": "",
+        "titolo_card": "",
+        "mostra_servizio": true,
+        "mostra_operatore": true,
+        "mostra_card": true,
+        "posizione_numero": "slot-2"
+      },
+      "finestre": [
+        {
+          "tipo": "carousel",
+          "titolo": "Ultimi chiamati"
+        },
+        {
+          "tipo": "corrente"
+        },
+        {
+          "tipo": "storico",
+          "titolo": "Info"
+        },
+        {
+          "tipo": "testo",
+          "titolo": "Messaggi",
+          "testo": ""
+        }
+      ],
       "dimensioni": {
         "numero": "5rem",
         "card": "1fr",
         "extra": "1fr"
+      },
+      "audio": {
+        "abilita": false,
+        "url": "",
+        "volume": 1.0
       },
       "tema": {
         "sfondo": "#0f172a",
@@ -40,6 +78,12 @@
       }
     },
     "kiosk": {
+      "contenuti": {
+        "testo": "Prendi il tuo ticket",
+        "logo": "",
+        "descrizione_servizi": "Seleziona un servizio per stampare il ticket.",
+        "posizione_testo": "sopra"
+      },
       "tema": {
         "sfondo": "#f4f5f7",
         "testo": "#1b1f24",

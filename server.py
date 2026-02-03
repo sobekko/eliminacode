@@ -45,6 +45,8 @@ def _default_config():
             "finestre": [
                 {"tipo": "storico", "titolo": "Ultimi chiamati"},
                 {"tipo": "carousel", "titolo": ""},
+                {"tipo": "testo", "titolo": "Info", "testo": ""},
+                {"tipo": "testo", "titolo": "Messaggi", "testo": ""},
             ],
             "dimensioni": {
                 "numero": "5rem",
@@ -749,7 +751,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 if not isinstance(finestra, dict):
                     continue
                 tipo = str(finestra.get("tipo", "")).strip()
-                if tipo not in {"storico", "carousel", "testo"}:
+                if tipo not in {"storico", "carousel", "testo", "custom"}:
                     continue
                 item = {"tipo": tipo}
                 titolo = str(finestra.get("titolo", "")).strip()
@@ -757,8 +759,10 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     item["titolo"] = titolo
                 if tipo == "testo":
                     item["testo"] = str(finestra.get("testo", "")).strip()
+                if tipo == "custom":
+                    item["html"] = str(finestra.get("html", "")).strip()
                 finestre_pulite.append(item)
-                if len(finestre_pulite) >= 3:
+                if len(finestre_pulite) >= 4:
                     break
             dimensioni_display = display.get("dimensioni", {})
             if not isinstance(dimensioni_display, dict):

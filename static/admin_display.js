@@ -100,6 +100,8 @@ function ensureDisplayDefaults(display = {}) {
       : [
           { tipo: "storico", titolo: "Ultimi chiamati" },
           { tipo: "carousel", titolo: "" },
+          { tipo: "testo", titolo: "Info", testo: "" },
+          { tipo: "testo", titolo: "Messaggi", testo: "" },
         ],
     dimensioni: {
       numero: display.dimensioni?.numero || "5rem",
@@ -135,6 +137,7 @@ function renderPanels(panels) {
       { value: "storico", label: "Storico chiamate" },
       { value: "carousel", label: "Carousel immagini" },
       { value: "testo", label: "Testo libero" },
+      { value: "custom", label: "HTML personalizzato" },
     ].forEach((optionData) => {
       const option = document.createElement("option");
       option.value = optionData.value;
@@ -159,15 +162,24 @@ function renderPanels(panels) {
     textArea.placeholder = "Testo mostrato nella finestra";
     textArea.value = panel.testo || "";
 
+    const htmlArea = document.createElement("textarea");
+    htmlArea.rows = 3;
+    htmlArea.dataset.index = String(index);
+    htmlArea.dataset.field = "html";
+    htmlArea.placeholder = "HTML personalizzato (attenzione: verrà inserito come HTML)";
+    htmlArea.value = panel.html || "";
+
     wrapper.appendChild(label);
     wrapper.appendChild(typeSelect);
     wrapper.appendChild(titleInput);
     wrapper.appendChild(textArea);
+    wrapper.appendChild(htmlArea);
 
     displayPanelsContainer.appendChild(wrapper);
 
     const updateVisibility = () => {
       textArea.style.display = typeSelect.value === "testo" ? "block" : "none";
+      htmlArea.style.display = typeSelect.value === "custom" ? "block" : "none";
     };
     typeSelect.addEventListener("change", updateVisibility);
     updateVisibility();
@@ -181,12 +193,16 @@ function collectPanels() {
     const typeSelect = row.querySelector("select");
     const titleInput = row.querySelector("input[data-field='titolo']");
     const textArea = row.querySelector("textarea[data-field='testo']");
+    const htmlArea = row.querySelector("textarea[data-field='html']");
     const panel = {
       tipo: typeSelect?.value || "storico",
       titolo: titleInput?.value.trim() || "",
     };
     if (panel.tipo === "testo") {
       panel.testo = textArea?.value.trim() || "";
+    }
+    if (panel.tipo === "custom") {
+      panel.html = htmlArea?.value.trim() || "";
     }
     panels.push(panel);
   });
@@ -206,7 +222,7 @@ async function caricaConfig() {
   const config = await response.json();
   configData = config;
   const display = ensureDisplayDefaults(config.display || {});
-  const finestre = display.finestre.slice(0, 3);
+  const finestre = display.finestre.slice(0, 4);
   displayTitle.value = display.contenuti.titolo || "";
   displaySubtitle.value = display.contenuti.sottotitolo || "";
   displayCardTitle.value = display.contenuti.titolo_card || "";

@@ -168,12 +168,14 @@ function renderPanels(display, storico) {
   extraContainer.innerHTML = "";
   storicoEl = null;
   immagineEl = null;
+  extraContainer.classList.toggle("schema-layout", panels.length === 4);
 
-  panels.forEach((panel) => {
+  panels.forEach((panel, index) => {
     const tipo = panel.tipo || "storico";
+    const slotClass = `panel-slot-${index + 1}`;
     if (tipo === "storico") {
       const section = document.createElement("div");
-      section.className = "display-history";
+      section.className = `display-history ${slotClass}`;
       section.appendChild(createPanelTitle(panel.titolo || "Ultimi chiamati"));
       const list = document.createElement("ul");
       list.id = "display-storico";
@@ -183,7 +185,7 @@ function renderPanels(display, storico) {
       renderStorico(storico, display.numero_ultimi || 5);
     } else if (tipo === "carousel") {
       const section = document.createElement("div");
-      section.className = "display-carousel";
+      section.className = `display-carousel ${slotClass}`;
       if (panel.titolo) {
         section.appendChild(createPanelTitle(panel.titolo));
       }
@@ -196,13 +198,24 @@ function renderPanels(display, storico) {
       renderImmagine();
     } else if (tipo === "testo") {
       const section = document.createElement("div");
-      section.className = "display-text-panel";
+      section.className = `display-text-panel ${slotClass}`;
       if (panel.titolo) {
         section.appendChild(createPanelTitle(panel.titolo));
       }
       const body = document.createElement("p");
       body.textContent = panel.testo || "";
       section.appendChild(body);
+      extraContainer.appendChild(section);
+    } else if (tipo === "custom") {
+      const section = document.createElement("div");
+      section.className = `display-custom-panel ${slotClass}`;
+      if (panel.titolo) {
+        section.appendChild(createPanelTitle(panel.titolo));
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "display-custom-body";
+      wrapper.innerHTML = panel.html || "";
+      section.appendChild(wrapper);
       extraContainer.appendChild(section);
     }
   });

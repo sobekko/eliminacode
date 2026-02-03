@@ -112,6 +112,31 @@
   grid-template-columns: 1fr;
 }
 
+.display-extra.schema-layout {
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-areas:
+    "slot1 slot2"
+    "slot1 slot3"
+    "slot4 slot4";
+}
+
+.display-extra.schema-layout .panel-slot-1 {
+  grid-area: slot1;
+}
+
+.display-extra.schema-layout .panel-slot-2 {
+  grid-area: slot2;
+}
+
+.display-extra.schema-layout .panel-slot-3 {
+  grid-area: slot3;
+}
+
+.display-extra.schema-layout .panel-slot-4 {
+  grid-area: slot4;
+}
+
 .display-history {
   background: var(--display-card, #1e293b);
   border-radius: 20px;
@@ -168,4 +193,16 @@
   margin: 0;
   font-size: 1.1rem;
   line-height: 1.5;
+}
+
+.display-custom-panel {
+  background: var(--display-card, #1e293b);
+  border-radius: 20px;
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.display-custom-body {
+  font-size: 1.1rem;
 }

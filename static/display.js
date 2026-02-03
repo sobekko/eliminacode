@@ -194,6 +194,18 @@ function createPanelTitle(title) {
   return heading;
 }
 
+function applyPanelSize(panel, section) {
+  if (!panel || !section) {
+    return;
+  }
+  if (panel.larghezza) {
+    section.style.width = panel.larghezza;
+  }
+  if (panel.altezza) {
+    section.style.height = panel.altezza;
+  }
+}
+
 function renderPanels(display, storico, corrente) {
   const panels = Array.isArray(display.finestre) ? display.finestre.slice() : [];
   const posizioneNumero = display.contenuti?.posizione_numero || "card";
@@ -222,6 +234,7 @@ function renderPanels(display, storico, corrente) {
     if (tipo === "storico") {
       const section = document.createElement("div");
       section.className = `display-history ${slotClass}`;
+      applyPanelSize(panel, section);
       section.appendChild(createPanelTitle(panel.titolo || "Ultimi chiamati"));
       const list = document.createElement("ul");
       list.id = "display-storico";
@@ -232,12 +245,16 @@ function renderPanels(display, storico, corrente) {
     } else if (tipo === "carousel") {
       const section = document.createElement("div");
       section.className = `display-carousel ${slotClass}`;
+      applyPanelSize(panel, section);
       if (panel.titolo) {
         section.appendChild(createPanelTitle(panel.titolo));
       }
       const image = document.createElement("img");
       image.id = "display-immagine";
       image.alt = panel.titolo || "Slide";
+      if (panel.altezza) {
+        image.style.maxHeight = "100%";
+      }
       section.appendChild(image);
       extraContainer.appendChild(section);
       immagineEl = image;
@@ -245,6 +262,7 @@ function renderPanels(display, storico, corrente) {
     } else if (tipo === "testo") {
       const section = document.createElement("div");
       section.className = `display-text-panel ${slotClass}`;
+      applyPanelSize(panel, section);
       if (panel.titolo) {
         section.appendChild(createPanelTitle(panel.titolo));
       }
@@ -255,6 +273,7 @@ function renderPanels(display, storico, corrente) {
     } else if (tipo === "ticker") {
       const section = document.createElement("div");
       section.className = `display-ticker-panel ${slotClass}`;
+      applyPanelSize(panel, section);
       if (panel.titolo) {
         section.appendChild(createPanelTitle(panel.titolo));
       }
@@ -269,10 +288,12 @@ function renderPanels(display, storico, corrente) {
     } else if (tipo === "corrente") {
       const section = renderCurrentPanel(panel, corrente);
       section.className += ` ${slotClass}`;
+      applyPanelSize(panel, section);
       extraContainer.appendChild(section);
     } else if (tipo === "custom") {
       const section = document.createElement("div");
       section.className = `display-custom-panel ${slotClass}`;
+      applyPanelSize(panel, section);
       if (panel.titolo) {
         section.appendChild(createPanelTitle(panel.titolo));
       }

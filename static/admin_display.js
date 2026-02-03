@@ -175,11 +175,27 @@ function renderPanels(panels) {
     htmlArea.placeholder = "HTML personalizzato (attenzione: verrà inserito come HTML)";
     htmlArea.value = panel.html || "";
 
+    const widthInput = document.createElement("input");
+    widthInput.type = "text";
+    widthInput.dataset.index = String(index);
+    widthInput.dataset.field = "larghezza";
+    widthInput.placeholder = "Larghezza finestra (es. 320px o 1fr)";
+    widthInput.value = panel.larghezza || "";
+
+    const heightInput = document.createElement("input");
+    heightInput.type = "text";
+    heightInput.dataset.index = String(index);
+    heightInput.dataset.field = "altezza";
+    heightInput.placeholder = "Altezza finestra (es. 240px)";
+    heightInput.value = panel.altezza || "";
+
     wrapper.appendChild(label);
     wrapper.appendChild(typeSelect);
     wrapper.appendChild(titleInput);
     wrapper.appendChild(textArea);
     wrapper.appendChild(htmlArea);
+    wrapper.appendChild(widthInput);
+    wrapper.appendChild(heightInput);
 
     displayPanelsContainer.appendChild(wrapper);
 
@@ -200,6 +216,8 @@ function collectPanels() {
     const titleInput = row.querySelector("input[data-field='titolo']");
     const textArea = row.querySelector("textarea[data-field='testo']");
     const htmlArea = row.querySelector("textarea[data-field='html']");
+    const widthInput = row.querySelector("input[data-field='larghezza']");
+    const heightInput = row.querySelector("input[data-field='altezza']");
     const panel = {
       tipo: typeSelect?.value || "storico",
       titolo: titleInput?.value.trim() || "",
@@ -209,6 +227,14 @@ function collectPanels() {
     }
     if (panel.tipo === "custom") {
       panel.html = htmlArea?.value.trim() || "";
+    }
+    const larghezza = widthInput?.value.trim() || "";
+    const altezza = heightInput?.value.trim() || "";
+    if (larghezza) {
+      panel.larghezza = larghezza;
+    }
+    if (altezza) {
+      panel.altezza = altezza;
     }
     panels.push(panel);
   });

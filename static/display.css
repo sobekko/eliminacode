@@ -15,8 +15,9 @@
 
 @media (min-width: 1280px) and (min-aspect-ratio: 16/9) {
   .display {
-    padding: 32px 48px;
-    gap: 20px;
+    padding: 24px 32px;
+    gap: 18px;
+    width: 100%;
   }
 
   .display header h1 {
@@ -24,12 +25,13 @@
   }
 
   .display-card {
-    max-width: 1100px;
-    padding: 32px 56px;
+    max-width: 100%;
+    width: 100%;
+    padding: 28px 48px;
   }
 
   .display-extra {
-    width: min(1100px, 100%);
+    width: 100%;
   }
 }
 

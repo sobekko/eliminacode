@@ -74,7 +74,6 @@
 
 .display-logo {
   max-width: 220px;
-  max-height: 120px;
   object-fit: contain;
   margin: 0 auto;
   display: none;
@@ -204,7 +203,6 @@
 
 .display-carousel img {
   max-width: 100%;
-  max-height: clamp(160px, 30vw, 220px);
   object-fit: contain;
   display: none;
 }

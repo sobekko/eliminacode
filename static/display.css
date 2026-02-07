@@ -16,7 +16,7 @@ body {
   background-repeat: no-repeat;
   padding: clamp(16px, 2.5vw, 32px);
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 3fr 1fr;
   grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.45fr);
   grid-template-areas:
     "window1 window2"

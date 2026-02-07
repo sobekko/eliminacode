@@ -11,6 +11,11 @@ let carouselIndex = 0;
 let lastImages = [];
 let lastPanels = [];
 let lastChiamataKey = "";
+let carouselOrder = [];
+let carouselPosition = 0;
+let lastCarouselInterval = 6000;
+let lastCarouselRandom = false;
+let carouselTimer = null;
 let popupTimer = null;
 let audioConfig = { abilita: false, url: "", volume: 1 };
 let audioPlayer = null;
@@ -91,7 +96,8 @@ function renderCarousel(container, immagini) {
   wrap.className = "display-carousel";
   const img = document.createElement("img");
   img.alt = "Slide";
-  img.src = immagini[carouselIndex % immagini.length];
+  const activeIndex = carouselOrder.length ? carouselOrder[carouselPosition] : 0;
+  img.src = immagini[activeIndex % immagini.length];
   wrap.appendChild(img);
   container.appendChild(wrap);
 }
@@ -173,6 +179,7 @@ function renderWindows(display, corrente, storico) {
     panels.push(defaultPanels[panels.length]);
   }
 
+  ensureCarouselOrder(display.immagini || [], display.carousel || {});
   panels.forEach((panel, index) => {
     const container = windows[index];
     if (!container) {
@@ -193,6 +200,35 @@ function renderWindows(display, corrente, storico) {
     }
   });
   lastPanels = panels.map((panel, index) => panel.tipo || defaultPanels[index].tipo);
+}
+
+function ensureCarouselOrder(immagini, carouselConfig) {
+  const randomEnabled = Boolean(carouselConfig?.casuale);
+  if (!immagini.length) {
+    carouselOrder = [];
+    carouselPosition = 0;
+    return;
+  }
+  const needsRebuild =
+    carouselOrder.length !== immagini.length || randomEnabled !== lastCarouselRandom;
+  if (needsRebuild) {
+    carouselOrder = immagini.map((_, index) => index);
+    if (randomEnabled) {
+      for (let i = carouselOrder.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [carouselOrder[i], carouselOrder[j]] = [carouselOrder[j], carouselOrder[i]];
+      }
+    }
+    carouselPosition = 0;
+  }
+  lastCarouselRandom = randomEnabled;
+}
+
+function scheduleCarousel(intervalMs) {
+  if (carouselTimer) {
+    clearInterval(carouselTimer);
+  }
+  carouselTimer = setInterval(rotateCarousel, intervalMs);
 }
 
 async function refreshDisplay() {
@@ -219,17 +255,29 @@ async function refreshDisplay() {
     mostraPopup(current);
   }
   const immagini = display.immagini || [];
+  const carouselConfig = display.carousel || {};
+  const intervalMs = Math.max(Number(carouselConfig.intervallo_ms || 6000), 1000);
+  if (intervalMs !== lastCarouselInterval) {
+    lastCarouselInterval = intervalMs;
+    scheduleCarousel(intervalMs);
+  }
   const sameImages =
     immagini.length === lastImages.length &&
     immagini.every((img, index) => img === lastImages[index]);
   if (!sameImages) {
     lastImages = immagini.slice();
     carouselIndex = 0;
+    carouselPosition = 0;
+    carouselOrder = [];
   }
+  ensureCarouselOrder(immagini, carouselConfig);
 }
 
 function rotateCarousel() {
   carouselIndex += 1;
+  if (carouselOrder.length) {
+    carouselPosition = (carouselPosition + 1) % carouselOrder.length;
+  }
   windows.forEach((container, index) => {
     if (!container) {
       return;
@@ -245,10 +293,11 @@ function rotateCarousel() {
     if (!lastImages.length) {
       return;
     }
-    img.src = lastImages[carouselIndex % lastImages.length];
+    const activeIndex = carouselOrder.length ? carouselOrder[carouselPosition] : 0;
+    img.src = lastImages[activeIndex % lastImages.length];
   });
 }
 
 refreshDisplay();
 setInterval(refreshDisplay, 2000);
-setInterval(rotateCarousel, 6000);
+scheduleCarousel(lastCarouselInterval);

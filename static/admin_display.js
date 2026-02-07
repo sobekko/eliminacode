@@ -9,6 +9,8 @@ const displayTesto = document.getElementById("display-testo");
 const displaySfondoImg = document.getElementById("display-sfondo-img");
 const displaySfondoFile = document.getElementById("display-sfondo-file");
 const displayImmagini = document.getElementById("display-immagini");
+const displayCarouselInterval = document.getElementById("display-carousel-interval");
+const displayCarouselRandom = document.getElementById("display-carousel-random");
 const displayImmaginiFile = document.getElementById("display-immagini-file");
 const displayImageUpload = document.getElementById("display-image-upload");
 const displayImageLibrary = document.getElementById("display-image-library");
@@ -75,6 +77,10 @@ function ensureDisplayDefaults(display = {}) {
   return {
     numero_ultimi: display.numero_ultimi ?? 5,
     immagini: display.immagini || [],
+    carousel: {
+      intervallo_ms: display.carousel?.intervallo_ms ?? 6000,
+      casuale: display.carousel?.casuale ?? false,
+    },
     finestre: Array.isArray(display.finestre) ? display.finestre : windowDefaults,
     fonts: {
       testo_famiglia: display.fonts?.testo_famiglia || "inherit",
@@ -184,6 +190,8 @@ async function caricaConfig() {
   displayTesto.value = display.tema.testo || "#f8fafc";
   displaySfondoImg.value = display.tema.immagine_sfondo || "";
   displayImmagini.value = (display.immagini || []).join(", ");
+  displayCarouselInterval.value = String(Math.round((display.carousel?.intervallo_ms ?? 6000) / 1000));
+  displayCarouselRandom.checked = Boolean(display.carousel?.casuale);
   displayAudioEnabled.checked = Boolean(display.audio.abilita);
   displayAudioUrl.value = display.audio.url || "";
   displayAudioVolume.value = String(display.audio.volume ?? 1);
@@ -270,6 +278,10 @@ form.addEventListener("submit", async (event) => {
       .split(",")
       .map((voce) => voce.trim())
       .filter(Boolean),
+    carousel: {
+      intervallo_ms: Math.max(Number(displayCarouselInterval.value || 6), 1) * 1000,
+      casuale: displayCarouselRandom.checked,
+    },
     finestre: collectWindows(),
     fonts: {
       testo_famiglia: displayFontText.value.trim() || "inherit",

@@ -97,7 +97,9 @@ function renderTicker(container, testo) {
   wrap.className = "display-ticker";
   const text = document.createElement("div");
   text.className = "display-ticker-text";
-  text.textContent = testo || "Benvenuti.";
+  const baseText = testo || "Benvenuti.";
+  const repeated = `${baseText} \u2022 ${baseText} \u2022 ${baseText}`;
+  text.textContent = repeated;
   wrap.appendChild(text);
   container.appendChild(wrap);
 }

@@ -12,6 +12,13 @@ const kioskBottoneSize = document.getElementById("kiosk-bottone-size");
 const kioskBottonePadding = document.getElementById("kiosk-bottone-padding");
 const kioskSfondoImg = document.getElementById("kiosk-sfondo-img");
 const kioskSfondoFile = document.getElementById("kiosk-sfondo-file");
+const kioskPrintEnabled = document.getElementById("kiosk-print-enabled");
+const kioskPrintHost = document.getElementById("kiosk-print-host");
+const kioskPrintPort = document.getElementById("kiosk-print-port");
+const kioskPrintName = document.getElementById("kiosk-print-name");
+const kioskPrintMessage = document.getElementById("kiosk-print-message");
+const kioskPrintFooter = document.getElementById("kiosk-print-footer");
+const kioskPrintCut = document.getElementById("kiosk-print-cut");
 const esitoKiosk = document.getElementById("esito-kiosk");
 let configData = null;
 
@@ -41,6 +48,15 @@ function ensureKioskDefaults(kiosk = {}) {
       bottone: kiosk.dimensioni?.bottone || "1rem",
       bottone_padding: kiosk.dimensioni?.bottone_padding || "8px 14px",
     },
+    stampa: {
+      abilita: kiosk.stampa?.abilita ?? false,
+      host: kiosk.stampa?.host || "",
+      port: kiosk.stampa?.port ?? 9100,
+      nome: kiosk.stampa?.nome || "",
+      messaggio: kiosk.stampa?.messaggio || "Ticket eliminacode",
+      footer: kiosk.stampa?.footer || "",
+      taglio: kiosk.stampa?.taglio ?? true,
+    },
   };
 }
 
@@ -68,6 +84,13 @@ async function caricaConfig() {
   kioskSfondoImg.value = kiosk.tema.immagine_sfondo || "";
   kioskBottoneSize.value = kiosk.dimensioni.bottone || "1rem";
   kioskBottonePadding.value = kiosk.dimensioni.bottone_padding || "8px 14px";
+  kioskPrintEnabled.checked = kiosk.stampa.abilita;
+  kioskPrintHost.value = kiosk.stampa.host || "";
+  kioskPrintPort.value = String(kiosk.stampa.port || 9100);
+  kioskPrintName.value = kiosk.stampa.nome || "";
+  kioskPrintMessage.value = kiosk.stampa.messaggio || "Ticket eliminacode";
+  kioskPrintFooter.value = kiosk.stampa.footer || "";
+  kioskPrintCut.checked = kiosk.stampa.taglio;
 }
 
 kioskSfondoFile.addEventListener("change", (event) => {
@@ -113,6 +136,15 @@ form.addEventListener("submit", async (event) => {
     dimensioni: {
       bottone: kioskBottoneSize.value.trim() || "1rem",
       bottone_padding: kioskBottonePadding.value.trim() || "8px 14px",
+    },
+    stampa: {
+      abilita: kioskPrintEnabled.checked,
+      host: kioskPrintHost.value.trim(),
+      port: Number(kioskPrintPort.value) || 9100,
+      nome: kioskPrintName.value.trim(),
+      messaggio: kioskPrintMessage.value.trim(),
+      footer: kioskPrintFooter.value.trim(),
+      taglio: kioskPrintCut.checked,
     },
   };
 

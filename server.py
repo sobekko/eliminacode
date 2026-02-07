@@ -2,6 +2,7 @@
 import json
 import mimetypes
 import os
+import socket
 import sqlite3
 from datetime import datetime, timezone
 from http import HTTPStatus
@@ -84,6 +85,15 @@ def _default_config():
             "dimensioni": {
                 "bottone": "1rem",
                 "bottone_padding": "8px 14px",
+            },
+            "stampa": {
+                "abilita": False,
+                "host": "",
+                "port": 9100,
+                "nome": "",
+                "messaggio": "Ticket eliminacode",
+                "footer": "",
+                "taglio": True,
             },
         },
         "operatori": [{"nome": "Operatore 1"}],
@@ -182,8 +192,11 @@ def _read_state():
         state["config"]["display"]["audio"] = _default_config()["display"]["audio"]
     if "kiosk" not in state["config"]:
         state["config"]["kiosk"] = _default_config()["kiosk"]
-    elif "dimensioni" not in state["config"]["kiosk"]:
-        state["config"]["kiosk"]["dimensioni"] = _default_config()["kiosk"]["dimensioni"]
+    else:
+        if "dimensioni" not in state["config"]["kiosk"]:
+            state["config"]["kiosk"]["dimensioni"] = _default_config()["kiosk"]["dimensioni"]
+        if "stampa" not in state["config"]["kiosk"]:
+            state["config"]["kiosk"]["stampa"] = _default_config()["kiosk"]["stampa"]
     if "contenuti" not in state["config"]["kiosk"]:
         state["config"]["kiosk"]["contenuti"] = _default_config()["kiosk"]["contenuti"]
     if "operatori" not in state["config"]:
@@ -254,6 +267,68 @@ def _parse_multipart_file(content_type, body):
                 content = content[:-2]
             return filename, content
     return None, None
+
+
+def _format_ticket_payload(ticket, stampa_config):
+    numero = f"{ticket.get('prefisso', '')}{ticket.get('numero', '')}"
+    servizio = ticket.get("servizio", "")
+    creato_il = ticket.get("creato_il")
+    try:
+        creato_dt = datetime.fromisoformat(creato_il.replace("Z", "+00:00")) if creato_il else None
+    except ValueError:
+        creato_dt = None
+    if creato_dt is None:
+        creato_dt = datetime.now(timezone.utc)
+    data_locale = creato_dt.astimezone().strftime("%d/%m/%Y %H:%M")
+
+    nome = stampa_config.get("nome", "").strip()
+    messaggio = stampa_config.get("messaggio", "Ticket eliminacode").strip()
+    footer = stampa_config.get("footer", "").strip()
+    taglio = bool(stampa_config.get("taglio", True))
+
+    payload = bytearray()
+    payload.extend(b"\x1b@")
+    payload.extend(b"\x1ba\x01")
+    if nome:
+        payload.extend(nome.encode("utf-8"))
+        payload.extend(b"\n")
+    if messaggio:
+        payload.extend(messaggio.encode("utf-8"))
+        payload.extend(b"\n")
+    payload.extend(b"\x1d!\x11")
+    payload.extend(str(numero).encode("utf-8"))
+    payload.extend(b"\n")
+    payload.extend(b"\x1d!\x00")
+    payload.extend(b"\x1ba\x00")
+    payload.extend(f"Servizio: {servizio}\n".encode("utf-8"))
+    payload.extend(f"Orario: {data_locale}\n".encode("utf-8"))
+    if footer:
+        payload.extend(b"\n")
+        payload.extend(footer.encode("utf-8"))
+        payload.extend(b"\n")
+    payload.extend(b"\n\n")
+    if taglio:
+        payload.extend(b"\x1dV\x00")
+    return bytes(payload)
+
+
+def _print_ticket(ticket, stampa_config):
+    if not stampa_config.get("abilita"):
+        return {"ok": True, "skipped": True}
+    host = str(stampa_config.get("host", "")).strip()
+    if not host:
+        return {"ok": False, "errore": "Host stampante mancante"}
+    try:
+        port = int(stampa_config.get("port", 9100))
+    except (TypeError, ValueError):
+        return {"ok": False, "errore": "Porta non valida"}
+    payload = _format_ticket_payload(ticket, stampa_config)
+    try:
+        with socket.create_connection((host, port), timeout=3) as sock:
+            sock.sendall(payload)
+    except OSError as exc:
+        return {"ok": False, "errore": str(exc)}
+    return {"ok": True}
 
 
 class EliminacodeHandler(BaseHTTPRequestHandler):
@@ -530,7 +605,12 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "INSERT INTO tickets (numero, servizio, prefisso, priorita, creato_il) VALUES (?, ?, ?, ?, datetime('now'))",
                 (ticket["numero"], ticket["servizio"], ticket["prefisso"], ticket["priorita"]),
             )
-            self._send_json({"ok": True, "ticket": ticket}, status=HTTPStatus.CREATED)
+            stampa_config = state["config"].get("kiosk", {}).get("stampa", {})
+            stampa_esito = _print_ticket(ticket, stampa_config)
+            self._send_json(
+                {"ok": True, "ticket": ticket, "stampa": stampa_esito},
+                status=HTTPStatus.CREATED,
+            )
             return
 
         if parsed.path == "/api/turni/next":
@@ -854,6 +934,29 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "bottone": str(kiosk_dimensioni.get("bottone", "1rem")).strip(),
                 "bottone_padding": str(kiosk_dimensioni.get("bottone_padding", "8px 14px")).strip(),
             }
+            stampa_kiosk = kiosk.get("stampa", {})
+            if stampa_kiosk is None:
+                stampa_kiosk = {}
+            if not isinstance(stampa_kiosk, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            try:
+                stampa_porta = int(stampa_kiosk.get("port", 9100))
+            except (TypeError, ValueError):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            if stampa_porta < 1 or stampa_porta > 65535:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            kiosk_stampa = {
+                "abilita": bool(stampa_kiosk.get("abilita", False)),
+                "host": str(stampa_kiosk.get("host", "")).strip(),
+                "port": stampa_porta,
+                "nome": str(stampa_kiosk.get("nome", "")).strip(),
+                "messaggio": str(stampa_kiosk.get("messaggio", "Ticket eliminacode")).strip(),
+                "footer": str(stampa_kiosk.get("footer", "")).strip(),
+                "taglio": bool(stampa_kiosk.get("taglio", True)),
+            }
             if not isinstance(operatori, list) or not operatori:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Operatori non validi")
                 return
@@ -876,21 +979,26 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     "display": {
                         "mostra_ultimi": mostra_ultimi,
                         "numero_ultimi": numero_ultimi,
-                    "logo": logo,
-                    "immagini": immagini_pulite,
-                    "layout": layout,
-                    "colonne_extra": colonne_extra,
-                    "contenuti": display_contenuti,
-                    "finestre": finestre_pulite,
-                    "dimensioni": display_dimensioni,
-                    "audio": {
-                        "abilita": audio_abilita,
-                        "url": audio_url,
-                        "volume": audio_volume,
+                        "logo": logo,
+                        "immagini": immagini_pulite,
+                        "layout": layout,
+                        "colonne_extra": colonne_extra,
+                        "contenuti": display_contenuti,
+                        "finestre": finestre_pulite,
+                        "dimensioni": display_dimensioni,
+                        "audio": {
+                            "abilita": audio_abilita,
+                            "url": audio_url,
+                            "volume": audio_volume,
+                        },
+                        "tema": display_tema,
                     },
-                    "tema": display_tema,
-                },
-                    "kiosk": {"contenuti": kiosk_contenuti, "tema": kiosk_tema, "dimensioni": kiosk_dim},
+                    "kiosk": {
+                        "contenuti": kiosk_contenuti,
+                        "tema": kiosk_tema,
+                        "dimensioni": kiosk_dim,
+                        "stampa": kiosk_stampa,
+                    },
                     "operatori": operatori_puliti,
                 }
                 _write_state(state)

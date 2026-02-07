@@ -58,6 +58,22 @@
           <input id="kiosk-sfondo-img" type="text" placeholder="https://..." />
           <input id="kiosk-sfondo-file" type="file" accept="image/*" />
 
+          <h3>Stampa ticket (ESC/POS di rete)</h3>
+          <label for="kiosk-print-enabled">Abilita stampa</label>
+          <input id="kiosk-print-enabled" type="checkbox" />
+          <label for="kiosk-print-host">Host stampante (IP o hostname)</label>
+          <input id="kiosk-print-host" type="text" placeholder="192.168.1.50" />
+          <label for="kiosk-print-port">Porta</label>
+          <input id="kiosk-print-port" type="number" min="1" max="65535" value="9100" />
+          <label for="kiosk-print-name">Nome stampante (opzionale)</label>
+          <input id="kiosk-print-name" type="text" placeholder="Cassa 1" />
+          <label for="kiosk-print-message">Messaggio principale</label>
+          <input id="kiosk-print-message" type="text" placeholder="Ticket eliminacode" />
+          <label for="kiosk-print-footer">Footer (opzionale)</label>
+          <input id="kiosk-print-footer" type="text" placeholder="Grazie per la visita" />
+          <label for="kiosk-print-cut">Taglio automatico</label>
+          <input id="kiosk-print-cut" type="checkbox" />
+
           <button type="submit">Salva configurazione kiosk</button>
         </form>
         <div id="esito-kiosk" class="esito" role="status"></div>

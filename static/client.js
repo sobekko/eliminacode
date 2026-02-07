@@ -69,7 +69,11 @@ async function creaTicket(servizio) {
   if (response.ok) {
     const data = await response.json();
     const prefisso = data.ticket.prefisso ? `${data.ticket.prefisso}` : "";
-    esito.textContent = `Ticket creato: ${prefisso}${data.ticket.numero}`;
+    let messaggio = `Ticket creato: ${prefisso}${data.ticket.numero}`;
+    if (data.stampa && data.stampa.ok === false) {
+      messaggio = `${messaggio} (stampa non riuscita)`;
+    }
+    esito.textContent = messaggio;
     esito.className = "esito ok";
   } else {
     esito.textContent = "Errore nella creazione del ticket.";

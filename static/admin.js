@@ -164,6 +164,15 @@ function ensureKioskDefaults(kiosk = {}) {
       bottone: kiosk.dimensioni?.bottone || "1rem",
       bottone_padding: kiosk.dimensioni?.bottone_padding || "8px 14px",
     },
+    stampa: {
+      abilita: kiosk.stampa?.abilita ?? false,
+      host: kiosk.stampa?.host || "",
+      port: kiosk.stampa?.port ?? 9100,
+      nome: kiosk.stampa?.nome || "",
+      messaggio: kiosk.stampa?.messaggio || "Ticket eliminacode",
+      footer: kiosk.stampa?.footer || "",
+      taglio: kiosk.stampa?.taglio ?? true,
+    },
   };
 }
 

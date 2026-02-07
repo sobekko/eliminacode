@@ -19,6 +19,9 @@ const displayBgLibrary = document.getElementById("display-bg-library");
 const displayBgApply = document.getElementById("display-bg-apply");
 const displayAudioEnabled = document.getElementById("display-audio-enabled");
 const displayAudioUrl = document.getElementById("display-audio-url");
+const displayAudioUpload = document.getElementById("display-audio-upload");
+const displayAudioLibrary = document.getElementById("display-audio-library");
+const displayAudioApply = document.getElementById("display-audio-apply");
 const displayAudioVolume = document.getElementById("display-audio-volume");
 const displayWindowsContainer = document.getElementById("display-windows");
 const esitoDisplay = document.getElementById("esito-display");
@@ -201,6 +204,8 @@ async function aggiornaLibrerie() {
   const immagini = await caricaUpload("image");
   fillSelect(displayImageLibrary, immagini);
   fillSelect(displayBgLibrary, immagini);
+  const audio = await caricaUpload("audio");
+  fillSelect(displayAudioLibrary, audio);
 }
 
 displaySfondoFile.addEventListener("change", (event) => {
@@ -264,6 +269,27 @@ displayBgApply.addEventListener("click", () => {
     return;
   }
   displaySfondoImg.value = displayBgLibrary.value;
+});
+
+displayAudioUpload.addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    return;
+  }
+  try {
+    await uploadFile(file, "audio");
+  } catch (error) {
+    setEsito("Errore upload audio.", "error");
+    return;
+  }
+  await aggiornaLibrerie();
+});
+
+displayAudioApply.addEventListener("click", () => {
+  if (!displayAudioLibrary.value) {
+    return;
+  }
+  displayAudioUrl.value = displayAudioLibrary.value;
 });
 
 form.addEventListener("submit", async (event) => {

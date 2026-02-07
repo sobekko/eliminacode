@@ -16,6 +16,7 @@ let carouselPosition = 0;
 let lastCarouselInterval = 6000;
 let lastCarouselRandom = false;
 let carouselTimer = null;
+let lastTickerTexts = [];
 let popupTimer = null;
 let audioConfig = { abilita: false, url: "", volume: 1 };
 let audioPlayer = null;
@@ -84,14 +85,19 @@ function mostraPopup(item) {
 }
 
 function renderCarousel(container, immagini) {
-  container.innerHTML = "";
   if (!immagini.length) {
+    container.innerHTML = "";
     const placeholder = document.createElement("div");
     placeholder.className = "display-placeholder";
     placeholder.textContent = "Nessuna immagine";
     container.appendChild(placeholder);
     return;
   }
+  const existingImage = container.querySelector(".display-carousel img");
+  if (existingImage && container.querySelector(".display-carousel")) {
+    return;
+  }
+  container.innerHTML = "";
   const wrap = document.createElement("div");
   wrap.className = "display-carousel";
   const img = document.createElement("img");
@@ -187,14 +193,25 @@ function renderWindows(display, corrente, storico) {
     }
     const tipo = panel.tipo || defaultPanels[index].tipo;
     if (tipo === "carousel") {
-      renderCarousel(container, display.immagini || []);
+      const immagini = display.immagini || [];
+      const sameImages =
+        immagini.length === lastImages.length &&
+        immagini.every((img, imageIndex) => img === lastImages[imageIndex]);
+      if (!sameImages) {
+        container.innerHTML = "";
+      }
+      renderCarousel(container, immagini);
     } else if (tipo === "corrente") {
       renderCurrent(container, corrente);
     } else if (tipo === "storico") {
       const numeroUltimi = Math.min(Number(display.numero_ultimi || 5), 10);
       renderHistory(container, storico || [], numeroUltimi);
     } else if (tipo === "ticker") {
-      renderTicker(container, panel.testo || "");
+      const testo = panel.testo || "";
+      if (lastTickerTexts[index] !== testo) {
+        renderTicker(container, testo);
+        lastTickerTexts[index] = testo;
+      }
     } else {
       renderPlaceholder(container);
     }

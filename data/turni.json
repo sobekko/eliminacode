@@ -1,0 +1,367 @@
+{
+  "turni": [
+    {
+      "numero": 16,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:01:32.456315+00:00"
+    },
+    {
+      "numero": 17,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:01:37.526207+00:00"
+    },
+    {
+      "numero": 18,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:01:46.484455+00:00"
+    },
+    {
+      "numero": 19,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:01:59.469091+00:00"
+    },
+    {
+      "numero": 20,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:02:03.783902+00:00"
+    },
+    {
+      "numero": 21,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:02:08.828661+00:00"
+    },
+    {
+      "numero": 22,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:02:15.645355+00:00"
+    },
+    {
+      "numero": 23,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:02:22.785506+00:00"
+    },
+    {
+      "numero": 24,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:04:19.289089+00:00"
+    },
+    {
+      "numero": 25,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:47:37.055762+00:00"
+    },
+    {
+      "numero": 26,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:47:42.195185+00:00"
+    }
+  ],
+  "corrente": {
+    "numero": 15,
+    "servizio": "vendite",
+    "priorita": 2,
+    "prefisso": "V",
+    "creato_il": "2026-02-07T19:00:38.219424+00:00",
+    "operatore": "Erika"
+  },
+  "ultimo": 0,
+  "contatori": {
+    "vendite": 26,
+    "ritiro": 2,
+    "prioritario": 3
+  },
+  "storico": [
+    {
+      "numero": 3,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T17:04:10.436541+00:00"
+    },
+    {
+      "numero": 3,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T17:04:17.628782+00:00"
+    },
+    {
+      "numero": 4,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T17:07:31.999256+00:00"
+    },
+    {
+      "numero": 5,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T17:07:38.591776+00:00"
+    },
+    {
+      "numero": 6,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:03:35.724408+00:00"
+    },
+    {
+      "numero": 7,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:03:48.736149+00:00"
+    },
+    {
+      "numero": 8,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:03:53.623785+00:00"
+    },
+    {
+      "numero": 9,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:03:59.380087+00:00"
+    },
+    {
+      "numero": 10,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:04:05.391977+00:00"
+    },
+    {
+      "numero": 11,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:04:12.810887+00:00"
+    },
+    {
+      "numero": 1,
+      "servizio": "prioritario",
+      "prefisso": "P",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T18:08:35.754598+00:00"
+    },
+    {
+      "numero": 1,
+      "servizio": "prioritario",
+      "prefisso": "P",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T18:08:43.353238+00:00"
+    },
+    {
+      "numero": 2,
+      "servizio": "prioritario",
+      "prefisso": "P",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T18:08:51.390224+00:00"
+    },
+    {
+      "numero": 12,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Edoardo",
+      "chiamato_il": "2026-02-07T18:08:57.347017+00:00"
+    },
+    {
+      "numero": 1,
+      "servizio": "ritiro",
+      "prefisso": "R",
+      "operatore": "Federico",
+      "chiamato_il": "2026-02-07T18:09:01.430257+00:00"
+    },
+    {
+      "numero": 13,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Marika",
+      "chiamato_il": "2026-02-07T18:09:03.155604+00:00"
+    },
+    {
+      "numero": 2,
+      "servizio": "ritiro",
+      "prefisso": "R",
+      "operatore": "Marika",
+      "chiamato_il": "2026-02-07T18:11:59.008512+00:00"
+    },
+    {
+      "numero": 14,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T19:00:40.294038+00:00"
+    },
+    {
+      "numero": 3,
+      "servizio": "prioritario",
+      "prefisso": "P",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T19:02:26.692120+00:00"
+    },
+    {
+      "numero": 15,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T19:44:25.943285+00:00"
+    }
+  ],
+  "config": {
+    "servizio": "vendite",
+    "servizi": [
+      "vendite",
+      "ritiro",
+      "prioritario"
+    ],
+    "priorita": {
+      "vendite": 2,
+      "ritiro": 2,
+      "prioritario": 1
+    },
+    "prefissi": {
+      "vendite": "V",
+      "ritiro": "R",
+      "prioritario": "P"
+    },
+    "descrizioni": {
+      "vendite": "",
+      "ritiro": "",
+      "prioritario": "sss"
+    },
+    "display": {
+      "mostra_ultimi": true,
+      "numero_ultimi": 8,
+      "logo": "",
+      "immagini": [
+        "/upload/image/Erika.jpg"
+      ],
+      "layout": "split",
+      "colonne_extra": 2,
+      "contenuti": {
+        "titolo": "Chiamata in corso",
+        "sottotitolo": "",
+        "titolo_card": "",
+        "mostra_servizio": true,
+        "mostra_operatore": true,
+        "mostra_card": true,
+        "posizione_numero": "card"
+      },
+      "finestre": [
+        {
+          "tipo": "carousel"
+        },
+        {
+          "tipo": "corrente"
+        },
+        {
+          "tipo": "storico"
+        },
+        {
+          "tipo": "ticker",
+          "testo": "ciao"
+        }
+      ],
+      "dimensioni": {
+        "numero": "5rem",
+        "card": "1fr",
+        "extra": "1fr"
+      },
+      "fonts": {
+        "testo_famiglia": "inherit",
+        "testo_dimensione": "1.2rem",
+        "numero_famiglia": "inherit",
+        "numero_dimensione": "4rem"
+      },
+      "audio": {
+        "abilita": true,
+        "url": "/upload/audio/new-notification-022-370046.mp3",
+        "volume": 1.0
+      },
+      "tema": {
+        "sfondo": "#dcb345",
+        "testo": "#f8fafc",
+        "card": "#1e293b",
+        "immagine_sfondo": ""
+      }
+    },
+    "kiosk": {
+      "contenuti": {
+        "testo": "Prendi il tuo ticket",
+        "logo": "",
+        "descrizione_servizi": "Seleziona un servizio per stampare il ticket.",
+        "posizione_testo": "sopra"
+      },
+      "tema": {
+        "sfondo": "#e3cca6",
+        "testo": "#1b1f24",
+        "bottone": "#cd8f3d",
+        "testo_bottone": "#ffffff",
+        "immagine_sfondo": ""
+      },
+      "dimensioni": {
+        "bottone": "1rem",
+        "bottone_padding": "8px 14px"
+      },
+      "stampa": {
+        "abilita": false,
+        "host": "",
+        "port": 9100,
+        "nome": "",
+        "logo": "",
+        "messaggio": "Ticket eliminacode",
+        "footer": "",
+        "mostra_data_ora": true,
+        "taglio": true
+      }
+    },
+    "operatore": {
+      "audio": {
+        "abilita": true,
+        "url": "/upload/audio/floraphonic-servant-bell-ring-2-211683.mp3",
+        "volume": 1.0
+      }
+    },
+    "operatori": [
+      {
+        "nome": "Erika"
+      },
+      {
+        "nome": "Edoardo"
+      },
+      {
+        "nome": "Marika"
+      },
+      {
+        "nome": "Federico"
+      }
+    ]
+  }
+}

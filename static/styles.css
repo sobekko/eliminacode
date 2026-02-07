@@ -1,0 +1,432 @@
+:root {
+  color-scheme: light;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #f4f5f7;
+  color: #1b1f24;
+}
+
+body {
+  margin: 0;
+}
+
+.kiosk {
+  background: var(--kiosk-bg, #f4f5f7);
+  color: var(--kiosk-text, #1b1f24);
+  background-image: var(--kiosk-bg-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+  display: grid;
+  gap: 20px;
+}
+
+.client-page {
+  max-width: 720px;
+}
+
+.kiosk-client {
+  min-height: 100vh;
+  align-content: start;
+  gap: 24px;
+  padding: 32px 20px 60px;
+}
+
+.kiosk-client header {
+  text-align: center;
+}
+
+.kiosk-client header h1 {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.kiosk-client header p {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+}
+
+.kiosk-content {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+
+.kiosk-text {
+  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+  font-weight: 600;
+  white-space: pre-line;
+}
+
+.kiosk-logo {
+  max-width: min(60vw, 280px);
+  max-height: 160px;
+  object-fit: contain;
+}
+
+.kiosk-servizi-desc {
+  margin: 12px auto 0;
+  text-align: center;
+  font-size: clamp(0.95rem, 2vw, 1.2rem);
+  color: inherit;
+  max-width: 420px;
+}
+
+.operator-page {
+  max-width: 720px;
+}
+
+.stats-page {
+  max-width: 900px;
+}
+
+header {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-link {
+  color: #1f6feb;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.admin-link:hover {
+  text-decoration: underline;
+}
+
+.admin-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-nav-link {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #e5e7eb;
+  color: #111827;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.admin-nav-link:hover {
+  background: #d1d5db;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+}
+
+textarea {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  background: #fff;
+}
+
+label {
+  font-weight: 600;
+  margin-top: 12px;
+  display: block;
+}
+
+label.inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #1f6feb;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-large {
+  padding: 14px 20px;
+  font-size: 1.05rem;
+}
+
+button.ghost {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.azioni {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.esito {
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.esito.ok {
+  color: #0f766e;
+}
+
+.esito.error {
+  color: #b91c1c;
+}
+
+.corrente {
+  margin-top: 16px;
+  font-size: 1.2rem;
+  display: grid;
+  gap: 4px;
+}
+
+.config {
+  display: grid;
+  gap: 12px;
+}
+
+.queue-summary {
+  display: grid;
+  gap: 12px;
+}
+
+.queue-detail {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.servizi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.servizi-kiosk {
+  justify-content: center;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.pill {
+  border-radius: 999px;
+  background: var(--kiosk-button, #e5e7eb);
+  color: var(--kiosk-button-text, #111827);
+  border: none;
+  padding: var(--kiosk-button-padding, 8px 14px);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--kiosk-button-size, 1rem);
+  text-align: center;
+}
+
+.kiosk-client .pill {
+  border-radius: 18px;
+  padding: clamp(14px, 2vw, 22px) clamp(18px, 4vw, 28px);
+  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  min-height: 64px;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+  display: grid;
+  gap: 6px;
+}
+
+.kiosk-client .card {
+  padding: clamp(18px, 3vw, 28px);
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  .kiosk-client {
+    padding: 24px 16px 50px;
+  }
+
+  .kiosk-logo {
+    max-width: min(70vw, 240px);
+  }
+
+  .servizi-kiosk {
+    grid-template-columns: 1fr;
+  }
+
+  .kiosk-client .pill {
+    min-height: 70px;
+  }
+}
+
+.pill.active {
+  background: #1f6feb;
+  color: #fff;
+}
+
+.pill-title {
+  font-weight: 700;
+}
+
+.pill-desc {
+  font-size: 0.85em;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.servizio-selezionato {
+  display: grid;
+  gap: 4px;
+}
+
+.config .label {
+  display: block;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.operatori {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.priorita {
+  display: grid;
+  gap: 10px;
+}
+
+.priorita-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.display-config {
+  display: grid;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.lista-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lista-inline li {
+  flex: 0 1 auto;
+}
+
+.lista li {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.ticket {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
+  background: #f9fafb;
+}
+
+.ticket-numero {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.ticket-nome {
+  font-size: 1.1rem;
+}
+
+.ticket-orario {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  header,
+  .card:not(#ticket-card),
+  #btn-stampa {
+    display: none !important;
+  }
+
+  #ticket-card {
+    box-shadow: none;
+    border-radius: 0;
+  }
+}

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Operatore - Chiamata turno</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container operator-page">
+
+
+      <section class="card">
+        <label for="operatore">Operatore</label>
+        <select id="operatore"></select>
+        <div class="azioni">
+          <button id="btn-next" class="btn-large">Chiama prossimo</button>
+          <button id="btn-recall" class="ghost" disabled>Chiama di nuovo</button>
+        </div>
+        <div class="corrente">
+          <span>In chiamata</span>
+          <strong id="corrente">Nessuno</strong>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="queue-summary">
+          <div>
+            <span class="label">Totale in attesa</span>
+            <strong id="totale-coda">0</strong>
+          </div>
+          <div>
+            <span class="label">Per servizio</span>
+            <ul id="coda-servizi" class="lista lista-inline"></ul>
+          </div>
+        </div>
+        <div class="queue-detail">
+          <span class="label">Dettaglio attese</span>
+          <ul id="coda-dettaglio" class="lista"></ul>
+        </div>
+      </section>
+    </main>
+
+    <script src="operatore.js"></script>
+  </body>
+</html>

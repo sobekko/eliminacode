@@ -6,6 +6,9 @@ const prefissiContainer = document.getElementById("prefissi-container");
 const descrizioniContainer = document.getElementById("descrizioni-container");
 const numeroOperatoriSelect = document.getElementById("numero-operatori");
 const operatoriContainer = document.getElementById("operatori-container");
+const operatoreAudioEnabled = document.getElementById("operatore-audio-enabled");
+const operatoreAudioUrl = document.getElementById("operatore-audio-url");
+const operatoreAudioVolume = document.getElementById("operatore-audio-volume");
 const esitoAdmin = document.getElementById("esito-admin");
 let configData = null;
 
@@ -178,6 +181,16 @@ function ensureKioskDefaults(kiosk = {}) {
   };
 }
 
+function ensureOperatoreDefaults(operatore = {}) {
+  return {
+    audio: {
+      abilita: operatore.audio?.abilita ?? false,
+      url: operatore.audio?.url || "",
+      volume: operatore.audio?.volume ?? 1,
+    },
+  };
+}
+
 async function caricaConfig() {
   const response = await fetch("/api/admin");
   if (!response.ok) {
@@ -185,6 +198,7 @@ async function caricaConfig() {
   }
   const config = await response.json();
   configData = config;
+  const operatore = ensureOperatoreDefaults(config.operatore || {});
   servizioInput.value = config.servizio || "";
   serviziInput.value = (config.servizi || []).join(", ");
   const operatori = config.operatori || [];
@@ -193,6 +207,9 @@ async function caricaConfig() {
   renderPriorita(config.servizi || [], config.priorita || {});
   renderPrefissi(config.servizi || [], config.prefissi || {});
   renderDescrizioni(config.servizi || [], config.descrizioni || {});
+  operatoreAudioEnabled.checked = Boolean(operatore.audio.abilita);
+  operatoreAudioUrl.value = operatore.audio.url || "";
+  operatoreAudioVolume.value = String(operatore.audio.volume ?? 1);
 }
 
 numeroOperatoriSelect.addEventListener("change", () => {
@@ -237,6 +254,14 @@ form.addEventListener("submit", async (event) => {
   });
   const display = configData?.display || {};
   const kiosk = configData?.kiosk || {};
+  const parsedVolume = Number(operatoreAudioVolume.value);
+  const operatore = {
+    audio: {
+      abilita: operatoreAudioEnabled.checked,
+      url: operatoreAudioUrl.value.trim(),
+      volume: Number.isFinite(parsedVolume) ? parsedVolume : 1,
+    },
+  };
   const operatori = Array.from(operatoriContainer.querySelectorAll("input")).map((input) => ({
     nome: input.value.trim(),
   }));
@@ -252,6 +277,7 @@ form.addEventListener("submit", async (event) => {
       descrizioni,
       display,
       kiosk,
+      operatore,
       operatori,
     }),
   });

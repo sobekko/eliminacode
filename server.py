@@ -104,6 +104,13 @@ def _default_config():
                 "taglio": True,
             },
         },
+        "operatore": {
+            "audio": {
+                "abilita": False,
+                "url": "",
+                "volume": 1.0,
+            }
+        },
         "operatori": [{"nome": "Operatore 1"}],
     }
 
@@ -215,6 +222,10 @@ def _read_state():
         state["config"]["kiosk"]["contenuti"] = _default_config()["kiosk"]["contenuti"]
     if "operatori" not in state["config"]:
         state["config"]["operatori"] = _default_config()["operatori"]
+    if "operatore" not in state["config"]:
+        state["config"]["operatore"] = _default_config()["operatore"]
+    elif "audio" not in state["config"]["operatore"]:
+        state["config"]["operatore"]["audio"] = _default_config()["operatore"]["audio"]
     if "storico" not in state:
         state["storico"] = []
     if "contatori" not in state:
@@ -769,6 +780,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             descrizioni = payload.get("descrizioni", {})
             display = payload.get("display", {})
             kiosk = payload.get("kiosk", {})
+            operatore = payload.get("operatore", {})
             operatori = payload.get("operatori", [])
             if not servizio:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Servizio richiesto")
@@ -982,6 +994,9 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             if not isinstance(kiosk, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
                 return
+            if not isinstance(operatore, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Operatore non valido")
+                return
             contenuti_kiosk = kiosk.get("contenuti", {})
             if contenuti_kiosk is None:
                 contenuti_kiosk = {}
@@ -1042,6 +1057,20 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "mostra_data_ora": bool(stampa_kiosk.get("mostra_data_ora", True)),
                 "taglio": bool(stampa_kiosk.get("taglio", True)),
             }
+            operatore_audio = operatore.get("audio", {})
+            if not isinstance(operatore_audio, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Operatore non valido")
+                return
+            operatore_audio_abilita = bool(operatore_audio.get("abilita", False))
+            operatore_audio_url = str(operatore_audio.get("url", "")).strip()
+            try:
+                operatore_audio_volume = float(operatore_audio.get("volume", 1.0))
+            except (TypeError, ValueError):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Operatore non valido")
+                return
+            if operatore_audio_volume < 0 or operatore_audio_volume > 1:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Operatore non valido")
+                return
             if not isinstance(operatori, list) or not operatori:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Operatori non validi")
                 return
@@ -1084,6 +1113,13 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         "tema": kiosk_tema,
                         "dimensioni": kiosk_dim,
                         "stampa": kiosk_stampa,
+                    },
+                    "operatore": {
+                        "audio": {
+                            "abilita": operatore_audio_abilita,
+                            "url": operatore_audio_url,
+                            "volume": operatore_audio_volume,
+                        }
                     },
                     "operatori": operatori_puliti,
                 }

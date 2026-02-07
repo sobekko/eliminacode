@@ -338,6 +338,7 @@ form.addEventListener("submit", async (event) => {
       descrizioni: configData.descrizioni || {},
       display,
       kiosk: configData.kiosk || {},
+      operatore: configData.operatore || {},
       operatori: configData.operatori || [],
     }),
   });

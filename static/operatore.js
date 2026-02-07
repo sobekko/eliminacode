@@ -6,6 +6,35 @@ const totaleCoda = document.getElementById("totale-coda");
 const codaServizi = document.getElementById("coda-servizi");
 const codaDettaglio = document.getElementById("coda-dettaglio");
 let ultimaChiamata = null;
+let operatoreAudio = { abilita: false, url: "", volume: 1 };
+let ticketAudio = null;
+let ultimoTotaleCoda = null;
+
+function aggiornaAudioOperatore(config) {
+  const audio = config?.operatore?.audio || {};
+  operatoreAudio = {
+    abilita: audio.abilita ?? false,
+    url: audio.url || "",
+    volume: audio.volume ?? 1,
+  };
+  if (!operatoreAudio.url) {
+    ticketAudio = null;
+    return;
+  }
+  if (!ticketAudio || ticketAudio.src !== operatoreAudio.url) {
+    ticketAudio = new Audio(operatoreAudio.url);
+  }
+  ticketAudio.volume = operatoreAudio.volume;
+}
+
+function riproduciAudioNuovoTicket() {
+  if (!operatoreAudio.abilita || !operatoreAudio.url || !ticketAudio) {
+    return;
+  }
+  ticketAudio.currentTime = 0;
+  ticketAudio.volume = operatoreAudio.volume;
+  ticketAudio.play().catch(() => {});
+}
 
 async function caricaOperatori() {
   const response = await fetch("/api/admin");
@@ -13,6 +42,7 @@ async function caricaOperatori() {
     return;
   }
   const config = await response.json();
+  aggiornaAudioOperatore(config);
   const operatori = config.operatori || [];
   selectOperatore.innerHTML = "";
   operatori.forEach((operatore, index) => {
@@ -124,7 +154,16 @@ async function aggiornaCoda() {
     return;
   }
   const data = await response.json();
-  renderCoda(data.turni || []);
+  const turni = data.turni || [];
+  renderCoda(turni);
+  if (ultimoTotaleCoda === null) {
+    ultimoTotaleCoda = turni.length;
+  } else if (turni.length > ultimoTotaleCoda) {
+    riproduciAudioNuovoTicket();
+    ultimoTotaleCoda = turni.length;
+  } else {
+    ultimoTotaleCoda = turni.length;
+  }
   if (data.corrente) {
     ultimaChiamata = data.corrente;
     btnRecall.disabled = false;

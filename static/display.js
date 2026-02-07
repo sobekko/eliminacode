@@ -10,6 +10,10 @@ const popupNumeroEl = document.getElementById("display-popup-numero");
 let carouselIndex = 0;
 let lastImages = [];
 let lastPanels = [];
+const STORAGE_KEY_LAST_CHIAMATA = "display-last-chiamata";
+const STORAGE_KEY_LAST_AUDIO = "display-last-audio";
+const STORAGE_KEY_LAST_AUDIO_PLAYED_AT = "display-last-audio-played-at";
+
 let lastChiamataKey = "";
 let carouselOrder = [];
 let carouselPosition = 0;
@@ -23,6 +27,38 @@ let audioConfig = { abilita: false, url: "", volume: 1 };
 let audioPlayer = null;
 let hasLoadedOnce = false;
 let lastAudioPlayedAt = 0;
+
+function loadStoredAudioState() {
+  if (!window.sessionStorage) {
+    return;
+  }
+  const storedChiamata = window.sessionStorage.getItem(STORAGE_KEY_LAST_CHIAMATA);
+  if (storedChiamata) {
+    lastChiamataKey = storedChiamata;
+  }
+  const storedAudio = window.sessionStorage.getItem(STORAGE_KEY_LAST_AUDIO);
+  if (storedAudio) {
+    lastAudioKey = storedAudio;
+  }
+  const storedAudioAt = window.sessionStorage.getItem(STORAGE_KEY_LAST_AUDIO_PLAYED_AT);
+  if (storedAudioAt) {
+    const parsed = Number(storedAudioAt);
+    if (!Number.isNaN(parsed)) {
+      lastAudioPlayedAt = parsed;
+    }
+  }
+}
+
+function saveStoredAudioState() {
+  if (!window.sessionStorage) {
+    return;
+  }
+  window.sessionStorage.setItem(STORAGE_KEY_LAST_CHIAMATA, lastChiamataKey);
+  window.sessionStorage.setItem(STORAGE_KEY_LAST_AUDIO, lastAudioKey);
+  window.sessionStorage.setItem(STORAGE_KEY_LAST_AUDIO_PLAYED_AT, String(lastAudioPlayedAt));
+}
+
+loadStoredAudioState();
 
 function applyDisplayTheme(display) {
   const tema = display.tema || {};
@@ -82,6 +118,7 @@ function mostraPopup(item) {
     }
     lastAudioKey = audioKey;
     lastAudioPlayedAt = now;
+    saveStoredAudioState();
     if (!audioPlayer) {
       audioPlayer = new Audio();
     }
@@ -278,11 +315,17 @@ async function refreshDisplay() {
   const current = lastItem || data.corrente;
   const chiamataKey = buildChiamataKey(current);
   if (!hasLoadedOnce) {
-    lastChiamataKey = chiamataKey;
-    lastAudioKey = chiamataKey;
+    if (!lastChiamataKey) {
+      lastChiamataKey = chiamataKey;
+    }
+    if (!lastAudioKey) {
+      lastAudioKey = chiamataKey;
+    }
+    saveStoredAudioState();
     hasLoadedOnce = true;
   } else if (chiamataKey && chiamataKey !== lastChiamataKey) {
     lastChiamataKey = chiamataKey;
+    saveStoredAudioState();
     mostraPopup(current);
   }
   const immagini = display.immagini || [];

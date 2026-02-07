@@ -1,6 +1,6 @@
 # Eliminacode locale
 
-Sistema eliminacode tipo "ezturns" per rete locale, senza dipendenze esterne o accesso a internet.
+Sistema eliminacode per rete locale, senza dipendenze esterne o accesso a internet.
 
 ## Requisiti
 

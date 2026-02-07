@@ -11,9 +11,6 @@ let carouselIndex = 0;
 let lastImages = [];
 let lastPanels = [];
 const STORAGE_KEY_LAST_CHIAMATA = "display-last-chiamata";
-const STORAGE_KEY_LAST_AUDIO = "display-last-audio";
-const STORAGE_KEY_LAST_AUDIO_PLAYED_AT = "display-last-audio-played-at";
-
 let lastChiamataKey = "";
 let carouselOrder = [];
 let carouselPosition = 0;
@@ -21,12 +18,8 @@ let lastCarouselInterval = 6000;
 let lastCarouselRandom = false;
 let carouselTimer = null;
 let lastTickerTexts = [];
-let lastAudioKey = "";
 let popupTimer = null;
-let audioConfig = { abilita: false, url: "", volume: 1 };
-let audioPlayer = null;
 let hasLoadedOnce = false;
-let lastAudioPlayedAt = 0;
 let refreshInFlight = false;
 
 function loadStoredAudioState() {
@@ -37,17 +30,6 @@ function loadStoredAudioState() {
   if (storedChiamata) {
     lastChiamataKey = storedChiamata;
   }
-  const storedAudio = window.sessionStorage.getItem(STORAGE_KEY_LAST_AUDIO);
-  if (storedAudio) {
-    lastAudioKey = storedAudio;
-  }
-  const storedAudioAt = window.sessionStorage.getItem(STORAGE_KEY_LAST_AUDIO_PLAYED_AT);
-  if (storedAudioAt) {
-    const parsed = Number(storedAudioAt);
-    if (!Number.isNaN(parsed)) {
-      lastAudioPlayedAt = parsed;
-    }
-  }
 }
 
 function saveStoredAudioState() {
@@ -55,8 +37,6 @@ function saveStoredAudioState() {
     return;
   }
   window.sessionStorage.setItem(STORAGE_KEY_LAST_CHIAMATA, lastChiamataKey);
-  window.sessionStorage.setItem(STORAGE_KEY_LAST_AUDIO, lastAudioKey);
-  window.sessionStorage.setItem(STORAGE_KEY_LAST_AUDIO_PLAYED_AT, String(lastAudioPlayedAt));
 }
 
 loadStoredAudioState();
@@ -107,28 +87,6 @@ function mostraPopup(item) {
   popupEl.classList.add("is-visible");
   if (popupTimer) {
     clearTimeout(popupTimer);
-  }
-  if (audioConfig.abilita && audioConfig.url) {
-    const audioKey = buildChiamataKey(item);
-    if (audioKey && audioKey === lastAudioKey) {
-      return;
-    }
-    const now = Date.now();
-    if (now - lastAudioPlayedAt < 1500) {
-      return;
-    }
-    lastAudioKey = audioKey;
-    lastAudioPlayedAt = now;
-    saveStoredAudioState();
-    if (!audioPlayer) {
-      audioPlayer = new Audio();
-    }
-    if (audioPlayer.src !== audioConfig.url) {
-      audioPlayer.src = audioConfig.url;
-    }
-    audioPlayer.volume = audioConfig.volume;
-    audioPlayer.currentTime = 0;
-    audioPlayer.play().catch(() => {});
   }
   popupTimer = setTimeout(() => {
     popupEl.classList.remove("is-visible");
@@ -309,12 +267,6 @@ async function refreshDisplay() {
     const data = await response.json();
     const display = data.display || {};
     applyDisplayTheme(display);
-    const newAudio = display.audio || {};
-    audioConfig = {
-      abilita: Boolean(newAudio.abilita),
-      url: newAudio.url || "",
-      volume: typeof newAudio.volume === "number" ? newAudio.volume : 1,
-    };
     renderWindows(display, data.corrente, data.storico || []);
     const storico = data.storico || [];
     const lastItem = storico.length ? storico[storico.length - 1] : null;
@@ -323,9 +275,6 @@ async function refreshDisplay() {
     if (!hasLoadedOnce) {
       if (!lastChiamataKey) {
         lastChiamataKey = chiamataKey;
-      }
-      if (!lastAudioKey) {
-        lastAudioKey = chiamataKey;
       }
       saveStoredAudioState();
       hasLoadedOnce = true;

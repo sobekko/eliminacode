@@ -1,38 +1,18 @@
 {
-  "turni": [
-    {
-      "numero": 6,
-      "servizio": "vendite",
-      "priorita": 2,
-      "prefisso": "V",
-      "creato_il": "2026-02-07T17:07:30.081029+00:00"
-    },
-    {
-      "numero": 7,
-      "servizio": "vendite",
-      "priorita": 2,
-      "prefisso": "V",
-      "creato_il": "2026-02-07T17:07:30.281488+00:00"
-    },
-    {
-      "numero": 8,
-      "servizio": "vendite",
-      "priorita": 2,
-      "prefisso": "V",
-      "creato_il": "2026-02-07T17:07:30.467464+00:00"
-    }
-  ],
+  "turni": [],
   "corrente": {
-    "numero": 5,
-    "servizio": "vendite",
+    "numero": 2,
+    "servizio": "ritiro",
     "priorita": 2,
-    "prefisso": "V",
-    "creato_il": "2026-02-07T17:07:29.860011+00:00",
-    "operatore": "Operatore 1"
+    "prefisso": "R",
+    "creato_il": "2026-02-07T18:06:04.045673+00:00",
+    "operatore": "Marika"
   },
   "ultimo": 0,
   "contatori": {
-    "vendite": 8
+    "vendite": 13,
+    "ritiro": 2,
+    "prioritario": 2
   },
   "storico": [
     {
@@ -76,6 +56,97 @@
       "prefisso": "V",
       "operatore": "Operatore 1",
       "chiamato_il": "2026-02-07T17:07:38.591776+00:00"
+    },
+    {
+      "numero": 6,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:03:35.724408+00:00"
+    },
+    {
+      "numero": 7,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:03:48.736149+00:00"
+    },
+    {
+      "numero": 8,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:03:53.623785+00:00"
+    },
+    {
+      "numero": 9,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:03:59.380087+00:00"
+    },
+    {
+      "numero": 10,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:04:05.391977+00:00"
+    },
+    {
+      "numero": 11,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T18:04:12.810887+00:00"
+    },
+    {
+      "numero": 1,
+      "servizio": "prioritario",
+      "prefisso": "P",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T18:08:35.754598+00:00"
+    },
+    {
+      "numero": 1,
+      "servizio": "prioritario",
+      "prefisso": "P",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T18:08:43.353238+00:00"
+    },
+    {
+      "numero": 2,
+      "servizio": "prioritario",
+      "prefisso": "P",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T18:08:51.390224+00:00"
+    },
+    {
+      "numero": 12,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Edoardo",
+      "chiamato_il": "2026-02-07T18:08:57.347017+00:00"
+    },
+    {
+      "numero": 1,
+      "servizio": "ritiro",
+      "prefisso": "R",
+      "operatore": "Federico",
+      "chiamato_il": "2026-02-07T18:09:01.430257+00:00"
+    },
+    {
+      "numero": 13,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Marika",
+      "chiamato_il": "2026-02-07T18:09:03.155604+00:00"
+    },
+    {
+      "numero": 2,
+      "servizio": "ritiro",
+      "prefisso": "R",
+      "operatore": "Marika",
+      "chiamato_il": "2026-02-07T18:11:59.008512+00:00"
     }
   ],
   "config": {
@@ -130,7 +201,7 @@
         },
         {
           "tipo": "ticker",
-          "testo": ""
+          "testo": "ciao"
         }
       ],
       "dimensioni": {
@@ -143,6 +214,11 @@
         "testo_dimensione": "1.2rem",
         "numero_famiglia": "inherit",
         "numero_dimensione": "4rem"
+      },
+      "audio": {
+        "abilita": true,
+        "url": "/upload/audio/new-notification-022-370046.mp3",
+        "volume": 1.0
       },
       "tema": {
         "sfondo": "#dcb345",
@@ -159,9 +235,9 @@
         "posizione_testo": "sopra"
       },
       "tema": {
-        "sfondo": "#f4f5f7",
+        "sfondo": "#e3cca6",
         "testo": "#1b1f24",
-        "bottone": "#1f6feb",
+        "bottone": "#cd8f3d",
         "testo_bottone": "#ffffff",
         "immagine_sfondo": ""
       },
@@ -183,7 +259,16 @@
     },
     "operatori": [
       {
-        "nome": "Operatore 1"
+        "nome": "Erika"
+      },
+      {
+        "nome": "Edoardo"
+      },
+      {
+        "nome": "Marika"
+      },
+      {
+        "nome": "Federico"
       }
     ]
   }

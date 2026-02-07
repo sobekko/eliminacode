@@ -1,5 +1,9 @@
 const form = document.getElementById("form-display");
 const displayNumeroUltimi = document.getElementById("display-numero-ultimi");
+const displayFontText = document.getElementById("display-font-text");
+const displayFontTextSize = document.getElementById("display-font-text-size");
+const displayFontNumber = document.getElementById("display-font-number");
+const displayFontNumberSize = document.getElementById("display-font-number-size");
 const displaySfondo = document.getElementById("display-sfondo");
 const displayTesto = document.getElementById("display-testo");
 const displaySfondoImg = document.getElementById("display-sfondo-img");
@@ -11,6 +15,9 @@ const displayImageLibrary = document.getElementById("display-image-library");
 const displayImageAdd = document.getElementById("display-image-add");
 const displayBgLibrary = document.getElementById("display-bg-library");
 const displayBgApply = document.getElementById("display-bg-apply");
+const displayAudioEnabled = document.getElementById("display-audio-enabled");
+const displayAudioUrl = document.getElementById("display-audio-url");
+const displayAudioVolume = document.getElementById("display-audio-volume");
 const displayWindowsContainer = document.getElementById("display-windows");
 const esitoDisplay = document.getElementById("esito-display");
 let configData = null;
@@ -69,10 +76,21 @@ function ensureDisplayDefaults(display = {}) {
     numero_ultimi: display.numero_ultimi ?? 5,
     immagini: display.immagini || [],
     finestre: Array.isArray(display.finestre) ? display.finestre : windowDefaults,
+    fonts: {
+      testo_famiglia: display.fonts?.testo_famiglia || "inherit",
+      testo_dimensione: display.fonts?.testo_dimensione || "1.2rem",
+      numero_famiglia: display.fonts?.numero_famiglia || "inherit",
+      numero_dimensione: display.fonts?.numero_dimensione || "4rem",
+    },
     tema: {
       sfondo: display.tema?.sfondo || "#0f172a",
       testo: display.tema?.testo || "#f8fafc",
       immagine_sfondo: display.tema?.immagine_sfondo || "",
+    },
+    audio: {
+      abilita: display.audio?.abilita ?? false,
+      url: display.audio?.url || "",
+      volume: display.audio?.volume ?? 1,
     },
   };
 }
@@ -158,10 +176,17 @@ async function caricaConfig() {
   }
   renderWindows(panels);
   displayNumeroUltimi.value = String(display.numero_ultimi ?? 5);
+  displayFontText.value = display.fonts.testo_famiglia || "inherit";
+  displayFontTextSize.value = display.fonts.testo_dimensione || "1.2rem";
+  displayFontNumber.value = display.fonts.numero_famiglia || "inherit";
+  displayFontNumberSize.value = display.fonts.numero_dimensione || "4rem";
   displaySfondo.value = display.tema.sfondo || "#0f172a";
   displayTesto.value = display.tema.testo || "#f8fafc";
   displaySfondoImg.value = display.tema.immagine_sfondo || "";
   displayImmagini.value = (display.immagini || []).join(", ");
+  displayAudioEnabled.checked = Boolean(display.audio.abilita);
+  displayAudioUrl.value = display.audio.url || "";
+  displayAudioVolume.value = String(display.audio.volume ?? 1);
 }
 
 async function aggiornaLibrerie() {
@@ -246,10 +271,21 @@ form.addEventListener("submit", async (event) => {
       .map((voce) => voce.trim())
       .filter(Boolean),
     finestre: collectWindows(),
+    fonts: {
+      testo_famiglia: displayFontText.value.trim() || "inherit",
+      testo_dimensione: displayFontTextSize.value.trim() || "1.2rem",
+      numero_famiglia: displayFontNumber.value.trim() || "inherit",
+      numero_dimensione: displayFontNumberSize.value.trim() || "4rem",
+    },
     tema: {
       sfondo: displaySfondo.value,
       testo: displayTesto.value,
       immagine_sfondo: displaySfondoImg.value.trim(),
+    },
+    audio: {
+      abilita: displayAudioEnabled.checked,
+      url: displayAudioUrl.value.trim(),
+      volume: Number(displayAudioVolume.value || 1),
     },
   };
 

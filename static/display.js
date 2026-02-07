@@ -4,16 +4,27 @@ const windows = [
   document.getElementById("window-3"),
   document.getElementById("window-4"),
 ];
+const popupEl = document.getElementById("display-popup");
+const popupNumeroEl = document.getElementById("display-popup-numero");
 
 let carouselIndex = 0;
 let lastImages = [];
 let lastPanels = [];
+let lastChiamataKey = "";
+let popupTimer = null;
+let audioConfig = { abilita: false, url: "", volume: 1 };
+let audioPlayer = null;
 
 function applyDisplayTheme(display) {
   const tema = display.tema || {};
+  const fonts = display.fonts || {};
   const root = document.documentElement;
   root.style.setProperty("--display-bg", tema.sfondo || "#0f172a");
   root.style.setProperty("--display-text", tema.testo || "#f8fafc");
+  root.style.setProperty("--display-text-font", fonts.testo_famiglia || "inherit");
+  root.style.setProperty("--display-text-size", fonts.testo_dimensione || "1.2rem");
+  root.style.setProperty("--display-number-font", fonts.numero_famiglia || "inherit");
+  root.style.setProperty("--display-number-size", fonts.numero_dimensione || "4rem");
   if (tema.immagine_sfondo) {
     root.style.setProperty("--display-bg-image", `url('${tema.immagine_sfondo}')`);
   } else {
@@ -27,6 +38,44 @@ function formatNumero(item) {
   }
   const prefisso = item.prefisso ? `${item.prefisso}` : "";
   return `${prefisso}${item.numero}`;
+}
+
+function buildChiamataKey(item) {
+  if (!item) {
+    return "";
+  }
+  if (item.chiamato_il) {
+    return item.chiamato_il;
+  }
+  const prefisso = item.prefisso ? `${item.prefisso}` : "";
+  const numero = item.numero ? `${item.numero}` : "";
+  const operatore = item.operatore ? `${item.operatore}` : "";
+  return `${prefisso}${numero}-${operatore}`;
+}
+
+function mostraPopup(item) {
+  if (!popupEl || !popupNumeroEl || !item?.numero) {
+    return;
+  }
+  popupNumeroEl.textContent = formatNumero(item);
+  popupEl.classList.add("is-visible");
+  if (popupTimer) {
+    clearTimeout(popupTimer);
+  }
+  if (audioConfig.abilita && audioConfig.url) {
+    if (!audioPlayer) {
+      audioPlayer = new Audio();
+    }
+    if (audioPlayer.src !== audioConfig.url) {
+      audioPlayer.src = audioConfig.url;
+    }
+    audioPlayer.volume = audioConfig.volume;
+    audioPlayer.currentTime = 0;
+    audioPlayer.play().catch(() => {});
+  }
+  popupTimer = setTimeout(() => {
+    popupEl.classList.remove("is-visible");
+  }, 4000);
 }
 
 function renderCarousel(container, immagini) {
@@ -154,7 +203,21 @@ async function refreshDisplay() {
   const data = await response.json();
   const display = data.display || {};
   applyDisplayTheme(display);
+  const newAudio = display.audio || {};
+  audioConfig = {
+    abilita: Boolean(newAudio.abilita),
+    url: newAudio.url || "",
+    volume: typeof newAudio.volume === "number" ? newAudio.volume : 1,
+  };
   renderWindows(display, data.corrente, data.storico || []);
+  const storico = data.storico || [];
+  const lastItem = storico.length ? storico[storico.length - 1] : null;
+  const current = lastItem || data.corrente;
+  const chiamataKey = buildChiamataKey(current);
+  if (chiamataKey && chiamataKey !== lastChiamataKey) {
+    lastChiamataKey = chiamataKey;
+    mostraPopup(current);
+  }
   const immagini = display.immagini || [];
   const sameImages =
     immagini.length === lastImages.length &&

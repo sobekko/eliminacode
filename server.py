@@ -56,6 +56,12 @@ def _default_config():
                 "card": "1fr",
                 "extra": "1fr",
             },
+            "fonts": {
+                "testo_famiglia": "inherit",
+                "testo_dimensione": "1.2rem",
+                "numero_famiglia": "inherit",
+                "numero_dimensione": "4rem",
+            },
             "audio": {
                 "abilita": False,
                 "url": "",
@@ -180,6 +186,8 @@ def _read_state():
         state["config"]["display"] = _default_config()["display"]
     elif "dimensioni" not in state["config"]["display"]:
         state["config"]["display"]["dimensioni"] = _default_config()["display"]["dimensioni"]
+    if "fonts" not in state["config"]["display"]:
+        state["config"]["display"]["fonts"] = _default_config()["display"]["fonts"]
     if "contenuti" not in state["config"]["display"]:
         state["config"]["display"]["contenuti"] = _default_config()["display"]["contenuti"]
     elif "posizione_numero" not in state["config"]["display"]["contenuti"]:
@@ -917,6 +925,32 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     dimensioni_display.get("extra", default_display["dimensioni"]["extra"])
                 ).strip(),
             }
+            fonts_display = display.get("fonts", default_display.get("fonts", {}))
+            if not isinstance(fonts_display, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            display_fonts = {
+                "testo_famiglia": str(
+                    fonts_display.get(
+                        "testo_famiglia", default_display["fonts"]["testo_famiglia"]
+                    )
+                ).strip(),
+                "testo_dimensione": str(
+                    fonts_display.get(
+                        "testo_dimensione", default_display["fonts"]["testo_dimensione"]
+                    )
+                ).strip(),
+                "numero_famiglia": str(
+                    fonts_display.get(
+                        "numero_famiglia", default_display["fonts"]["numero_famiglia"]
+                    )
+                ).strip(),
+                "numero_dimensione": str(
+                    fonts_display.get(
+                        "numero_dimensione", default_display["fonts"]["numero_dimensione"]
+                    )
+                ).strip(),
+            }
             display_audio = display.get("audio", default_display["audio"])
             if not isinstance(display_audio, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
@@ -1037,6 +1071,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         "contenuti": display_contenuti,
                         "finestre": finestre_pulite,
                         "dimensioni": display_dimensioni,
+                        "fonts": display_fonts,
                         "audio": {
                             "abilita": audio_abilita,
                             "url": audio_url,

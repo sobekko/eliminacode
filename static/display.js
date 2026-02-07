@@ -95,8 +95,8 @@ function buildChiamataKey(item) {
   }
   const prefisso = item.prefisso ? `${item.prefisso}` : "";
   const numero = item.numero ? `${item.numero}` : "";
-  const operatore = item.operatore ? `${item.operatore}` : "";
-  return `${prefisso}${numero}-${operatore}`;
+  const servizio = item.servizio ? `${item.servizio}` : "";
+  return `${prefisso}${numero}-${servizio}`;
 }
 
 function mostraPopup(item) {

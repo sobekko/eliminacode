@@ -370,6 +370,16 @@ button.ghost {
   gap: 8px;
 }
 
+.lista-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lista-inline li {
+  flex: 0 1 auto;
+}
+
 .lista li {
   background: #f9fafb;
   border-radius: 10px;

@@ -10,7 +10,7 @@
     <main class="container">
       <header>
         <h1>Display chiamata</h1>
-        <p>Personalizza il layout e i contenuti mostrati sul display pubblico.</p>
+        <p>Configura le quattro finestre del display e i contenuti principali.</p>
         <div class="admin-nav">
           <a class="admin-link" href="/admin">Torna all'admin</a>
           <a class="admin-link" href="/admin_kiosk">Vai al kiosk</a>
@@ -20,78 +20,18 @@
       <section class="card">
         <h2>Configurazione display</h2>
         <form id="form-display">
-          <label for="display-title">Titolo display</label>
-          <input id="display-title" type="text" placeholder="Es. Chiamata in corso" />
-          <label for="display-subtitle">Sottotitolo display</label>
-          <input id="display-subtitle" type="text" placeholder="Es. Benvenuti" />
-          <label for="display-card-title">Titolo riquadro principale</label>
-          <input id="display-card-title" type="text" placeholder="Es. Numero chiamato" />
-          <label class="inline">
-            <input type="checkbox" id="display-show-servizio" />
-            Mostra testo servizio
-          </label>
-          <label class="inline">
-            <input type="checkbox" id="display-show-operatore" />
-            Mostra testo operatore
-          </label>
-          <label class="inline">
-            <input type="checkbox" id="display-show-card" />
-            Mostra riquadro principale
-          </label>
-          <label for="display-number-position">Posizione numero chiamato</label>
-          <select id="display-number-position">
-            <option value="card">Riquadro principale</option>
-            <option value="slot-1">Finestra 1</option>
-            <option value="slot-2">Finestra 2</option>
-            <option value="slot-3">Finestra 3</option>
-            <option value="slot-4">Finestra 4</option>
-          </select>
-
-          <label class="inline">
-            <input type="checkbox" id="display-ultimi" />
-            Mostra ultimi numeri chiamati
-          </label>
-          <label for="display-numero-ultimi">Numero ultimi</label>
+          <label for="display-numero-ultimi">Numero ultimi (max 10)</label>
           <input id="display-numero-ultimi" type="number" min="1" max="10" value="5" />
-          <label for="display-layout">Layout display</label>
-          <select id="display-layout">
-            <option value="split">Affiancato</option>
-            <option value="stacked">Impilato</option>
-          </select>
-          <label for="display-extra-columns">Colonne area extra</label>
-          <select id="display-extra-columns">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
-          <label for="display-panels-count">Numero finestre extra</label>
-          <select id="display-panels-count">
-            <option value="0">0</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-          </select>
-          <div id="display-panels" class="display-config"></div>
-          <label for="display-numero-size">Dimensione numero chiamata</label>
-          <input id="display-numero-size" type="text" placeholder="es. 5rem" />
-          <label for="display-card-size">Larghezza card principale</label>
-          <input id="display-card-size" type="text" placeholder="es. 1fr o 420px" />
-          <label for="display-extra-size">Larghezza area extra</label>
-          <input id="display-extra-size" type="text" placeholder="es. 1fr o 300px" />
+
           <label for="display-sfondo">Colore sfondo</label>
           <input id="display-sfondo" type="color" value="#0f172a" />
           <label for="display-testo">Colore testo</label>
           <input id="display-testo" type="color" value="#f8fafc" />
-          <label for="display-card">Colore riquadri</label>
-          <input id="display-card" type="color" value="#1e293b" />
-          <label for="display-logo">Logo (URL)</label>
-          <input id="display-logo" type="text" placeholder="https://..." />
-          <input id="display-logo-file" type="file" accept="image/*" />
           <label for="display-sfondo-img">Sfondo display (URL)</label>
           <input id="display-sfondo-img" type="text" placeholder="https://..." />
           <input id="display-sfondo-file" type="file" accept="image/*" />
-          <label for="display-immagini">Immagini (URL separati da virgola)</label>
+
+          <label for="display-immagini">Immagini per il carousel (URL separati da virgola)</label>
           <textarea id="display-immagini" rows="3" placeholder="https://..., https://..."></textarea>
           <input id="display-immagini-file" type="file" accept="image/*" multiple />
           <label for="display-image-upload">Carica immagini (server)</label>
@@ -101,31 +41,14 @@
             <select id="display-image-library"></select>
             <button type="button" id="display-image-add" class="ghost">Aggiungi a lista</button>
           </div>
-          <label for="display-logo-library">Logo da archivio</label>
-          <div class="row">
-            <select id="display-logo-library"></select>
-            <button type="button" id="display-logo-apply" class="ghost">Usa come logo</button>
-          </div>
           <label for="display-bg-library">Sfondo da archivio</label>
           <div class="row">
             <select id="display-bg-library"></select>
             <button type="button" id="display-bg-apply" class="ghost">Usa come sfondo</button>
           </div>
-          <label class="inline">
-            <input type="checkbox" id="display-audio-enabled" />
-            Abilita avviso audio
-          </label>
-          <label for="display-audio-url">Audio chiamata (URL)</label>
-          <input id="display-audio-url" type="text" placeholder="https://..." />
-          <label for="display-audio-upload">Carica audio (server)</label>
-          <input id="display-audio-upload" type="file" accept="audio/*" />
-          <label for="display-audio-library">Audio caricati</label>
-          <div class="row">
-            <select id="display-audio-library"></select>
-            <button type="button" id="display-audio-apply" class="ghost">Usa audio</button>
-          </div>
-          <label for="display-audio-volume">Volume audio (0-1)</label>
-          <input id="display-audio-volume" type="number" step="0.1" min="0" max="1" value="1" />
+
+          <h3>Finestre</h3>
+          <div id="display-windows" class="display-config"></div>
 
           <button type="submit">Salva configurazione display</button>
         </form>

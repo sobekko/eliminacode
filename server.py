@@ -804,43 +804,70 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             if not isinstance(display, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
-            mostra_ultimi = bool(display.get("mostra_ultimi", True))
-            numero_ultimi = int(display.get("numero_ultimi", 5))
+            default_display = _default_config()["display"]
+            mostra_ultimi = bool(display.get("mostra_ultimi", default_display["mostra_ultimi"]))
+            numero_ultimi = int(display.get("numero_ultimi", default_display["numero_ultimi"]))
             if numero_ultimi < 1 or numero_ultimi > 10:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
-            logo = str(display.get("logo", "")).strip()
-            immagini = display.get("immagini", [])
+            logo = str(display.get("logo", default_display["logo"])).strip()
+            immagini = display.get("immagini", default_display["immagini"])
             if not isinstance(immagini, list):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
             immagini_pulite = [str(url).strip() for url in immagini if str(url).strip()]
-            layout = str(display.get("layout", "split")).strip()
+            layout = str(display.get("layout", default_display["layout"])).strip()
             if layout not in {"split", "stacked"}:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
             try:
-                colonne_extra = int(display.get("colonne_extra", 2))
+                colonne_extra = int(display.get("colonne_extra", default_display["colonne_extra"]))
             except (TypeError, ValueError):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
             if colonne_extra < 1 or colonne_extra > 3:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
-            contenuti_display = display.get("contenuti", {})
+            contenuti_display = display.get("contenuti", default_display["contenuti"])
             if contenuti_display is None:
                 contenuti_display = {}
             if not isinstance(contenuti_display, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
             display_contenuti = {
-                "titolo": str(contenuti_display.get("titolo", "Chiamata in corso")).strip(),
-                "sottotitolo": str(contenuti_display.get("sottotitolo", "")).strip(),
-                "titolo_card": str(contenuti_display.get("titolo_card", "")).strip(),
-                "mostra_servizio": bool(contenuti_display.get("mostra_servizio", True)),
-                "mostra_operatore": bool(contenuti_display.get("mostra_operatore", True)),
-                "mostra_card": bool(contenuti_display.get("mostra_card", True)),
-                "posizione_numero": str(contenuti_display.get("posizione_numero", "card")).strip(),
+                "titolo": str(
+                    contenuti_display.get("titolo", default_display["contenuti"]["titolo"])
+                ).strip(),
+                "sottotitolo": str(
+                    contenuti_display.get(
+                        "sottotitolo", default_display["contenuti"]["sottotitolo"]
+                    )
+                ).strip(),
+                "titolo_card": str(
+                    contenuti_display.get(
+                        "titolo_card", default_display["contenuti"]["titolo_card"]
+                    )
+                ).strip(),
+                "mostra_servizio": bool(
+                    contenuti_display.get(
+                        "mostra_servizio", default_display["contenuti"]["mostra_servizio"]
+                    )
+                ),
+                "mostra_operatore": bool(
+                    contenuti_display.get(
+                        "mostra_operatore", default_display["contenuti"]["mostra_operatore"]
+                    )
+                ),
+                "mostra_card": bool(
+                    contenuti_display.get(
+                        "mostra_card", default_display["contenuti"]["mostra_card"]
+                    )
+                ),
+                "posizione_numero": str(
+                    contenuti_display.get(
+                        "posizione_numero", default_display["contenuti"]["posizione_numero"]
+                    )
+                ).strip(),
             }
             if display_contenuti["posizione_numero"] not in {
                 "card",
@@ -851,7 +878,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             }:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
-            finestre = display.get("finestre", [])
+            finestre = display.get("finestre", default_display["finestre"])
             if not isinstance(finestre, list):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
@@ -875,38 +902,48 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 finestre_pulite.append(item)
                 if len(finestre_pulite) >= 4:
                     break
-            dimensioni_display = display.get("dimensioni", {})
+            dimensioni_display = display.get("dimensioni", default_display["dimensioni"])
             if not isinstance(dimensioni_display, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
             display_dimensioni = {
-                "numero": str(dimensioni_display.get("numero", "5rem")).strip(),
-                "card": str(dimensioni_display.get("card", "1fr")).strip(),
-                "extra": str(dimensioni_display.get("extra", "1fr")).strip(),
+                "numero": str(
+                    dimensioni_display.get("numero", default_display["dimensioni"]["numero"])
+                ).strip(),
+                "card": str(
+                    dimensioni_display.get("card", default_display["dimensioni"]["card"])
+                ).strip(),
+                "extra": str(
+                    dimensioni_display.get("extra", default_display["dimensioni"]["extra"])
+                ).strip(),
             }
-            display_audio = display.get("audio", {})
+            display_audio = display.get("audio", default_display["audio"])
             if not isinstance(display_audio, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
-            audio_abilita = bool(display_audio.get("abilita", False))
-            audio_url = str(display_audio.get("url", "")).strip()
+            audio_abilita = bool(display_audio.get("abilita", default_display["audio"]["abilita"]))
+            audio_url = str(display_audio.get("url", default_display["audio"]["url"])).strip()
             try:
-                audio_volume = float(display_audio.get("volume", 1.0))
+                audio_volume = float(display_audio.get("volume", default_display["audio"]["volume"]))
             except (TypeError, ValueError):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
             if audio_volume < 0 or audio_volume > 1:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
-            tema_display = display.get("tema", {})
+            tema_display = display.get("tema", default_display["tema"])
             if not isinstance(tema_display, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
             display_tema = {
-                "sfondo": str(tema_display.get("sfondo", "#0f172a")).strip(),
-                "testo": str(tema_display.get("testo", "#f8fafc")).strip(),
-                "card": str(tema_display.get("card", "#1e293b")).strip(),
-                "immagine_sfondo": str(tema_display.get("immagine_sfondo", "")).strip(),
+                "sfondo": str(tema_display.get("sfondo", default_display["tema"]["sfondo"])).strip(),
+                "testo": str(tema_display.get("testo", default_display["tema"]["testo"])).strip(),
+                "card": str(tema_display.get("card", default_display["tema"]["card"])).strip(),
+                "immagine_sfondo": str(
+                    tema_display.get(
+                        "immagine_sfondo", default_display["tema"]["immagine_sfondo"]
+                    )
+                ).strip(),
             }
             if not isinstance(kiosk, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")

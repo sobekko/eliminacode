@@ -235,8 +235,8 @@ form.addEventListener("submit", async (event) => {
   descrizioniContainer.querySelectorAll("input").forEach((input) => {
     descrizioni[input.dataset.servizio] = input.value.trim();
   });
-  const display = ensureDisplayDefaults(configData?.display || {});
-  const kiosk = ensureKioskDefaults(configData?.kiosk || {});
+  const display = configData?.display || {};
+  const kiosk = configData?.kiosk || {};
   const operatori = Array.from(operatoriContainer.querySelectorAll("input")).map((input) => ({
     nome: input.value.trim(),
   }));

@@ -144,11 +144,6 @@
         "numero_famiglia": "inherit",
         "numero_dimensione": "4rem"
       },
-      "audio": {
-        "abilita": true,
-        "url": "/upload/audio/new-notification-022-370046.mp3",
-        "volume": 1.0
-      },
       "tema": {
         "sfondo": "#dcb345",
         "testo": "#f8fafc",

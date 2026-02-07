@@ -56,8 +56,12 @@ function renderCurrent(container, corrente) {
   label.textContent = "Ultimo numero";
   const number = document.createElement("div");
   number.textContent = formatNumero(corrente);
+  const operator = document.createElement("div");
+  operator.className = "display-current-operator";
+  operator.textContent = corrente?.operatore ? `Operatore: ${corrente.operatore}` : "Operatore: —";
   wrapper.appendChild(label);
   wrapper.appendChild(number);
+  wrapper.appendChild(operator);
   container.appendChild(wrapper);
 }
 
@@ -78,7 +82,8 @@ function renderHistory(container, storico, numeroUltimi) {
   } else {
     ultimi.forEach((item) => {
       const li = document.createElement("li");
-      li.textContent = formatNumero(item);
+      const operatore = item?.operatore ? ` - ${item.operatore}` : "";
+      li.textContent = `${formatNumero(item)}${operatore}`;
       list.appendChild(li);
     });
   }

@@ -21,6 +21,8 @@ let lastAudioKey = "";
 let popupTimer = null;
 let audioConfig = { abilita: false, url: "", volume: 1 };
 let audioPlayer = null;
+let hasLoadedOnce = false;
+let lastAudioPlayedAt = 0;
 
 function applyDisplayTheme(display) {
   const tema = display.tema || {};
@@ -74,7 +76,12 @@ function mostraPopup(item) {
     if (audioKey && audioKey === lastAudioKey) {
       return;
     }
+    const now = Date.now();
+    if (now - lastAudioPlayedAt < 1500) {
+      return;
+    }
     lastAudioKey = audioKey;
+    lastAudioPlayedAt = now;
     if (!audioPlayer) {
       audioPlayer = new Audio();
     }
@@ -270,7 +277,11 @@ async function refreshDisplay() {
   const lastItem = storico.length ? storico[storico.length - 1] : null;
   const current = lastItem || data.corrente;
   const chiamataKey = buildChiamataKey(current);
-  if (chiamataKey && chiamataKey !== lastChiamataKey) {
+  if (!hasLoadedOnce) {
+    lastChiamataKey = chiamataKey;
+    lastAudioKey = chiamataKey;
+    hasLoadedOnce = true;
+  } else if (chiamataKey && chiamataKey !== lastChiamataKey) {
     lastChiamataKey = chiamataKey;
     mostraPopup(current);
   }

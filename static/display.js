@@ -27,6 +27,7 @@ let audioConfig = { abilita: false, url: "", volume: 1 };
 let audioPlayer = null;
 let hasLoadedOnce = false;
 let lastAudioPlayedAt = 0;
+let refreshInFlight = false;
 
 function loadStoredAudioState() {
   if (!window.sessionStorage) {
@@ -296,55 +297,63 @@ function scheduleCarousel(intervalMs) {
 }
 
 async function refreshDisplay() {
-  const response = await fetch("/api/display");
-  if (!response.ok) {
+  if (refreshInFlight) {
     return;
   }
-  const data = await response.json();
-  const display = data.display || {};
-  applyDisplayTheme(display);
-  const newAudio = display.audio || {};
-  audioConfig = {
-    abilita: Boolean(newAudio.abilita),
-    url: newAudio.url || "",
-    volume: typeof newAudio.volume === "number" ? newAudio.volume : 1,
-  };
-  renderWindows(display, data.corrente, data.storico || []);
-  const storico = data.storico || [];
-  const lastItem = storico.length ? storico[storico.length - 1] : null;
-  const current = lastItem || data.corrente;
-  const chiamataKey = buildChiamataKey(current);
-  if (!hasLoadedOnce) {
-    if (!lastChiamataKey) {
+  refreshInFlight = true;
+  const response = await fetch("/api/display");
+  try {
+    if (!response.ok) {
+      return;
+    }
+    const data = await response.json();
+    const display = data.display || {};
+    applyDisplayTheme(display);
+    const newAudio = display.audio || {};
+    audioConfig = {
+      abilita: Boolean(newAudio.abilita),
+      url: newAudio.url || "",
+      volume: typeof newAudio.volume === "number" ? newAudio.volume : 1,
+    };
+    renderWindows(display, data.corrente, data.storico || []);
+    const storico = data.storico || [];
+    const lastItem = storico.length ? storico[storico.length - 1] : null;
+    const current = lastItem || data.corrente;
+    const chiamataKey = buildChiamataKey(current);
+    if (!hasLoadedOnce) {
+      if (!lastChiamataKey) {
+        lastChiamataKey = chiamataKey;
+      }
+      if (!lastAudioKey) {
+        lastAudioKey = chiamataKey;
+      }
+      saveStoredAudioState();
+      hasLoadedOnce = true;
+    } else if (chiamataKey && chiamataKey !== lastChiamataKey) {
       lastChiamataKey = chiamataKey;
+      saveStoredAudioState();
+      mostraPopup(current);
     }
-    if (!lastAudioKey) {
-      lastAudioKey = chiamataKey;
+    const immagini = display.immagini || [];
+    const carouselConfig = display.carousel || {};
+    const intervalMs = Math.max(Number(carouselConfig.intervallo_ms || 6000), 1000);
+    if (intervalMs !== lastCarouselInterval) {
+      lastCarouselInterval = intervalMs;
+      scheduleCarousel(intervalMs);
     }
-    saveStoredAudioState();
-    hasLoadedOnce = true;
-  } else if (chiamataKey && chiamataKey !== lastChiamataKey) {
-    lastChiamataKey = chiamataKey;
-    saveStoredAudioState();
-    mostraPopup(current);
+    const sameImages =
+      immagini.length === lastImages.length &&
+      immagini.every((img, index) => img === lastImages[index]);
+    if (!sameImages) {
+      lastImages = immagini.slice();
+      carouselIndex = 0;
+      carouselPosition = 0;
+      carouselOrder = [];
+    }
+    ensureCarouselOrder(immagini, carouselConfig);
+  } finally {
+    refreshInFlight = false;
   }
-  const immagini = display.immagini || [];
-  const carouselConfig = display.carousel || {};
-  const intervalMs = Math.max(Number(carouselConfig.intervallo_ms || 6000), 1000);
-  if (intervalMs !== lastCarouselInterval) {
-    lastCarouselInterval = intervalMs;
-    scheduleCarousel(intervalMs);
-  }
-  const sameImages =
-    immagini.length === lastImages.length &&
-    immagini.every((img, index) => img === lastImages[index]);
-  if (!sameImages) {
-    lastImages = immagini.slice();
-    carouselIndex = 0;
-    carouselPosition = 0;
-    carouselOrder = [];
-  }
-  ensureCarouselOrder(immagini, carouselConfig);
 }
 
 function rotateCarousel() {

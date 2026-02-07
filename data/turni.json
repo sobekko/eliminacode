@@ -1,34 +1,98 @@
 {
-  "turni": [],
+  "turni": [
+    {
+      "numero": 16,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:01:32.456315+00:00"
+    },
+    {
+      "numero": 17,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:01:37.526207+00:00"
+    },
+    {
+      "numero": 18,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:01:46.484455+00:00"
+    },
+    {
+      "numero": 19,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:01:59.469091+00:00"
+    },
+    {
+      "numero": 20,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:02:03.783902+00:00"
+    },
+    {
+      "numero": 21,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:02:08.828661+00:00"
+    },
+    {
+      "numero": 22,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:02:15.645355+00:00"
+    },
+    {
+      "numero": 23,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:02:22.785506+00:00"
+    },
+    {
+      "numero": 24,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:04:19.289089+00:00"
+    },
+    {
+      "numero": 25,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:47:37.055762+00:00"
+    },
+    {
+      "numero": 26,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T19:47:42.195185+00:00"
+    }
+  ],
   "corrente": {
-    "numero": 2,
-    "servizio": "ritiro",
+    "numero": 15,
+    "servizio": "vendite",
     "priorita": 2,
-    "prefisso": "R",
-    "creato_il": "2026-02-07T18:06:04.045673+00:00",
-    "operatore": "Marika"
+    "prefisso": "V",
+    "creato_il": "2026-02-07T19:00:38.219424+00:00",
+    "operatore": "Erika"
   },
   "ultimo": 0,
   "contatori": {
-    "vendite": 13,
+    "vendite": 26,
     "ritiro": 2,
-    "prioritario": 2
+    "prioritario": 3
   },
   "storico": [
-    {
-      "numero": 1,
-      "servizio": "vendite",
-      "prefisso": "V",
-      "operatore": "Operatore 1",
-      "chiamato_il": "2026-02-07T17:03:50.393084+00:00"
-    },
-    {
-      "numero": 2,
-      "servizio": "vendite",
-      "prefisso": "V",
-      "operatore": "Operatore 1",
-      "chiamato_il": "2026-02-07T17:04:02.456972+00:00"
-    },
     {
       "numero": 3,
       "servizio": "vendite",
@@ -147,6 +211,27 @@
       "prefisso": "R",
       "operatore": "Marika",
       "chiamato_il": "2026-02-07T18:11:59.008512+00:00"
+    },
+    {
+      "numero": 14,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T19:00:40.294038+00:00"
+    },
+    {
+      "numero": 3,
+      "servizio": "prioritario",
+      "prefisso": "P",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T19:02:26.692120+00:00"
+    },
+    {
+      "numero": 15,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Erika",
+      "chiamato_il": "2026-02-07T19:44:25.943285+00:00"
     }
   ],
   "config": {
@@ -169,7 +254,7 @@
     "descrizioni": {
       "vendite": "",
       "ritiro": "",
-      "prioritario": ""
+      "prioritario": "sss"
     },
     "display": {
       "mostra_ultimi": true,
@@ -255,6 +340,13 @@
         "footer": "",
         "mostra_data_ora": true,
         "taglio": true
+      }
+    },
+    "operatore": {
+      "audio": {
+        "abilita": true,
+        "url": "/upload/audio/floraphonic-servant-bell-ring-2-211683.mp3",
+        "volume": 1.0
       }
     },
     "operatori": [

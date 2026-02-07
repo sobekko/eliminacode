@@ -120,7 +120,6 @@ function renderCurrent(container, corrente) {
   wrapper.className = "display-current";
   const label = document.createElement("div");
   label.className = "display-current-label";
-  label.textContent = "Ultimo numero";
   const number = document.createElement("div");
   number.textContent = formatNumero(corrente);
   const operator = document.createElement("div");
@@ -137,7 +136,6 @@ function renderHistory(container, storico, numeroUltimi) {
   const wrapper = document.createElement("div");
   wrapper.className = "display-history";
   const title = document.createElement("h2");
-  title.textContent = "Ultimi numeri";
   wrapper.appendChild(title);
   const list = document.createElement("ul");
   list.className = "display-history-list";

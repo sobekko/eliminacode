@@ -1,9 +1,83 @@
 {
-  "turni": [],
-  "corrente": null,
+  "turni": [
+    {
+      "numero": 6,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T17:07:30.081029+00:00"
+    },
+    {
+      "numero": 7,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T17:07:30.281488+00:00"
+    },
+    {
+      "numero": 8,
+      "servizio": "vendite",
+      "priorita": 2,
+      "prefisso": "V",
+      "creato_il": "2026-02-07T17:07:30.467464+00:00"
+    }
+  ],
+  "corrente": {
+    "numero": 5,
+    "servizio": "vendite",
+    "priorita": 2,
+    "prefisso": "V",
+    "creato_il": "2026-02-07T17:07:29.860011+00:00",
+    "operatore": "Operatore 1"
+  },
   "ultimo": 0,
-  "contatori": {},
-  "storico": [],
+  "contatori": {
+    "vendite": 8
+  },
+  "storico": [
+    {
+      "numero": 1,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T17:03:50.393084+00:00"
+    },
+    {
+      "numero": 2,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T17:04:02.456972+00:00"
+    },
+    {
+      "numero": 3,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T17:04:10.436541+00:00"
+    },
+    {
+      "numero": 3,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T17:04:17.628782+00:00"
+    },
+    {
+      "numero": 4,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T17:07:31.999256+00:00"
+    },
+    {
+      "numero": 5,
+      "servizio": "vendite",
+      "prefisso": "V",
+      "operatore": "Operatore 1",
+      "chiamato_il": "2026-02-07T17:07:38.591776+00:00"
+    }
+  ],
   "config": {
     "servizio": "vendite",
     "servizi": [
@@ -28,35 +102,34 @@
     },
     "display": {
       "mostra_ultimi": true,
-      "numero_ultimi": 5,
+      "numero_ultimi": 8,
       "logo": "",
-      "immagini": [],
+      "immagini": [
+        "/upload/image/Erika.jpg"
+      ],
       "layout": "split",
       "colonne_extra": 2,
       "contenuti": {
-        "titolo": "c",
+        "titolo": "Chiamata in corso",
         "sottotitolo": "",
         "titolo_card": "",
         "mostra_servizio": true,
         "mostra_operatore": true,
         "mostra_card": true,
-        "posizione_numero": "slot-2"
+        "posizione_numero": "card"
       },
       "finestre": [
         {
-          "tipo": "carousel",
-          "titolo": "Ultimi chiamati"
+          "tipo": "carousel"
         },
         {
           "tipo": "corrente"
         },
         {
-          "tipo": "storico",
-          "titolo": "Info"
+          "tipo": "storico"
         },
         {
-          "tipo": "testo",
-          "titolo": "Messaggi",
+          "tipo": "ticker",
           "testo": ""
         }
       ],
@@ -65,13 +138,19 @@
         "card": "1fr",
         "extra": "1fr"
       },
+      "fonts": {
+        "testo_famiglia": "inherit",
+        "testo_dimensione": "1.2rem",
+        "numero_famiglia": "inherit",
+        "numero_dimensione": "4rem"
+      },
       "audio": {
-        "abilita": false,
-        "url": "",
+        "abilita": true,
+        "url": "/upload/audio/new-notification-022-370046.mp3",
         "volume": 1.0
       },
       "tema": {
-        "sfondo": "#0f172a",
+        "sfondo": "#dcb345",
         "testo": "#f8fafc",
         "card": "#1e293b",
         "immagine_sfondo": ""
@@ -94,6 +173,17 @@
       "dimensioni": {
         "bottone": "1rem",
         "bottone_padding": "8px 14px"
+      },
+      "stampa": {
+        "abilita": false,
+        "host": "",
+        "port": 9100,
+        "nome": "",
+        "logo": "",
+        "messaggio": "Ticket eliminacode",
+        "footer": "",
+        "mostra_data_ora": true,
+        "taglio": true
       }
     },
     "operatori": [

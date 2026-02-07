@@ -51,6 +51,16 @@
 
           <div id="operatori-container" class="operatori"></div>
 
+          <label>Audio scheda operatore</label>
+          <label class="inline" for="operatore-audio-enabled">
+            <input type="checkbox" id="operatore-audio-enabled" />
+            Abilita audio su nuovo ticket
+          </label>
+          <label for="operatore-audio-url">Audio (URL)</label>
+          <input id="operatore-audio-url" name="operatore-audio-url" type="text" placeholder="https://..." />
+          <label for="operatore-audio-volume">Volume audio (0-1)</label>
+          <input id="operatore-audio-volume" name="operatore-audio-volume" type="number" min="0" max="1" step="0.1" value="1" />
+
           <button type="submit">Salva configurazione</button>
         </form>
         <div id="esito-admin" class="esito" role="status"></div>

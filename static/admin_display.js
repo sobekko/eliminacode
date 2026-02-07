@@ -335,8 +335,10 @@ form.addEventListener("submit", async (event) => {
       servizi: configData.servizi,
       priorita: configData.priorita || {},
       prefissi: configData.prefissi || {},
+      descrizioni: configData.descrizioni || {},
       display,
       kiosk: configData.kiosk || {},
+      operatore: configData.operatore || {},
       operatori: configData.operatori || [],
     }),
   });

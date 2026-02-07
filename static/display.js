@@ -21,6 +21,8 @@ let lastTickerTexts = [];
 let popupTimer = null;
 let hasLoadedOnce = false;
 let refreshInFlight = false;
+let audioConfig = { abilita: false, url: "", volume: 1 };
+let audioPlayer = null;
 
 function loadStoredAudioState() {
   if (!window.sessionStorage) {
@@ -87,6 +89,17 @@ function mostraPopup(item) {
   popupEl.classList.add("is-visible");
   if (popupTimer) {
     clearTimeout(popupTimer);
+  }
+  if (audioConfig.abilita && audioConfig.url) {
+    if (!audioPlayer) {
+      audioPlayer = new Audio();
+    }
+    if (audioPlayer.src !== audioConfig.url) {
+      audioPlayer.src = audioConfig.url;
+    }
+    audioPlayer.volume = audioConfig.volume;
+    audioPlayer.currentTime = 0;
+    audioPlayer.play().catch(() => {});
   }
   popupTimer = setTimeout(() => {
     popupEl.classList.remove("is-visible");
@@ -267,6 +280,12 @@ async function refreshDisplay() {
     const data = await response.json();
     const display = data.display || {};
     applyDisplayTheme(display);
+    const newAudio = display.audio || {};
+    audioConfig = {
+      abilita: Boolean(newAudio.abilita),
+      url: newAudio.url || "",
+      volume: typeof newAudio.volume === "number" ? newAudio.volume : 1,
+    };
     renderWindows(display, data.corrente, data.storico || []);
     const storico = data.storico || [];
     const lastItem = storico.length ? storico[storico.length - 1] : null;

@@ -17,6 +17,12 @@ const displayImageLibrary = document.getElementById("display-image-library");
 const displayImageAdd = document.getElementById("display-image-add");
 const displayBgLibrary = document.getElementById("display-bg-library");
 const displayBgApply = document.getElementById("display-bg-apply");
+const displayAudioEnabled = document.getElementById("display-audio-enabled");
+const displayAudioUrl = document.getElementById("display-audio-url");
+const displayAudioUpload = document.getElementById("display-audio-upload");
+const displayAudioLibrary = document.getElementById("display-audio-library");
+const displayAudioApply = document.getElementById("display-audio-apply");
+const displayAudioVolume = document.getElementById("display-audio-volume");
 const displayWindowsContainer = document.getElementById("display-windows");
 const esitoDisplay = document.getElementById("esito-display");
 let configData = null;
@@ -89,6 +95,11 @@ function ensureDisplayDefaults(display = {}) {
       sfondo: display.tema?.sfondo || "#0f172a",
       testo: display.tema?.testo || "#f8fafc",
       immagine_sfondo: display.tema?.immagine_sfondo || "",
+    },
+    audio: {
+      abilita: display.audio?.abilita ?? false,
+      url: display.audio?.url || "",
+      volume: display.audio?.volume ?? 1,
     },
   };
 }
@@ -184,12 +195,17 @@ async function caricaConfig() {
   displayImmagini.value = (display.immagini || []).join(", ");
   displayCarouselInterval.value = String(Math.round((display.carousel?.intervallo_ms ?? 6000) / 1000));
   displayCarouselRandom.checked = Boolean(display.carousel?.casuale);
+  displayAudioEnabled.checked = Boolean(display.audio.abilita);
+  displayAudioUrl.value = display.audio.url || "";
+  displayAudioVolume.value = String(display.audio.volume ?? 1);
 }
 
 async function aggiornaLibrerie() {
   const immagini = await caricaUpload("image");
   fillSelect(displayImageLibrary, immagini);
   fillSelect(displayBgLibrary, immagini);
+  const audio = await caricaUpload("audio");
+  fillSelect(displayAudioLibrary, audio);
 }
 
 displaySfondoFile.addEventListener("change", (event) => {
@@ -255,6 +271,27 @@ displayBgApply.addEventListener("click", () => {
   displaySfondoImg.value = displayBgLibrary.value;
 });
 
+displayAudioUpload.addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    return;
+  }
+  try {
+    await uploadFile(file, "audio");
+  } catch (error) {
+    setEsito("Errore upload audio.", "error");
+    return;
+  }
+  await aggiornaLibrerie();
+});
+
+displayAudioApply.addEventListener("click", () => {
+  if (!displayAudioLibrary.value) {
+    return;
+  }
+  displayAudioUrl.value = displayAudioLibrary.value;
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!configData?.servizio || !configData?.servizi?.length || !configData?.operatori?.length) {
@@ -282,6 +319,11 @@ form.addEventListener("submit", async (event) => {
       sfondo: displaySfondo.value,
       testo: displayTesto.value,
       immagine_sfondo: displaySfondoImg.value.trim(),
+    },
+    audio: {
+      abilita: displayAudioEnabled.checked,
+      url: displayAudioUrl.value.trim(),
+      volume: Number(displayAudioVolume.value || 1),
     },
   };
 

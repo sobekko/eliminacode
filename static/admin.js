@@ -130,6 +130,11 @@ function ensureDisplayDefaults(display = {}) {
       card: display.dimensioni?.card || "1fr",
       extra: display.dimensioni?.extra || "1fr",
     },
+    audio: {
+      abilita: display.audio?.abilita ?? false,
+      url: display.audio?.url || "",
+      volume: display.audio?.volume ?? 1,
+    },
     tema: {
       sfondo: display.tema?.sfondo || "#0f172a",
       testo: display.tema?.testo || "#f8fafc",

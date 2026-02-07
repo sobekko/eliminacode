@@ -16,6 +16,7 @@ DATA_FILE = os.path.join(DATA_DIR, "turni.json")
 DB_FILE = os.path.join(DATA_DIR, "eliminacode.db")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 UPLOAD_DIR = os.path.join(BASE_DIR, "upload")
+AUDIO_DIR = os.path.join(UPLOAD_DIR, "audio")
 IMAGE_DIR = os.path.join(UPLOAD_DIR, "image")
 
 DATA_LOCK = Lock()
@@ -60,6 +61,11 @@ def _default_config():
                 "testo_dimensione": "1.2rem",
                 "numero_famiglia": "inherit",
                 "numero_dimensione": "4rem",
+            },
+            "audio": {
+                "abilita": False,
+                "url": "",
+                "volume": 1.0,
             },
             "tema": {
                 "sfondo": "#0f172a",
@@ -120,6 +126,7 @@ def _ensure_data_file():
 
 
 def _ensure_upload_dirs():
+    os.makedirs(AUDIO_DIR, exist_ok=True)
     os.makedirs(IMAGE_DIR, exist_ok=True)
 
 
@@ -191,6 +198,8 @@ def _read_state():
         state["config"]["display"]["finestre"] = _default_config()["display"]["finestre"]
     if "colonne_extra" not in state["config"]["display"]:
         state["config"]["display"]["colonne_extra"] = _default_config()["display"]["colonne_extra"]
+    if "audio" not in state["config"]["display"]:
+        state["config"]["display"]["audio"] = _default_config()["display"]["audio"]
     if "kiosk" not in state["config"]:
         state["config"]["kiosk"] = _default_config()["kiosk"]
     else:
@@ -399,7 +408,10 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             if parsed.path == "/api/uploads":
                 query = parse_qs(parsed.query)
                 tipo = (query.get("type") or [""])[0]
-                if tipo == "image":
+                if tipo == "audio":
+                    base_dir = AUDIO_DIR
+                    base_url = "/upload/audio"
+                elif tipo == "image":
                     base_dir = IMAGE_DIR
                     base_url = "/upload/image"
                 else:
@@ -719,7 +731,10 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
         if parsed.path == "/api/upload":
             query = parse_qs(parsed.query)
             tipo = (query.get("type") or [""])[0]
-            if tipo == "image":
+            if tipo == "audio":
+                base_dir = AUDIO_DIR
+                base_url = "/upload/audio"
+            elif tipo == "image":
                 base_dir = IMAGE_DIR
                 base_url = "/upload/image"
             else:
@@ -936,6 +951,20 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     )
                 ).strip(),
             }
+            display_audio = display.get("audio", default_display["audio"])
+            if not isinstance(display_audio, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            audio_abilita = bool(display_audio.get("abilita", default_display["audio"]["abilita"]))
+            audio_url = str(display_audio.get("url", default_display["audio"]["url"])).strip()
+            try:
+                audio_volume = float(display_audio.get("volume", default_display["audio"]["volume"]))
+            except (TypeError, ValueError):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            if audio_volume < 0 or audio_volume > 1:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
             tema_display = display.get("tema", default_display["tema"])
             if not isinstance(tema_display, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
@@ -1043,6 +1072,11 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         "finestre": finestre_pulite,
                         "dimensioni": display_dimensioni,
                         "fonts": display_fonts,
+                        "audio": {
+                            "abilita": audio_abilita,
+                            "url": audio_url,
+                            "volume": audio_volume,
+                        },
                         "tema": display_tema,
                     },
                     "kiosk": {

@@ -318,8 +318,8 @@ async function refreshDisplay() {
     renderWindows(display, data.corrente, data.storico || []);
     const storico = data.storico || [];
     const lastItem = storico.length ? storico[storico.length - 1] : null;
-    const current = lastItem || data.corrente;
-    const chiamataKey = buildChiamataKey(current);
+    const current = data.corrente;
+    const chiamataKey = buildChiamataKey(lastItem);
     if (!hasLoadedOnce) {
       if (!lastChiamataKey) {
         lastChiamataKey = chiamataKey;
@@ -332,7 +332,7 @@ async function refreshDisplay() {
     } else if (chiamataKey && chiamataKey !== lastChiamataKey) {
       lastChiamataKey = chiamataKey;
       saveStoredAudioState();
-      mostraPopup(current);
+      mostraPopup(lastItem);
     }
     const immagini = display.immagini || [];
     const carouselConfig = display.carousel || {};

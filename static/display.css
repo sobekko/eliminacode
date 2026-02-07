@@ -1,4 +1,12 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
 .display {
+  height: 100vh;
   min-height: 100vh;
   background: var(--display-bg, #0f172a);
   color: var(--display-text, #f8fafc);
@@ -25,6 +33,8 @@
   display: grid;
   place-items: center;
   overflow: hidden;
+  box-sizing: border-box;
+  min-height: 0;
 }
 
 .window-1 {

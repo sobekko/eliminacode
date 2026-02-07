@@ -17,6 +17,7 @@ let lastCarouselInterval = 6000;
 let lastCarouselRandom = false;
 let carouselTimer = null;
 let lastTickerTexts = [];
+let lastAudioKey = "";
 let popupTimer = null;
 let audioConfig = { abilita: false, url: "", volume: 1 };
 let audioPlayer = null;
@@ -69,6 +70,11 @@ function mostraPopup(item) {
     clearTimeout(popupTimer);
   }
   if (audioConfig.abilita && audioConfig.url) {
+    const audioKey = buildChiamataKey(item);
+    if (audioKey && audioKey === lastAudioKey) {
+      return;
+    }
+    lastAudioKey = audioKey;
     if (!audioPlayer) {
       audioPlayer = new Audio();
     }
@@ -159,8 +165,7 @@ function renderTicker(container, testo) {
   const text = document.createElement("div");
   text.className = "display-ticker-text";
   const baseText = testo || "Benvenuti.";
-  const repeated = `${baseText} \u2022 ${baseText} \u2022 ${baseText}`;
-  text.textContent = repeated;
+  text.textContent = baseText;
   wrap.appendChild(text);
   container.appendChild(wrap);
 }

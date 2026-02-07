@@ -91,8 +91,10 @@ def _default_config():
                 "host": "",
                 "port": 9100,
                 "nome": "",
+                "logo": "",
                 "messaggio": "Ticket eliminacode",
                 "footer": "",
+                "mostra_data_ora": True,
                 "taglio": True,
             },
         },
@@ -197,6 +199,10 @@ def _read_state():
             state["config"]["kiosk"]["dimensioni"] = _default_config()["kiosk"]["dimensioni"]
         if "stampa" not in state["config"]["kiosk"]:
             state["config"]["kiosk"]["stampa"] = _default_config()["kiosk"]["stampa"]
+        else:
+            stampa_default = _default_config()["kiosk"]["stampa"]
+            for key, value in stampa_default.items():
+                state["config"]["kiosk"]["stampa"].setdefault(key, value)
     if "contenuti" not in state["config"]["kiosk"]:
         state["config"]["kiosk"]["contenuti"] = _default_config()["kiosk"]["contenuti"]
     if "operatori" not in state["config"]:
@@ -282,8 +288,10 @@ def _format_ticket_payload(ticket, stampa_config):
     data_locale = creato_dt.astimezone().strftime("%d/%m/%Y %H:%M")
 
     nome = stampa_config.get("nome", "").strip()
+    logo = stampa_config.get("logo", "").strip()
     messaggio = stampa_config.get("messaggio", "Ticket eliminacode").strip()
     footer = stampa_config.get("footer", "").strip()
+    mostra_data_ora = bool(stampa_config.get("mostra_data_ora", True))
     taglio = bool(stampa_config.get("taglio", True))
 
     payload = bytearray()
@@ -291,6 +299,9 @@ def _format_ticket_payload(ticket, stampa_config):
     payload.extend(b"\x1ba\x01")
     if nome:
         payload.extend(nome.encode("utf-8"))
+        payload.extend(b"\n")
+    if logo:
+        payload.extend(logo.encode("utf-8"))
         payload.extend(b"\n")
     if messaggio:
         payload.extend(messaggio.encode("utf-8"))
@@ -301,7 +312,8 @@ def _format_ticket_payload(ticket, stampa_config):
     payload.extend(b"\x1d!\x00")
     payload.extend(b"\x1ba\x00")
     payload.extend(f"Servizio: {servizio}\n".encode("utf-8"))
-    payload.extend(f"Orario: {data_locale}\n".encode("utf-8"))
+    if mostra_data_ora:
+        payload.extend(f"Orario: {data_locale}\n".encode("utf-8"))
     if footer:
         payload.extend(b"\n")
         payload.extend(footer.encode("utf-8"))
@@ -953,8 +965,10 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "host": str(stampa_kiosk.get("host", "")).strip(),
                 "port": stampa_porta,
                 "nome": str(stampa_kiosk.get("nome", "")).strip(),
+                "logo": str(stampa_kiosk.get("logo", "")).strip(),
                 "messaggio": str(stampa_kiosk.get("messaggio", "Ticket eliminacode")).strip(),
                 "footer": str(stampa_kiosk.get("footer", "")).strip(),
+                "mostra_data_ora": bool(stampa_kiosk.get("mostra_data_ora", True)),
                 "taglio": bool(stampa_kiosk.get("taglio", True)),
             }
             if not isinstance(operatori, list) or not operatori:

@@ -16,8 +16,10 @@ const kioskPrintEnabled = document.getElementById("kiosk-print-enabled");
 const kioskPrintHost = document.getElementById("kiosk-print-host");
 const kioskPrintPort = document.getElementById("kiosk-print-port");
 const kioskPrintName = document.getElementById("kiosk-print-name");
+const kioskPrintLogo = document.getElementById("kiosk-print-logo");
 const kioskPrintMessage = document.getElementById("kiosk-print-message");
 const kioskPrintFooter = document.getElementById("kiosk-print-footer");
+const kioskPrintDatetime = document.getElementById("kiosk-print-datetime");
 const kioskPrintCut = document.getElementById("kiosk-print-cut");
 const esitoKiosk = document.getElementById("esito-kiosk");
 let configData = null;
@@ -53,8 +55,10 @@ function ensureKioskDefaults(kiosk = {}) {
       host: kiosk.stampa?.host || "",
       port: kiosk.stampa?.port ?? 9100,
       nome: kiosk.stampa?.nome || "",
+      logo: kiosk.stampa?.logo || "",
       messaggio: kiosk.stampa?.messaggio || "Ticket eliminacode",
       footer: kiosk.stampa?.footer || "",
+      mostra_data_ora: kiosk.stampa?.mostra_data_ora ?? true,
       taglio: kiosk.stampa?.taglio ?? true,
     },
   };
@@ -88,8 +92,10 @@ async function caricaConfig() {
   kioskPrintHost.value = kiosk.stampa.host || "";
   kioskPrintPort.value = String(kiosk.stampa.port || 9100);
   kioskPrintName.value = kiosk.stampa.nome || "";
+  kioskPrintLogo.value = kiosk.stampa.logo || "";
   kioskPrintMessage.value = kiosk.stampa.messaggio || "Ticket eliminacode";
   kioskPrintFooter.value = kiosk.stampa.footer || "";
+  kioskPrintDatetime.checked = kiosk.stampa.mostra_data_ora ?? true;
   kioskPrintCut.checked = kiosk.stampa.taglio;
 }
 
@@ -142,8 +148,10 @@ form.addEventListener("submit", async (event) => {
       host: kioskPrintHost.value.trim(),
       port: Number(kioskPrintPort.value) || 9100,
       nome: kioskPrintName.value.trim(),
+      logo: kioskPrintLogo.value.trim(),
       messaggio: kioskPrintMessage.value.trim(),
       footer: kioskPrintFooter.value.trim(),
+      mostra_data_ora: kioskPrintDatetime.checked,
       taglio: kioskPrintCut.checked,
     },
   };

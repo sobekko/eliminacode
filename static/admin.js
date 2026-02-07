@@ -169,8 +169,10 @@ function ensureKioskDefaults(kiosk = {}) {
       host: kiosk.stampa?.host || "",
       port: kiosk.stampa?.port ?? 9100,
       nome: kiosk.stampa?.nome || "",
+      logo: kiosk.stampa?.logo || "",
       messaggio: kiosk.stampa?.messaggio || "Ticket eliminacode",
       footer: kiosk.stampa?.footer || "",
+      mostra_data_ora: kiosk.stampa?.mostra_data_ora ?? true,
       taglio: kiosk.stampa?.taglio ?? true,
     },
   };

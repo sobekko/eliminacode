@@ -10,6 +10,7 @@ const popupNumeroEl = document.getElementById("display-popup-numero");
 let carouselIndex = 0;
 let lastImages = [];
 let lastPanels = [];
+const STORAGE_KEY_LAST_CHIAMATA = "display-last-chiamata";
 let lastChiamataKey = "";
 let carouselOrder = [];
 let carouselPosition = 0;
@@ -17,10 +18,30 @@ let lastCarouselInterval = 6000;
 let lastCarouselRandom = false;
 let carouselTimer = null;
 let lastTickerTexts = [];
-let lastAudioKey = "";
 let popupTimer = null;
+let hasLoadedOnce = false;
+let refreshInFlight = false;
 let audioConfig = { abilita: false, url: "", volume: 1 };
 let audioPlayer = null;
+
+function loadStoredAudioState() {
+  if (!window.sessionStorage) {
+    return;
+  }
+  const storedChiamata = window.sessionStorage.getItem(STORAGE_KEY_LAST_CHIAMATA);
+  if (storedChiamata) {
+    lastChiamataKey = storedChiamata;
+  }
+}
+
+function saveStoredAudioState() {
+  if (!window.sessionStorage) {
+    return;
+  }
+  window.sessionStorage.setItem(STORAGE_KEY_LAST_CHIAMATA, lastChiamataKey);
+}
+
+loadStoredAudioState();
 
 function applyDisplayTheme(display) {
   const tema = display.tema || {};
@@ -56,8 +77,8 @@ function buildChiamataKey(item) {
   }
   const prefisso = item.prefisso ? `${item.prefisso}` : "";
   const numero = item.numero ? `${item.numero}` : "";
-  const operatore = item.operatore ? `${item.operatore}` : "";
-  return `${prefisso}${numero}-${operatore}`;
+  const servizio = item.servizio ? `${item.servizio}` : "";
+  return `${prefisso}${numero}-${servizio}`;
 }
 
 function mostraPopup(item) {
@@ -70,11 +91,6 @@ function mostraPopup(item) {
     clearTimeout(popupTimer);
   }
   if (audioConfig.abilita && audioConfig.url) {
-    const audioKey = buildChiamataKey(item);
-    if (audioKey && audioKey === lastAudioKey) {
-      return;
-    }
-    lastAudioKey = audioKey;
     if (!audioPlayer) {
       audioPlayer = new Audio();
     }
@@ -252,45 +268,60 @@ function scheduleCarousel(intervalMs) {
 }
 
 async function refreshDisplay() {
-  const response = await fetch("/api/display");
-  if (!response.ok) {
+  if (refreshInFlight) {
     return;
   }
-  const data = await response.json();
-  const display = data.display || {};
-  applyDisplayTheme(display);
-  const newAudio = display.audio || {};
-  audioConfig = {
-    abilita: Boolean(newAudio.abilita),
-    url: newAudio.url || "",
-    volume: typeof newAudio.volume === "number" ? newAudio.volume : 1,
-  };
-  renderWindows(display, data.corrente, data.storico || []);
-  const storico = data.storico || [];
-  const lastItem = storico.length ? storico[storico.length - 1] : null;
-  const current = lastItem || data.corrente;
-  const chiamataKey = buildChiamataKey(current);
-  if (chiamataKey && chiamataKey !== lastChiamataKey) {
-    lastChiamataKey = chiamataKey;
-    mostraPopup(current);
+  refreshInFlight = true;
+  const response = await fetch("/api/display");
+  try {
+    if (!response.ok) {
+      return;
+    }
+    const data = await response.json();
+    const display = data.display || {};
+    applyDisplayTheme(display);
+    const newAudio = display.audio || {};
+    audioConfig = {
+      abilita: Boolean(newAudio.abilita),
+      url: newAudio.url || "",
+      volume: typeof newAudio.volume === "number" ? newAudio.volume : 1,
+    };
+    renderWindows(display, data.corrente, data.storico || []);
+    const storico = data.storico || [];
+    const lastItem = storico.length ? storico[storico.length - 1] : null;
+    const current = data.corrente;
+    const chiamataKey = buildChiamataKey(lastItem);
+    if (!hasLoadedOnce) {
+      if (!lastChiamataKey) {
+        lastChiamataKey = chiamataKey;
+      }
+      saveStoredAudioState();
+      hasLoadedOnce = true;
+    } else if (chiamataKey && chiamataKey !== lastChiamataKey) {
+      lastChiamataKey = chiamataKey;
+      saveStoredAudioState();
+      mostraPopup(lastItem);
+    }
+    const immagini = display.immagini || [];
+    const carouselConfig = display.carousel || {};
+    const intervalMs = Math.max(Number(carouselConfig.intervallo_ms || 6000), 1000);
+    if (intervalMs !== lastCarouselInterval) {
+      lastCarouselInterval = intervalMs;
+      scheduleCarousel(intervalMs);
+    }
+    const sameImages =
+      immagini.length === lastImages.length &&
+      immagini.every((img, index) => img === lastImages[index]);
+    if (!sameImages) {
+      lastImages = immagini.slice();
+      carouselIndex = 0;
+      carouselPosition = 0;
+      carouselOrder = [];
+    }
+    ensureCarouselOrder(immagini, carouselConfig);
+  } finally {
+    refreshInFlight = false;
   }
-  const immagini = display.immagini || [];
-  const carouselConfig = display.carousel || {};
-  const intervalMs = Math.max(Number(carouselConfig.intervallo_ms || 6000), 1000);
-  if (intervalMs !== lastCarouselInterval) {
-    lastCarouselInterval = intervalMs;
-    scheduleCarousel(intervalMs);
-  }
-  const sameImages =
-    immagini.length === lastImages.length &&
-    immagini.every((img, index) => img === lastImages[index]);
-  if (!sameImages) {
-    lastImages = immagini.slice();
-    carouselIndex = 0;
-    carouselPosition = 0;
-    carouselOrder = [];
-  }
-  ensureCarouselOrder(immagini, carouselConfig);
 }
 
 function rotateCarousel() {

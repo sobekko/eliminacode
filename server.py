@@ -40,7 +40,7 @@ def _default_config():
                 "titolo": "Chiamata in corso",
                 "sottotitolo": "",
                 "titolo_card": "",
-                "mostra_servizio": True,
+                "mostra_servizio": False,
                 "mostra_operatore": True,
                 "mostra_card": True,
                 "posizione_numero": "card",
@@ -99,7 +99,11 @@ def _default_config():
                 "nome": "",
                 "logo": "",
                 "messaggio": "Ticket eliminacode",
+                "font_size": 2,
+                "margine_superiore": 0,
+                "margine_inferiore": 2,
                 "footer": "",
+                "mostra_servizio": False,
                 "mostra_data_ora": True,
                 "taglio": True,
             },
@@ -309,12 +313,30 @@ def _format_ticket_payload(ticket, stampa_config):
     nome = stampa_config.get("nome", "").strip()
     logo = stampa_config.get("logo", "").strip()
     messaggio = stampa_config.get("messaggio", "Ticket eliminacode").strip()
+    try:
+        font_size = int(stampa_config.get("font_size", 2))
+    except (TypeError, ValueError):
+        font_size = 2
+    font_size = max(1, min(font_size, 8))
+    try:
+        margine_superiore = int(stampa_config.get("margine_superiore", 0))
+    except (TypeError, ValueError):
+        margine_superiore = 0
+    margine_superiore = max(0, min(margine_superiore, 20))
+    try:
+        margine_inferiore = int(stampa_config.get("margine_inferiore", 2))
+    except (TypeError, ValueError):
+        margine_inferiore = 2
+    margine_inferiore = max(0, min(margine_inferiore, 20))
     footer = stampa_config.get("footer", "").strip()
+    mostra_servizio = bool(stampa_config.get("mostra_servizio", False))
     mostra_data_ora = bool(stampa_config.get("mostra_data_ora", True))
     taglio = bool(stampa_config.get("taglio", True))
 
     payload = bytearray()
     payload.extend(b"\x1b@")
+    if margine_superiore:
+        payload.extend(b"\n" * margine_superiore)
     payload.extend(b"\x1ba\x01")
     if nome:
         payload.extend(nome.encode("utf-8"))
@@ -325,19 +347,22 @@ def _format_ticket_payload(ticket, stampa_config):
     if messaggio:
         payload.extend(messaggio.encode("utf-8"))
         payload.extend(b"\n")
-    payload.extend(b"\x1d!\x11")
+    size_value = (font_size - 1) << 4 | (font_size - 1)
+    payload.extend(bytes((0x1D, 0x21, size_value)))
     payload.extend(str(numero).encode("utf-8"))
     payload.extend(b"\n")
     payload.extend(b"\x1d!\x00")
-    payload.extend(b"\x1ba\x00")
-    payload.extend(f"Servizio: {servizio}\n".encode("utf-8"))
+    payload.extend(b"\x1ba\x01")
     if mostra_data_ora:
-        payload.extend(f"Orario: {data_locale}\n".encode("utf-8"))
+        payload.extend(f"{data_locale}\n".encode("utf-8"))
+    payload.extend(b"\x1ba\x00")
+    if mostra_servizio:
+        payload.extend(f"Servizio: {servizio}\n".encode("utf-8"))
     if footer:
         payload.extend(b"\n")
         payload.extend(footer.encode("utf-8"))
         payload.extend(b"\n")
-    payload.extend(b"\n\n")
+    payload.extend(b"\n" * (margine_inferiore + 1))
     if taglio:
         payload.extend(b"\x1dV\x00")
     return bytes(payload)
@@ -1046,6 +1071,26 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             if stampa_porta < 1 or stampa_porta > 65535:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
                 return
+            try:
+                stampa_font_size = int(stampa_kiosk.get("font_size", 2))
+            except (TypeError, ValueError):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            if stampa_font_size < 1 or stampa_font_size > 8:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            try:
+                stampa_margine_superiore = int(stampa_kiosk.get("margine_superiore", 0))
+                stampa_margine_inferiore = int(stampa_kiosk.get("margine_inferiore", 2))
+            except (TypeError, ValueError):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            if stampa_margine_superiore < 0 or stampa_margine_superiore > 20:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            if stampa_margine_inferiore < 0 or stampa_margine_inferiore > 20:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
             kiosk_stampa = {
                 "abilita": bool(stampa_kiosk.get("abilita", False)),
                 "host": str(stampa_kiosk.get("host", "")).strip(),
@@ -1053,7 +1098,11 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "nome": str(stampa_kiosk.get("nome", "")).strip(),
                 "logo": str(stampa_kiosk.get("logo", "")).strip(),
                 "messaggio": str(stampa_kiosk.get("messaggio", "Ticket eliminacode")).strip(),
+                "font_size": stampa_font_size,
+                "margine_superiore": stampa_margine_superiore,
+                "margine_inferiore": stampa_margine_inferiore,
                 "footer": str(stampa_kiosk.get("footer", "")).strip(),
+                "mostra_servizio": bool(stampa_kiosk.get("mostra_servizio", False)),
                 "mostra_data_ora": bool(stampa_kiosk.get("mostra_data_ora", True)),
                 "taglio": bool(stampa_kiosk.get("taglio", True)),
             }

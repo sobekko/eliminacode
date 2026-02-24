@@ -4,6 +4,10 @@ import mimetypes
 import os
 import socket
 import sqlite3
+import ssl
+import sys
+import threading
+import time
 from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -20,6 +24,10 @@ AUDIO_DIR = os.path.join(UPLOAD_DIR, "audio")
 IMAGE_DIR = os.path.join(UPLOAD_DIR, "image")
 
 DATA_LOCK = Lock()
+RESTART_LOCK = Lock()
+RESTART_IN_PROGRESS = False
+TICKET_MIN = 1
+TICKET_MAX = 99
 
 
 def _default_config():
@@ -40,7 +48,7 @@ def _default_config():
                 "titolo": "Chiamata in corso",
                 "sottotitolo": "",
                 "titolo_card": "",
-                "mostra_servizio": True,
+                "mostra_servizio": False,
                 "mostra_operatore": True,
                 "mostra_card": True,
                 "posizione_numero": "card",
@@ -50,6 +58,7 @@ def _default_config():
                 {"tipo": "carousel", "titolo": ""},
                 {"tipo": "testo", "titolo": "Info", "testo": ""},
                 {"tipo": "testo", "titolo": "Messaggi", "testo": ""},
+                {"tipo": "testo", "titolo": "Info 2", "testo": ""},
             ],
             "dimensioni": {
                 "numero": "5rem",
@@ -61,6 +70,11 @@ def _default_config():
                 "testo_dimensione": "1.2rem",
                 "numero_famiglia": "inherit",
                 "numero_dimensione": "4rem",
+                "storico_dimensione": "clamp(1rem, 2.2vw, 1.5rem)",
+            },
+            "ticker": {
+                "dimensione": "clamp(1rem, 2.4vw, 1.6rem)",
+                "velocita_s": 16,
             },
             "audio": {
                 "abilita": False,
@@ -71,6 +85,7 @@ def _default_config():
                 "sfondo": "#0f172a",
                 "testo": "#f8fafc",
                 "card": "#1e293b",
+                "storico_sfondo": "rgba(205, 143, 61, 0.7)",
                 "immagine_sfondo": "",
             },
         },
@@ -91,6 +106,7 @@ def _default_config():
             "dimensioni": {
                 "bottone": "1rem",
                 "bottone_padding": "8px 14px",
+                "descrizione_servizio": "0.85em",
             },
             "stampa": {
                 "abilita": False,
@@ -99,7 +115,11 @@ def _default_config():
                 "nome": "",
                 "logo": "",
                 "messaggio": "Ticket eliminacode",
+                "font_size": 2,
+                "margine_superiore": 0,
+                "margine_inferiore": 2,
                 "footer": "",
+                "mostra_servizio": False,
                 "mostra_data_ora": True,
                 "taglio": True,
             },
@@ -195,6 +215,11 @@ def _read_state():
         state["config"]["display"]["dimensioni"] = _default_config()["display"]["dimensioni"]
     if "fonts" not in state["config"]["display"]:
         state["config"]["display"]["fonts"] = _default_config()["display"]["fonts"]
+    else:
+        for key, value in _default_config()["display"]["fonts"].items():
+            state["config"]["display"]["fonts"].setdefault(key, value)
+    if "ticker" not in state["config"]["display"]:
+        state["config"]["display"]["ticker"] = _default_config()["display"]["ticker"]
     if "contenuti" not in state["config"]["display"]:
         state["config"]["display"]["contenuti"] = _default_config()["display"]["contenuti"]
     elif "posizione_numero" not in state["config"]["display"]["contenuti"]:
@@ -203,10 +228,22 @@ def _read_state():
         ]["posizione_numero"]
     if "finestre" not in state["config"]["display"]:
         state["config"]["display"]["finestre"] = _default_config()["display"]["finestre"]
+    elif isinstance(state["config"]["display"]["finestre"], list):
+        finestre = state["config"]["display"]["finestre"]
+        default_finestre = _default_config()["display"]["finestre"]
+        if len(finestre) == 4:
+            finestre.append(dict(finestre[2]))
+        while len(finestre) < 5:
+            finestre.append(dict(default_finestre[len(finestre)]))
     if "colonne_extra" not in state["config"]["display"]:
         state["config"]["display"]["colonne_extra"] = _default_config()["display"]["colonne_extra"]
     if "audio" not in state["config"]["display"]:
         state["config"]["display"]["audio"] = _default_config()["display"]["audio"]
+    if "tema" not in state["config"]["display"]:
+        state["config"]["display"]["tema"] = _default_config()["display"]["tema"]
+    else:
+        for key, value in _default_config()["display"]["tema"].items():
+            state["config"]["display"]["tema"].setdefault(key, value)
     if "kiosk" not in state["config"]:
         state["config"]["kiosk"] = _default_config()["kiosk"]
     else:
@@ -218,6 +255,9 @@ def _read_state():
             stampa_default = _default_config()["kiosk"]["stampa"]
             for key, value in stampa_default.items():
                 state["config"]["kiosk"]["stampa"].setdefault(key, value)
+        if "dimensioni" in state["config"]["kiosk"]:
+            for key, value in _default_config()["kiosk"]["dimensioni"].items():
+                state["config"]["kiosk"]["dimensioni"].setdefault(key, value)
     if "contenuti" not in state["config"]["kiosk"]:
         state["config"]["kiosk"]["contenuti"] = _default_config()["kiosk"]["contenuti"]
     if "operatori" not in state["config"]:
@@ -290,7 +330,26 @@ def _parse_multipart_file(content_type, body):
         if name == "file" and filename:
             if content.endswith(b"\r\n"):
                 content = content[:-2]
-            return filename, content
+    return filename, content
+
+
+def _schedule_restart(server):
+    global RESTART_IN_PROGRESS
+    with RESTART_LOCK:
+        if RESTART_IN_PROGRESS:
+            return False
+        RESTART_IN_PROGRESS = True
+
+    def _restart():
+        time.sleep(0.3)
+        try:
+            server.shutdown()
+            server.server_close()
+        finally:
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+
+    threading.Thread(target=_restart, daemon=True).start()
+    return True
     return None, None
 
 
@@ -309,12 +368,30 @@ def _format_ticket_payload(ticket, stampa_config):
     nome = stampa_config.get("nome", "").strip()
     logo = stampa_config.get("logo", "").strip()
     messaggio = stampa_config.get("messaggio", "Ticket eliminacode").strip()
+    try:
+        font_size = int(stampa_config.get("font_size", 2))
+    except (TypeError, ValueError):
+        font_size = 2
+    font_size = max(1, min(font_size, 8))
+    try:
+        margine_superiore = int(stampa_config.get("margine_superiore", 0))
+    except (TypeError, ValueError):
+        margine_superiore = 0
+    margine_superiore = max(0, min(margine_superiore, 20))
+    try:
+        margine_inferiore = int(stampa_config.get("margine_inferiore", 2))
+    except (TypeError, ValueError):
+        margine_inferiore = 2
+    margine_inferiore = max(0, min(margine_inferiore, 20))
     footer = stampa_config.get("footer", "").strip()
+    mostra_servizio = bool(stampa_config.get("mostra_servizio", False))
     mostra_data_ora = bool(stampa_config.get("mostra_data_ora", True))
     taglio = bool(stampa_config.get("taglio", True))
 
     payload = bytearray()
     payload.extend(b"\x1b@")
+    if margine_superiore:
+        payload.extend(b"\n" * margine_superiore)
     payload.extend(b"\x1ba\x01")
     if nome:
         payload.extend(nome.encode("utf-8"))
@@ -325,19 +402,22 @@ def _format_ticket_payload(ticket, stampa_config):
     if messaggio:
         payload.extend(messaggio.encode("utf-8"))
         payload.extend(b"\n")
-    payload.extend(b"\x1d!\x11")
+    size_value = (font_size - 1) << 4 | (font_size - 1)
+    payload.extend(bytes((0x1D, 0x21, size_value)))
     payload.extend(str(numero).encode("utf-8"))
     payload.extend(b"\n")
     payload.extend(b"\x1d!\x00")
-    payload.extend(b"\x1ba\x00")
-    payload.extend(f"Servizio: {servizio}\n".encode("utf-8"))
+    payload.extend(b"\x1ba\x01")
     if mostra_data_ora:
-        payload.extend(f"Orario: {data_locale}\n".encode("utf-8"))
+        payload.extend(f"{data_locale}\n".encode("utf-8"))
+    payload.extend(b"\x1ba\x00")
+    if mostra_servizio:
+        payload.extend(f"Servizio: {servizio}\n".encode("utf-8"))
     if footer:
         payload.extend(b"\n")
         payload.extend(footer.encode("utf-8"))
         payload.extend(b"\n")
-    payload.extend(b"\n\n")
+    payload.extend(b"\n" * (margine_inferiore + 1))
     if taglio:
         payload.extend(b"\x1dV\x00")
     return bytes(payload)
@@ -506,6 +586,15 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         LIMIT 12
                         """
                     ).fetchall()
+                    per_anno = conn.execute(
+                        """
+                        SELECT strftime('%Y', creato_il) AS periodo, COUNT(*) AS count
+                        FROM tickets
+                        GROUP BY strftime('%Y', creato_il)
+                        ORDER BY periodo DESC
+                        LIMIT 10
+                        """
+                    ).fetchall()
                 self._send_json(
                     {
                         "totale_ticket": totale_ticket,
@@ -541,6 +630,219 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                             {"periodo": row["periodo"], "count": row["count"]}
                             for row in per_mese
                         ],
+                        "per_anno": [
+                            {"periodo": row["periodo"], "count": row["count"]}
+                            for row in per_anno
+                        ],
+                    }
+                )
+                return
+            if parsed.path == "/api/stats_day":
+                query = parse_qs(parsed.query)
+                giorno = (query.get("date") or [""])[0]
+                if not giorno or len(giorno) != 10 or giorno[4] != "-" or giorno[7] != "-":
+                    self.send_error(HTTPStatus.BAD_REQUEST, "Data non valida")
+                    return
+                for char in giorno.replace("-", ""):
+                    if not char.isdigit():
+                        self.send_error(HTTPStatus.BAD_REQUEST, "Data non valida")
+                        return
+                with sqlite3.connect(DB_FILE) as conn:
+                    conn.row_factory = sqlite3.Row
+                    chiamate_totali = conn.execute(
+                        """
+                        SELECT COUNT(*) AS count
+                        FROM chiamate
+                        WHERE date(chiamato_il) = ?
+                        """,
+                        (giorno,),
+                    ).fetchone()["count"]
+                    attesa_media = conn.execute(
+                        """
+                        SELECT AVG((julianday(c.chiamato_il) - julianday(t.creato_il)) * 86400.0) AS media
+                        FROM chiamate c
+                        JOIN tickets t
+                          ON t.numero = c.numero
+                         AND t.servizio = c.servizio
+                         AND t.prefisso = c.prefisso
+                        WHERE date(c.chiamato_il) = ?
+                        """,
+                        (giorno,),
+                    ).fetchone()["media"]
+                    per_servizio = conn.execute(
+                        """
+                        SELECT servizio, COUNT(*) AS count
+                        FROM chiamate
+                        WHERE date(chiamato_il) = ?
+                        GROUP BY servizio
+                        ORDER BY count DESC
+                        """,
+                        (giorno,),
+                    ).fetchall()
+                    per_operatore = conn.execute(
+                        """
+                        SELECT operatore, COUNT(*) AS count
+                        FROM chiamate
+                        WHERE date(chiamato_il) = ?
+                        GROUP BY operatore
+                        ORDER BY count DESC
+                        """,
+                        (giorno,),
+                    ).fetchall()
+                self._send_json(
+                    {
+                        "giorno": giorno,
+                        "chiamate_totali": chiamate_totali,
+                        "attesa_media_secondi": attesa_media,
+                        "per_servizio": [
+                            {"servizio": row["servizio"], "count": row["count"]}
+                            for row in per_servizio
+                        ],
+                        "per_operatore": [
+                            {"operatore": row["operatore"], "count": row["count"]}
+                            for row in per_operatore
+                        ],
+                    }
+                )
+                return
+            if parsed.path == "/api/stats_week":
+                query = parse_qs(parsed.query)
+                settimana = (query.get("week") or [""])[0]
+                if (
+                    not settimana
+                    or len(settimana) != 8
+                    or settimana[4] != "-"
+                    or settimana[5] != "W"
+                ):
+                    self.send_error(HTTPStatus.BAD_REQUEST, "Settimana non valida")
+                    return
+                for char in settimana.replace("-", "").replace("W", ""):
+                    if not char.isdigit():
+                        self.send_error(HTTPStatus.BAD_REQUEST, "Settimana non valida")
+                        return
+                with sqlite3.connect(DB_FILE) as conn:
+                    conn.row_factory = sqlite3.Row
+                    chiamate_totali = conn.execute(
+                        """
+                        SELECT COUNT(*) AS count
+                        FROM chiamate
+                        WHERE strftime('%Y-W%W', chiamato_il) = ?
+                        """,
+                        (settimana,),
+                    ).fetchone()["count"]
+                    attesa_media = conn.execute(
+                        """
+                        SELECT AVG((julianday(c.chiamato_il) - julianday(t.creato_il)) * 86400.0) AS media
+                        FROM chiamate c
+                        JOIN tickets t
+                          ON t.numero = c.numero
+                         AND t.servizio = c.servizio
+                         AND t.prefisso = c.prefisso
+                        WHERE strftime('%Y-W%W', c.chiamato_il) = ?
+                        """,
+                        (settimana,),
+                    ).fetchone()["media"]
+                    per_servizio = conn.execute(
+                        """
+                        SELECT servizio, COUNT(*) AS count
+                        FROM chiamate
+                        WHERE strftime('%Y-W%W', chiamato_il) = ?
+                        GROUP BY servizio
+                        ORDER BY count DESC
+                        """,
+                        (settimana,),
+                    ).fetchall()
+                    per_operatore = conn.execute(
+                        """
+                        SELECT operatore, COUNT(*) AS count
+                        FROM chiamate
+                        WHERE strftime('%Y-W%W', chiamato_il) = ?
+                        GROUP BY operatore
+                        ORDER BY count DESC
+                        """,
+                        (settimana,),
+                    ).fetchall()
+                self._send_json(
+                    {
+                        "settimana": settimana,
+                        "chiamate_totali": chiamate_totali,
+                        "attesa_media_secondi": attesa_media,
+                        "per_servizio": [
+                            {"servizio": row["servizio"], "count": row["count"]}
+                            for row in per_servizio
+                        ],
+                        "per_operatore": [
+                            {"operatore": row["operatore"], "count": row["count"]}
+                            for row in per_operatore
+                        ],
+                    }
+                )
+                return
+            if parsed.path == "/api/stats_month":
+                query = parse_qs(parsed.query)
+                mese = (query.get("month") or [""])[0]
+                if not mese or len(mese) != 7 or mese[4] != "-":
+                    self.send_error(HTTPStatus.BAD_REQUEST, "Mese non valido")
+                    return
+                for char in mese.replace("-", ""):
+                    if not char.isdigit():
+                        self.send_error(HTTPStatus.BAD_REQUEST, "Mese non valido")
+                        return
+                with sqlite3.connect(DB_FILE) as conn:
+                    conn.row_factory = sqlite3.Row
+                    chiamate_totali = conn.execute(
+                        """
+                        SELECT COUNT(*) AS count
+                        FROM chiamate
+                        WHERE strftime('%Y-%m', chiamato_il) = ?
+                        """,
+                        (mese,),
+                    ).fetchone()["count"]
+                    attesa_media = conn.execute(
+                        """
+                        SELECT AVG((julianday(c.chiamato_il) - julianday(t.creato_il)) * 86400.0) AS media
+                        FROM chiamate c
+                        JOIN tickets t
+                          ON t.numero = c.numero
+                         AND t.servizio = c.servizio
+                         AND t.prefisso = c.prefisso
+                        WHERE strftime('%Y-%m', c.chiamato_il) = ?
+                        """,
+                        (mese,),
+                    ).fetchone()["media"]
+                    per_servizio = conn.execute(
+                        """
+                        SELECT servizio, COUNT(*) AS count
+                        FROM chiamate
+                        WHERE strftime('%Y-%m', chiamato_il) = ?
+                        GROUP BY servizio
+                        ORDER BY count DESC
+                        """,
+                        (mese,),
+                    ).fetchall()
+                    per_operatore = conn.execute(
+                        """
+                        SELECT operatore, COUNT(*) AS count
+                        FROM chiamate
+                        WHERE strftime('%Y-%m', chiamato_il) = ?
+                        GROUP BY operatore
+                        ORDER BY count DESC
+                        """,
+                        (mese,),
+                    ).fetchall()
+                self._send_json(
+                    {
+                        "mese": mese,
+                        "chiamate_totali": chiamate_totali,
+                        "attesa_media_secondi": attesa_media,
+                        "per_servizio": [
+                            {"servizio": row["servizio"], "count": row["count"]}
+                            for row in per_servizio
+                        ],
+                        "per_operatore": [
+                            {"operatore": row["operatore"], "count": row["count"]}
+                            for row in per_operatore
+                        ],
                     }
                 )
                 return
@@ -561,6 +863,21 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
         if parsed.path == "/stat":
             self._send_file(os.path.join(STATIC_DIR, "stat.html"))
             return
+        if parsed.path == "/stat_totali":
+            self._send_file(os.path.join(STATIC_DIR, "stat_totali.html"))
+            return
+        if parsed.path == "/stat_giorno":
+            self._send_file(os.path.join(STATIC_DIR, "stat_giorno.html"))
+            return
+        if parsed.path == "/stat_settimana":
+            self._send_file(os.path.join(STATIC_DIR, "stat_settimana.html"))
+            return
+        if parsed.path == "/stat_mese":
+            self._send_file(os.path.join(STATIC_DIR, "stat_mese.html"))
+            return
+        if parsed.path == "/stat_anno":
+            self._send_file(os.path.join(STATIC_DIR, "stat_anno.html"))
+            return
         if parsed.path == "/admin":
             self._send_file(os.path.join(STATIC_DIR, "admin.html"))
             return
@@ -569,6 +886,12 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/admin_kiosk":
             self._send_file(os.path.join(STATIC_DIR, "admin_kiosk.html"))
+            return
+        if parsed.path == "/multioperatore":
+            self._send_file(os.path.join(STATIC_DIR, "multioperatore.html"))
+            return
+        if parsed.path == "/multiclient":
+            self._send_file(os.path.join(STATIC_DIR, "multiclient.html"))
             return
         if parsed.path.startswith("/upload/"):
             _ensure_upload_dirs()
@@ -606,6 +929,14 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 self.send_error(HTTPStatus.BAD_REQUEST, "JSON non valido")
                 return
 
+        if parsed.path == "/api/stats/reset":
+            with sqlite3.connect(DB_FILE) as conn:
+                conn.execute("DELETE FROM tickets")
+                conn.execute("DELETE FROM chiamate")
+                conn.commit()
+            self._send_json({"ok": True})
+            return
+
         if parsed.path == "/api/turni":
             with DATA_LOCK:
                 state = _read_state()
@@ -621,7 +952,8 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 priorita = int(priorita_config.get(servizio, 3))
                 creato_il = datetime.now(timezone.utc).isoformat()
                 contatori = state.get("contatori", {})
-                contatori[servizio] = contatori.get(servizio, 0) + 1
+                corrente = int(contatori.get(servizio, 0) or 0)
+                contatori[servizio] = ((corrente - TICKET_MIN + 1) % TICKET_MAX) + TICKET_MIN
                 state["contatori"] = contatori
                 ticket = {
                     "numero": contatori[servizio],
@@ -772,6 +1104,14 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             self._send_json({"ok": True, "name": filename, "url": f"{base_url}/{filename}"})
             return
 
+        if parsed.path == "/api/restart":
+            scheduled = _schedule_restart(self.server)
+            if not scheduled:
+                self._send_json({"ok": False, "message": "Riavvio già in corso"}, status=HTTPStatus.CONFLICT)
+                return
+            self._send_json({"ok": True, "message": "Riavvio avviato"})
+            return
+
         if parsed.path == "/api/admin":
             servizio = str(payload.get("servizio", "")).strip()
             servizi = payload.get("servizi", [])
@@ -895,6 +1235,7 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "slot-2",
                 "slot-3",
                 "slot-4",
+                "slot-5",
             }:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
@@ -907,7 +1248,15 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 if not isinstance(finestra, dict):
                     continue
                 tipo = str(finestra.get("tipo", "")).strip()
-                if tipo not in {"storico", "carousel", "testo", "custom", "corrente", "ticker"}:
+                if tipo not in {
+                    "storico",
+                    "carousel",
+                    "testo",
+                    "custom",
+                    "corrente",
+                    "ticker",
+                    "immagine_fissa",
+                }:
                     continue
                 item = {"tipo": tipo}
                 titolo = str(finestra.get("titolo", "")).strip()
@@ -919,8 +1268,10 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                     item["testo"] = str(finestra.get("testo", "")).strip()
                 if tipo == "custom":
                     item["html"] = str(finestra.get("html", "")).strip()
+                if tipo == "immagine_fissa":
+                    item["immagine"] = str(finestra.get("immagine", "")).strip()
                 finestre_pulite.append(item)
-                if len(finestre_pulite) >= 4:
+                if len(finestre_pulite) >= 5:
                     break
             dimensioni_display = display.get("dimensioni", default_display["dimensioni"])
             if not isinstance(dimensioni_display, dict):
@@ -962,6 +1313,11 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                         "numero_dimensione", default_display["fonts"]["numero_dimensione"]
                     )
                 ).strip(),
+                "storico_dimensione": str(
+                    fonts_display.get(
+                        "storico_dimensione", default_display["fonts"]["storico_dimensione"]
+                    )
+                ).strip(),
             }
             display_audio = display.get("audio", default_display["audio"])
             if not isinstance(display_audio, dict):
@@ -977,6 +1333,23 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             if audio_volume < 0 or audio_volume > 1:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
                 return
+            ticker_display = display.get("ticker", default_display.get("ticker", {}))
+            if not isinstance(ticker_display, dict):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            ticker_dimensione = str(
+                ticker_display.get("dimensione", default_display["ticker"]["dimensione"])
+            ).strip()
+            try:
+                ticker_velocita = float(
+                    ticker_display.get("velocita_s", default_display["ticker"]["velocita_s"])
+                )
+            except (TypeError, ValueError):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
+            if ticker_velocita <= 0 or ticker_velocita > 300:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
+                return
             tema_display = display.get("tema", default_display["tema"])
             if not isinstance(tema_display, dict):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Display non valido")
@@ -985,6 +1358,11 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "sfondo": str(tema_display.get("sfondo", default_display["tema"]["sfondo"])).strip(),
                 "testo": str(tema_display.get("testo", default_display["tema"]["testo"])).strip(),
                 "card": str(tema_display.get("card", default_display["tema"]["card"])).strip(),
+                "storico_sfondo": str(
+                    tema_display.get(
+                        "storico_sfondo", default_display["tema"]["storico_sfondo"]
+                    )
+                ).strip(),
                 "immagine_sfondo": str(
                     tema_display.get(
                         "immagine_sfondo", default_display["tema"]["immagine_sfondo"]
@@ -1031,6 +1409,9 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             kiosk_dim = {
                 "bottone": str(kiosk_dimensioni.get("bottone", "1rem")).strip(),
                 "bottone_padding": str(kiosk_dimensioni.get("bottone_padding", "8px 14px")).strip(),
+                "descrizione_servizio": str(
+                    kiosk_dimensioni.get("descrizione_servizio", "0.85em")
+                ).strip(),
             }
             stampa_kiosk = kiosk.get("stampa", {})
             if stampa_kiosk is None:
@@ -1046,6 +1427,26 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
             if stampa_porta < 1 or stampa_porta > 65535:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
                 return
+            try:
+                stampa_font_size = int(stampa_kiosk.get("font_size", 2))
+            except (TypeError, ValueError):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            if stampa_font_size < 1 or stampa_font_size > 8:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            try:
+                stampa_margine_superiore = int(stampa_kiosk.get("margine_superiore", 0))
+                stampa_margine_inferiore = int(stampa_kiosk.get("margine_inferiore", 2))
+            except (TypeError, ValueError):
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            if stampa_margine_superiore < 0 or stampa_margine_superiore > 20:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
+            if stampa_margine_inferiore < 0 or stampa_margine_inferiore > 20:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Kiosk non valido")
+                return
             kiosk_stampa = {
                 "abilita": bool(stampa_kiosk.get("abilita", False)),
                 "host": str(stampa_kiosk.get("host", "")).strip(),
@@ -1053,7 +1454,11 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                 "nome": str(stampa_kiosk.get("nome", "")).strip(),
                 "logo": str(stampa_kiosk.get("logo", "")).strip(),
                 "messaggio": str(stampa_kiosk.get("messaggio", "Ticket eliminacode")).strip(),
+                "font_size": stampa_font_size,
+                "margine_superiore": stampa_margine_superiore,
+                "margine_inferiore": stampa_margine_inferiore,
                 "footer": str(stampa_kiosk.get("footer", "")).strip(),
+                "mostra_servizio": bool(stampa_kiosk.get("mostra_servizio", False)),
                 "mostra_data_ora": bool(stampa_kiosk.get("mostra_data_ora", True)),
                 "taglio": bool(stampa_kiosk.get("taglio", True)),
             }
@@ -1106,6 +1511,10 @@ class EliminacodeHandler(BaseHTTPRequestHandler):
                             "url": audio_url,
                             "volume": audio_volume,
                         },
+                        "ticker": {
+                            "dimensione": ticker_dimensione,
+                            "velocita_s": ticker_velocita,
+                        },
                         "tema": display_tema,
                     },
                     "kiosk": {
@@ -1136,8 +1545,39 @@ if __name__ == "__main__":
     _init_db()
     host = os.environ.get("ELIMINACODE_HOST", "0.0.0.0")
     port = int(os.environ.get("ELIMINACODE_PORT", "8000"))
+    https_enabled = os.environ.get("ELIMINACODE_HTTPS", "0").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    cert_file = os.environ.get("ELIMINACODE_TLS_CERT", os.path.join(BASE_DIR, "certs", "localhost.pem"))
+    key_file = os.environ.get(
+        "ELIMINACODE_TLS_KEY",
+        os.path.join(BASE_DIR, "certs", "localhost-key.pem"),
+    )
+
     server = ThreadingHTTPServer((host, port), EliminacodeHandler)
-    print(f"Eliminacode avviato su http://{host}:{port}")
+    scheme = "http"
+    if https_enabled:
+        cert_file_abs = os.path.abspath(cert_file)
+        key_file_abs = os.path.abspath(key_file)
+        if not os.path.isfile(cert_file_abs):
+            print(f"Certificato TLS non trovato: {cert_file_abs}", file=sys.stderr)
+            sys.exit(1)
+        if not os.path.isfile(key_file_abs):
+            print(f"Chiave TLS non trovata: {key_file_abs}", file=sys.stderr)
+            sys.exit(1)
+        try:
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            context.load_cert_chain(certfile=cert_file_abs, keyfile=key_file_abs)
+            server.socket = context.wrap_socket(server.socket, server_side=True)
+            scheme = "https"
+        except ssl.SSLError as exc:
+            print(f"Errore configurazione TLS: {exc}", file=sys.stderr)
+            sys.exit(1)
+
+    print(f"Eliminacode avviato su {scheme}://{host}:{port}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

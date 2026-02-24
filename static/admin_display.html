@@ -10,7 +10,7 @@
     <main class="container">
       <header>
         <h1>Display chiamata</h1>
-        <p>Configura le quattro finestre del display e i contenuti principali.</p>
+        <p>Configura le cinque finestre del display (con finestra 3 divisa in due) e i contenuti principali.</p>
         <div class="admin-nav">
           <a class="admin-link" href="/admin">Torna all'admin</a>
           <a class="admin-link" href="/admin_kiosk">Vai al kiosk</a>
@@ -31,11 +31,23 @@
           <input id="display-font-number" type="text" placeholder="es. 'Oswald', sans-serif" />
           <label for="display-font-number-size">Dimensione numero chiamato</label>
           <input id="display-font-number-size" type="text" placeholder="es. 4rem" />
+          <label for="display-font-history-size">Dimensione ultimi numeri chiamati</label>
+          <input id="display-font-history-size" type="text" placeholder="es. 1.4rem" />
+          <label for="display-ticker-size">Dimensione testo scorrevole</label>
+          <input id="display-ticker-size" type="text" placeholder="es. 1.4rem" />
+          <label for="display-ticker-speed">Velocita testo scorrevole (secondi)</label>
+          <input id="display-ticker-speed" type="number" min="5" step="1" value="16" />
 
           <label for="display-sfondo">Colore sfondo</label>
           <input id="display-sfondo" type="color" value="#0f172a" />
           <label for="display-testo">Colore testo</label>
           <input id="display-testo" type="color" value="#f8fafc" />
+          <label for="display-history-bg">Colore finestre ultimi numeri</label>
+          <input
+            id="display-history-bg"
+            type="text"
+            placeholder="es. rgba(205, 143, 61, 0.7)"
+          />
           <label for="display-sfondo-img">Sfondo display (URL)</label>
           <input id="display-sfondo-img" type="text" placeholder="https://..." />
           <input id="display-sfondo-file" type="file" accept="image/*" />

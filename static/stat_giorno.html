@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Statistiche per giorno - Eliminacode</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container stats-page">
+      <header>
+        <h1>Statistiche per giorno</h1>
+        <p>Ticket aggregati per giorno.</p>
+        <div class="admin-nav">
+          <a class="admin-nav-link" href="/stat">Indice statistiche</a>
+          <a class="admin-nav-link" href="/stat_totali">Totali</a>
+        </div>
+      </header>
+
+      <section class="card">
+        <h2>Seleziona giorno</h2>
+        <label for="stat-day-date" class="label">Giorno</label>
+        <input id="stat-day-date" type="date" />
+      </section>
+
+      <section class="card">
+        <h2>Chiamate totali</h2>
+        <div class="stats-grid">
+          <div>
+            <span class="label">Ticket chiamati</span>
+            <strong id="stat-day-total">0</strong>
+          </div>
+          <div>
+            <span class="label">Attesa media</span>
+            <strong id="stat-day-attesa">0m 0s</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Chiamate per servizio</h2>
+        <ul id="stat-day-servizi" class="lista"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Chiamate per operatore</h2>
+        <ul id="stat-day-operatori" class="lista"></ul>
+      </section>
+    </main>
+
+    <script src="stat.js"></script>
+  </body>
+</html>

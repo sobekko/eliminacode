@@ -10,6 +10,8 @@ const operatoreAudioEnabled = document.getElementById("operatore-audio-enabled")
 const operatoreAudioUrl = document.getElementById("operatore-audio-url");
 const operatoreAudioVolume = document.getElementById("operatore-audio-volume");
 const esitoAdmin = document.getElementById("esito-admin");
+const restartButton = document.getElementById("restart-server");
+const esitoRestart = document.getElementById("esito-restart");
 let configData = null;
 
 function creaOperatoriInputs(numero, valori = []) {
@@ -166,6 +168,7 @@ function ensureKioskDefaults(kiosk = {}) {
     dimensioni: {
       bottone: kiosk.dimensioni?.bottone || "1rem",
       bottone_padding: kiosk.dimensioni?.bottone_padding || "8px 14px",
+      descrizione_servizio: kiosk.dimensioni?.descrizione_servizio || "0.85em",
     },
     stampa: {
       abilita: kiosk.stampa?.abilita ?? false,
@@ -174,7 +177,11 @@ function ensureKioskDefaults(kiosk = {}) {
       nome: kiosk.stampa?.nome || "",
       logo: kiosk.stampa?.logo || "",
       messaggio: kiosk.stampa?.messaggio || "Ticket eliminacode",
+      font_size: kiosk.stampa?.font_size ?? 2,
+      margine_superiore: kiosk.stampa?.margine_superiore ?? 0,
+      margine_inferiore: kiosk.stampa?.margine_inferiore ?? 2,
       footer: kiosk.stampa?.footer || "",
+      mostra_servizio: kiosk.stampa?.mostra_servizio ?? false,
       mostra_data_ora: kiosk.stampa?.mostra_data_ora ?? true,
       taglio: kiosk.stampa?.taglio ?? true,
     },
@@ -294,3 +301,38 @@ form.addEventListener("submit", async (event) => {
 });
 
 caricaConfig();
+
+if (restartButton) {
+  restartButton.addEventListener("click", async () => {
+    const conferma = window.confirm("Riavviare il server? Gli utenti verranno disconnessi.");
+    if (!conferma) {
+      return;
+    }
+    restartButton.disabled = true;
+    esitoRestart.textContent = "Riavvio in corso...";
+    esitoRestart.className = "esito";
+    try {
+      const response = await fetch("/api/restart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "restart" }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        esitoRestart.textContent = data.message || "Errore nel riavvio.";
+        esitoRestart.className = "esito error";
+        restartButton.disabled = false;
+        return;
+      }
+      esitoRestart.textContent = "Riavvio avviato. La pagina verra ricaricata.";
+      esitoRestart.className = "esito ok";
+      setTimeout(() => {
+        window.location.reload();
+      }, 2500);
+    } catch (error) {
+      esitoRestart.textContent = "Errore nel riavvio.";
+      esitoRestart.className = "esito error";
+      restartButton.disabled = false;
+    }
+  });
+}

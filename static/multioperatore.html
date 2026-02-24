@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Multi operatore - Eliminacode</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container multi-operator-page">
+      <header>
+        <div class="admin-nav multi-operator-tools">
+          <div class="multi-operator-left">
+            <button id="multi-audio-test" class="ghost">Test audio</button>
+            <span id="multi-audio-status" class="label"></span>
+            <button id="multi-cast-display" class="ghost">Trasmetti display</button>
+            <span id="multi-cast-status" class="label"></span>
+          </div>
+          <div class="multi-operator-right">
+              <strong id="multi-operator-time">--</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="multi-operator-grid">
+        <article class="card operator-card" data-index="0">
+          <div class="operator-card-header">
+            <label for="operatore-1">Operatore 1</label>
+            <select id="operatore-1" class="operator-select"></select>
+          </div>
+          <div class="azioni">
+            <button class="btn-large btn-next">Chiama prossimo</button>
+            <button class="ghost btn-recall" disabled>Richiama</button>
+          </div>
+          <div class="corrente">
+            <span>In chiamata</span>
+            <strong class="corrente-val">Nessuno</strong>
+          </div>
+        </article>
+
+        <article class="card operator-card" data-index="1">
+          <div class="operator-card-header">
+            <label for="operatore-2">Operatore 2</label>
+            <select id="operatore-2" class="operator-select"></select>
+          </div>
+          <div class="azioni">
+            <button class="btn-large btn-next">Chiama prossimo</button>
+            <button class="ghost btn-recall" disabled>Richiama</button>
+          </div>
+          <div class="corrente">
+            <span>In chiamata</span>
+            <strong class="corrente-val">Nessuno</strong>
+          </div>
+        </article>
+
+        <article class="card operator-card" data-index="2">
+          <div class="operator-card-header">
+            <label for="operatore-3">Operatore 3</label>
+            <select id="operatore-3" class="operator-select"></select>
+          </div>
+          <div class="azioni">
+            <button class="btn-large btn-next">Chiama prossimo</button>
+            <button class="ghost btn-recall" disabled>Richiama</button>
+          </div>
+          <div class="corrente">
+            <span>In chiamata</span>
+            <strong class="corrente-val">Nessuno</strong>
+          </div>
+        </article>
+
+        <article class="card operator-card" data-index="3">
+          <div class="operator-card-header">
+            <label for="operatore-4">Operatore 4</label>
+            <select id="operatore-4" class="operator-select"></select>
+          </div>
+          <div class="azioni">
+            <button class="btn-large btn-next">Chiama prossimo</button>
+            <button class="ghost btn-recall" disabled>Richiama</button>
+          </div>
+          <div class="corrente">
+            <span>In chiamata</span>
+            <strong class="corrente-val">Nessuno</strong>
+          </div>
+        </article>
+      </section>
+
+      <section class="card multi-operator-queue">
+        <div class="queue-summary">
+          <div>
+            <span class="label">Totale in attesa</span>
+            <strong id="multi-totale-coda">0</strong>
+          </div>
+          <div>
+            <span class="label">Per servizio</span>
+            <ul id="multi-coda-servizi" class="lista lista-inline"></ul>
+          </div>
+        </div>
+        <div class="queue-detail">
+          <span class="label">Dettaglio attese</span>
+          <ul id="multi-coda-dettaglio" class="lista"></ul>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <script src="multioperatore.js"></script>
+  </body>
+</html>

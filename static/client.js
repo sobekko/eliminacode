@@ -4,6 +4,8 @@ const kioskTextTop = document.getElementById("kiosk-text-top");
 const kioskTextBottom = document.getElementById("kiosk-text-bottom");
 const kioskLogo = document.getElementById("kiosk-logo");
 const kioskServiziDesc = document.getElementById("kiosk-servizi-desc");
+const printPopup = document.getElementById("print-popup");
+let printPopupTimeout = null;
 
 function setElementVisibility(element, shouldShow) {
   if (!element) {
@@ -20,8 +22,12 @@ function applyKioskTheme(kiosk) {
   root.style.setProperty("--kiosk-button", tema.bottone || "#1f6feb");
   root.style.setProperty("--kiosk-button-text", tema.testo_bottone || "#ffffff");
   const dimensioni = (kiosk && kiosk.dimensioni) || {};
-  root.style.setProperty("--kiosk-button-size", dimensioni.bottone || "1rem");
+  root.style.setProperty("--kiosk-button-size", dimensioni.bottone || "2rem");
   root.style.setProperty("--kiosk-button-padding", dimensioni.bottone_padding || "8px 14px");
+  root.style.setProperty(
+    "--kiosk-button-desc-size",
+    dimensioni.descrizione_servizio || "0.85em"
+  );
   if (tema.immagine_sfondo) {
     root.style.setProperty("--kiosk-bg-image", `url('${tema.immagine_sfondo}')`);
   } else {
@@ -101,6 +107,16 @@ function renderServizi(config) {
       button.appendChild(subtitle);
     }
     button.addEventListener("click", () => {
+      if (printPopup) {
+        printPopup.classList.add("visible");
+        if (printPopupTimeout) {
+          clearTimeout(printPopupTimeout);
+        }
+        printPopupTimeout = setTimeout(() => {
+          printPopup.classList.remove("visible");
+          printPopupTimeout = null;
+        }, 3000);
+      }
       creaTicket(servizio);
     });
     serviziContainer.appendChild(button);

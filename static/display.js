@@ -3,6 +3,7 @@ const windows = [
   document.getElementById("window-2"),
   document.getElementById("window-3"),
   document.getElementById("window-4"),
+  document.getElementById("window-5"),
 ];
 const popupEl = document.getElementById("display-popup");
 const popupNumeroEl = document.getElementById("display-popup-numero");
@@ -46,6 +47,7 @@ loadStoredAudioState();
 function applyDisplayTheme(display) {
   const tema = display.tema || {};
   const fonts = display.fonts || {};
+  const ticker = display.ticker || {};
   const root = document.documentElement;
   root.style.setProperty("--display-bg", tema.sfondo || "#0f172a");
   root.style.setProperty("--display-text", tema.testo || "#f8fafc");
@@ -53,6 +55,21 @@ function applyDisplayTheme(display) {
   root.style.setProperty("--display-text-size", fonts.testo_dimensione || "1.2rem");
   root.style.setProperty("--display-number-font", fonts.numero_famiglia || "inherit");
   root.style.setProperty("--display-number-size", fonts.numero_dimensione || "4rem");
+  root.style.setProperty(
+    "--display-history-size",
+    fonts.storico_dimensione || "clamp(1rem, 2.2vw, 1.5rem)"
+  );
+  root.style.setProperty(
+    "--display-history-bg",
+    tema.storico_sfondo || "rgba(205, 143, 61, 0.7)"
+  );
+  root.style.setProperty(
+    "--display-ticker-size",
+    ticker.dimensione || "clamp(1rem, 2.4vw, 1.6rem)"
+  );
+  const speedSeconds = Number(ticker.velocita_s);
+  const safeSpeed = Number.isFinite(speedSeconds) && speedSeconds > 0 ? speedSeconds : 16;
+  root.style.setProperty("--display-ticker-speed", `${safeSpeed}s`);
   if (tema.immagine_sfondo) {
     root.style.setProperty("--display-bg-image", `url('${tema.immagine_sfondo}')`);
   } else {
@@ -130,6 +147,24 @@ function renderCarousel(container, immagini) {
   container.appendChild(wrap);
 }
 
+function renderStaticImage(container, immagine) {
+  container.innerHTML = "";
+  if (!immagine) {
+    const placeholder = document.createElement("div");
+    placeholder.className = "display-placeholder";
+    placeholder.textContent = "Nessuna immagine";
+    container.appendChild(placeholder);
+    return;
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "display-carousel";
+  const img = document.createElement("img");
+  img.alt = "Immagine fissa";
+  img.src = immagine;
+  wrap.appendChild(img);
+  container.appendChild(wrap);
+}
+
 function renderCurrent(container, corrente) {
   container.innerHTML = "";
   const wrapper = document.createElement("div");
@@ -137,6 +172,7 @@ function renderCurrent(container, corrente) {
   const label = document.createElement("div");
   label.className = "display-current-label";
   const number = document.createElement("div");
+  number.className = "display-current-number";
   number.textContent = formatNumero(corrente);
   const operator = document.createElement("div");
   operator.className = "display-current-operator";
@@ -193,14 +229,18 @@ function renderPlaceholder(container) {
 }
 
 function renderWindows(display, corrente, storico) {
-  const panels = Array.isArray(display.finestre) ? display.finestre.slice(0, 4) : [];
+  const panels = Array.isArray(display.finestre) ? display.finestre.slice(0, 5) : [];
   const defaultPanels = [
     { tipo: "carousel" },
     { tipo: "corrente" },
     { tipo: "storico" },
     { tipo: "ticker", testo: "" },
+    { tipo: "storico" },
   ];
-  while (panels.length < 4) {
+  if (panels.length === 4) {
+    panels.push({ ...panels[2] });
+  }
+  while (panels.length < 5) {
     panels.push(defaultPanels[panels.length]);
   }
 
@@ -211,6 +251,7 @@ function renderWindows(display, corrente, storico) {
       return;
     }
     const tipo = panel.tipo || defaultPanels[index].tipo;
+    container.classList.toggle("is-carousel", tipo === "carousel" || tipo === "immagine_fissa");
     if (tipo === "carousel") {
       const immagini = display.immagini || [];
       const sameImages =
@@ -220,6 +261,8 @@ function renderWindows(display, corrente, storico) {
         container.innerHTML = "";
       }
       renderCarousel(container, immagini);
+    } else if (tipo === "immagine_fissa") {
+      renderStaticImage(container, panel.immagine || "");
     } else if (tipo === "corrente") {
       renderCurrent(container, corrente);
     } else if (tipo === "storico") {

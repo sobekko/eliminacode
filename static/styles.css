@@ -56,7 +56,7 @@ body {
 }
 
 .kiosk-text {
-  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+  font-size: clamp(1.8rem, 2.2vw, 2.5rem);
   font-weight: 600;
   white-space: pre-line;
 }
@@ -77,6 +77,77 @@ body {
 
 .operator-page {
   max-width: 720px;
+}
+
+.multi-operator-page {
+  max-width: 1100px;
+}
+
+.multi-operator-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 20px);
+}
+
+.multi-operator-tools {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.multi-operator-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.multi-operator-right {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.operator-card {
+  display: grid;
+  gap: 14px;
+}
+
+.operator-card-header {
+  display: grid;
+  gap: 6px;
+}
+
+.operator-card .azioni {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.operator-card .btn-large {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  padding: clamp(12px, 2vw, 16px) clamp(16px, 3vw, 22px);
+}
+
+.operator-card .corrente strong {
+  font-size: clamp(1.1rem, 2.6vw, 1.5rem);
+}
+
+@media (max-width: 900px) {
+  .multi-operator-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .multi-operator-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.operator-time {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 14px;
 }
 
 .stats-page {
@@ -143,7 +214,7 @@ textarea {
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid #d1d5db;
-  font-size: 1rem;
+  font-size: 2rem;
   font-family: inherit;
   resize: vertical;
 }
@@ -152,7 +223,7 @@ select {
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid #d1d5db;
-  font-size: 1rem;
+  font-size: 2rem;
   background: #fff;
 }
 
@@ -218,6 +289,33 @@ button.ghost {
   color: #b91c1c;
 }
 
+.print-popup {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform: scale(0.98);
+  background: rgba(17, 24, 39, 0.72);
+  color: #fff;
+  padding: 24px;
+  font-weight: 600;
+  font-size: clamp(2rem, 5vw, 4rem);
+  text-align: center;
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.print-popup.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
 .corrente {
   margin-top: 16px;
   font-size: 1.2rem;
@@ -275,8 +373,11 @@ button.ghost {
 
 .kiosk-client .pill {
   border-radius: 18px;
-  padding: clamp(14px, 2vw, 22px) clamp(18px, 4vw, 28px);
-  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  padding: var(
+    --kiosk-button-padding,
+    clamp(14px, 2vw, 22px) clamp(18px, 4vw, 28px)
+  );
+  font-size: var(--kiosk-button-size, clamp(1.1rem, 2.4vw, 1.6rem));
   min-height: 64px;
   box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
   display: grid;
@@ -315,7 +416,7 @@ button.ghost {
 }
 
 .pill-desc {
-  font-size: 0.85em;
+  font-size: var(--kiosk-button-desc-size, 0.85em);
   font-weight: 500;
   opacity: 0.85;
 }

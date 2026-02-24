@@ -5,6 +5,7 @@ const corrente = document.getElementById("corrente");
 const totaleCoda = document.getElementById("totale-coda");
 const codaServizi = document.getElementById("coda-servizi");
 const codaDettaglio = document.getElementById("coda-dettaglio");
+const operatoreTime = document.getElementById("operatore-time");
 let ultimaChiamata = null;
 let operatoreAudio = { abilita: false, url: "", volume: 1 };
 let ticketAudio = null;
@@ -148,6 +149,16 @@ function renderCoda(turni) {
   });
 }
 
+function aggiornaOra() {
+  if (!operatoreTime) {
+    return;
+  }
+  const now = new Date();
+  const data = now.toLocaleDateString("it-IT");
+  const ora = now.toLocaleTimeString("it-IT");
+  operatoreTime.textContent = `${data} ${ora}`;
+}
+
 async function aggiornaCoda() {
   const response = await fetch("/api/turni");
   if (!response.ok) {
@@ -181,4 +192,6 @@ btnRecall.addEventListener("click", () => {
 
 caricaOperatori();
 aggiornaCoda();
+aggiornaOra();
 setInterval(aggiornaCoda, 3000);
+setInterval(aggiornaOra, 1000);

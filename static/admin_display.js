@@ -4,8 +4,12 @@ const displayFontText = document.getElementById("display-font-text");
 const displayFontTextSize = document.getElementById("display-font-text-size");
 const displayFontNumber = document.getElementById("display-font-number");
 const displayFontNumberSize = document.getElementById("display-font-number-size");
+const displayFontHistorySize = document.getElementById("display-font-history-size");
+const displayTickerSize = document.getElementById("display-ticker-size");
+const displayTickerSpeed = document.getElementById("display-ticker-speed");
 const displaySfondo = document.getElementById("display-sfondo");
 const displayTesto = document.getElementById("display-testo");
+const displayHistoryBg = document.getElementById("display-history-bg");
 const displaySfondoImg = document.getElementById("display-sfondo-img");
 const displaySfondoFile = document.getElementById("display-sfondo-file");
 const displayImmagini = document.getElementById("display-immagini");
@@ -32,6 +36,7 @@ const windowDefaults = [
   { tipo: "corrente" },
   { tipo: "storico" },
   { tipo: "ticker", testo: "Benvenuti." },
+  { tipo: "storico" },
 ];
 
 function readFileAsDataUrl(file, callback) {
@@ -90,10 +95,17 @@ function ensureDisplayDefaults(display = {}) {
       testo_dimensione: display.fonts?.testo_dimensione || "1.2rem",
       numero_famiglia: display.fonts?.numero_famiglia || "inherit",
       numero_dimensione: display.fonts?.numero_dimensione || "4rem",
+      storico_dimensione:
+        display.fonts?.storico_dimensione || "clamp(1rem, 2.2vw, 1.5rem)",
+    },
+    ticker: {
+      dimensione: display.ticker?.dimensione || "clamp(1rem, 2.4vw, 1.6rem)",
+      velocita_s: display.ticker?.velocita_s ?? 16,
     },
     tema: {
       sfondo: display.tema?.sfondo || "#0f172a",
       testo: display.tema?.testo || "#f8fafc",
+      storico_sfondo: display.tema?.storico_sfondo || "rgba(205, 143, 61, 0.7)",
       immagine_sfondo: display.tema?.immagine_sfondo || "",
     },
     audio: {
@@ -106,7 +118,7 @@ function ensureDisplayDefaults(display = {}) {
 
 function renderWindows(panels) {
   displayWindowsContainer.innerHTML = "";
-  panels.slice(0, 4).forEach((panel, index) => {
+  panels.slice(0, 5).forEach((panel, index) => {
     const wrapper = document.createElement("div");
     wrapper.className = "priorita-row";
 
@@ -117,6 +129,7 @@ function renderWindows(panels) {
     typeSelect.dataset.index = String(index);
     [
       { value: "carousel", label: "Immagini che scorrono" },
+      { value: "immagine_fissa", label: "Immagine fissa" },
       { value: "corrente", label: "Ultimo numero chiamato" },
       { value: "storico", label: "Ultimi numeri chiamati" },
       { value: "ticker", label: "Testo scorrevole" },
@@ -137,13 +150,22 @@ function renderWindows(panels) {
     tickerInput.placeholder = "Testo scorrevole";
     tickerInput.value = panel.testo || "";
 
+    const imageInput = document.createElement("input");
+    imageInput.type = "text";
+    imageInput.dataset.index = String(index);
+    imageInput.dataset.field = "immagine";
+    imageInput.placeholder = "URL immagine fissa";
+    imageInput.value = panel.immagine || "";
+
     wrapper.appendChild(label);
     wrapper.appendChild(typeSelect);
     wrapper.appendChild(tickerInput);
+    wrapper.appendChild(imageInput);
     displayWindowsContainer.appendChild(wrapper);
 
     const updateVisibility = () => {
       tickerInput.style.display = typeSelect.value === "ticker" ? "block" : "none";
+      imageInput.style.display = typeSelect.value === "immagine_fissa" ? "block" : "none";
     };
     typeSelect.addEventListener("change", updateVisibility);
     updateVisibility();
@@ -156,10 +178,14 @@ function collectWindows() {
   rows.forEach((row, index) => {
     const typeSelect = row.querySelector("select");
     const tickerInput = row.querySelector("textarea[data-field='testo']");
+    const imageInput = row.querySelector("input[data-field='immagine']");
     const tipo = typeSelect?.value || windowDefaults[index].tipo;
     const panel = { tipo };
     if (tipo === "ticker") {
       panel.testo = tickerInput?.value.trim() || "";
+    }
+    if (tipo === "immagine_fissa") {
+      panel.immagine = imageInput?.value.trim() || "";
     }
     panels.push(panel);
   });
@@ -179,8 +205,11 @@ async function caricaConfig() {
   const config = await response.json();
   configData = config;
   const display = ensureDisplayDefaults(config.display || {});
-  const panels = display.finestre.slice(0, 4);
-  while (panels.length < 4) {
+  const panels = display.finestre.slice(0, 5);
+  if (panels.length === 4) {
+    panels.push({ ...panels[2] });
+  }
+  while (panels.length < 5) {
     panels.push(windowDefaults[panels.length]);
   }
   renderWindows(panels);
@@ -189,8 +218,13 @@ async function caricaConfig() {
   displayFontTextSize.value = display.fonts.testo_dimensione || "1.2rem";
   displayFontNumber.value = display.fonts.numero_famiglia || "inherit";
   displayFontNumberSize.value = display.fonts.numero_dimensione || "4rem";
+  displayFontHistorySize.value =
+    display.fonts.storico_dimensione || "clamp(1rem, 2.2vw, 1.5rem)";
+  displayTickerSize.value = display.ticker?.dimensione || "clamp(1rem, 2.4vw, 1.6rem)";
+  displayTickerSpeed.value = String(display.ticker?.velocita_s ?? 16);
   displaySfondo.value = display.tema.sfondo || "#0f172a";
   displayTesto.value = display.tema.testo || "#f8fafc";
+  displayHistoryBg.value = display.tema.storico_sfondo || "rgba(205, 143, 61, 0.7)";
   displaySfondoImg.value = display.tema.immagine_sfondo || "";
   displayImmagini.value = (display.immagini || []).join(", ");
   displayCarouselInterval.value = String(Math.round((display.carousel?.intervallo_ms ?? 6000) / 1000));
@@ -314,10 +348,17 @@ form.addEventListener("submit", async (event) => {
       testo_dimensione: displayFontTextSize.value.trim() || "1.2rem",
       numero_famiglia: displayFontNumber.value.trim() || "inherit",
       numero_dimensione: displayFontNumberSize.value.trim() || "4rem",
+      storico_dimensione:
+        displayFontHistorySize.value.trim() || "clamp(1rem, 2.2vw, 1.5rem)",
+    },
+    ticker: {
+      dimensione: displayTickerSize.value.trim() || "clamp(1rem, 2.4vw, 1.6rem)",
+      velocita_s: Math.max(Number(displayTickerSpeed.value || 16), 1),
     },
     tema: {
       sfondo: displaySfondo.value,
       testo: displayTesto.value,
+      storico_sfondo: displayHistoryBg.value.trim() || "rgba(205, 143, 61, 0.7)",
       immagine_sfondo: displaySfondoImg.value.trim(),
     },
     audio: {

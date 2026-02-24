@@ -10,6 +10,7 @@ const kioskBottone = document.getElementById("kiosk-bottone");
 const kioskTestoBottone = document.getElementById("kiosk-testo-bottone");
 const kioskBottoneSize = document.getElementById("kiosk-bottone-size");
 const kioskBottonePadding = document.getElementById("kiosk-bottone-padding");
+const kioskBottoneDescSize = document.getElementById("kiosk-bottone-desc-size");
 const kioskSfondoImg = document.getElementById("kiosk-sfondo-img");
 const kioskSfondoFile = document.getElementById("kiosk-sfondo-file");
 const kioskPrintEnabled = document.getElementById("kiosk-print-enabled");
@@ -18,7 +19,11 @@ const kioskPrintPort = document.getElementById("kiosk-print-port");
 const kioskPrintName = document.getElementById("kiosk-print-name");
 const kioskPrintLogo = document.getElementById("kiosk-print-logo");
 const kioskPrintMessage = document.getElementById("kiosk-print-message");
+const kioskPrintFontSize = document.getElementById("kiosk-print-font-size");
+const kioskPrintMarginTop = document.getElementById("kiosk-print-margin-top");
+const kioskPrintMarginBottom = document.getElementById("kiosk-print-margin-bottom");
 const kioskPrintFooter = document.getElementById("kiosk-print-footer");
+const kioskPrintShowService = document.getElementById("kiosk-print-show-service");
 const kioskPrintDatetime = document.getElementById("kiosk-print-datetime");
 const kioskPrintCut = document.getElementById("kiosk-print-cut");
 const esitoKiosk = document.getElementById("esito-kiosk");
@@ -49,6 +54,7 @@ function ensureKioskDefaults(kiosk = {}) {
     dimensioni: {
       bottone: kiosk.dimensioni?.bottone || "1rem",
       bottone_padding: kiosk.dimensioni?.bottone_padding || "8px 14px",
+      descrizione_servizio: kiosk.dimensioni?.descrizione_servizio || "0.85em",
     },
     stampa: {
       abilita: kiosk.stampa?.abilita ?? false,
@@ -57,7 +63,11 @@ function ensureKioskDefaults(kiosk = {}) {
       nome: kiosk.stampa?.nome || "",
       logo: kiosk.stampa?.logo || "",
       messaggio: kiosk.stampa?.messaggio || "Ticket eliminacode",
+      font_size: kiosk.stampa?.font_size ?? 2,
+      margine_superiore: kiosk.stampa?.margine_superiore ?? 0,
+      margine_inferiore: kiosk.stampa?.margine_inferiore ?? 2,
       footer: kiosk.stampa?.footer || "",
+      mostra_servizio: kiosk.stampa?.mostra_servizio ?? false,
       mostra_data_ora: kiosk.stampa?.mostra_data_ora ?? true,
       taglio: kiosk.stampa?.taglio ?? true,
     },
@@ -88,13 +98,18 @@ async function caricaConfig() {
   kioskSfondoImg.value = kiosk.tema.immagine_sfondo || "";
   kioskBottoneSize.value = kiosk.dimensioni.bottone || "1rem";
   kioskBottonePadding.value = kiosk.dimensioni.bottone_padding || "8px 14px";
+  kioskBottoneDescSize.value = kiosk.dimensioni.descrizione_servizio || "0.85em";
   kioskPrintEnabled.checked = kiosk.stampa.abilita;
   kioskPrintHost.value = kiosk.stampa.host || "";
   kioskPrintPort.value = String(kiosk.stampa.port || 9100);
   kioskPrintName.value = kiosk.stampa.nome || "";
   kioskPrintLogo.value = kiosk.stampa.logo || "";
   kioskPrintMessage.value = kiosk.stampa.messaggio || "Ticket eliminacode";
+  kioskPrintFontSize.value = String(kiosk.stampa.font_size ?? 2);
+  kioskPrintMarginTop.value = String(kiosk.stampa.margine_superiore ?? 0);
+  kioskPrintMarginBottom.value = String(kiosk.stampa.margine_inferiore ?? 2);
   kioskPrintFooter.value = kiosk.stampa.footer || "";
+  kioskPrintShowService.checked = kiosk.stampa.mostra_servizio ?? false;
   kioskPrintDatetime.checked = kiosk.stampa.mostra_data_ora ?? true;
   kioskPrintCut.checked = kiosk.stampa.taglio;
 }
@@ -142,6 +157,7 @@ form.addEventListener("submit", async (event) => {
     dimensioni: {
       bottone: kioskBottoneSize.value.trim() || "1rem",
       bottone_padding: kioskBottonePadding.value.trim() || "8px 14px",
+      descrizione_servizio: kioskBottoneDescSize.value.trim() || "0.85em",
     },
     stampa: {
       abilita: kioskPrintEnabled.checked,
@@ -150,7 +166,11 @@ form.addEventListener("submit", async (event) => {
       nome: kioskPrintName.value.trim(),
       logo: kioskPrintLogo.value.trim(),
       messaggio: kioskPrintMessage.value.trim(),
+      font_size: Number(kioskPrintFontSize.value) || 2,
+      margine_superiore: Number(kioskPrintMarginTop.value) || 0,
+      margine_inferiore: Number(kioskPrintMarginBottom.value) || 0,
       footer: kioskPrintFooter.value.trim(),
+      mostra_servizio: kioskPrintShowService.checked,
       mostra_data_ora: kioskPrintDatetime.checked,
       taglio: kioskPrintCut.checked,
     },

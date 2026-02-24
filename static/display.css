@@ -17,10 +17,11 @@ body {
   padding: clamp(16px, 2.5vw, 32px);
   display: grid;
   grid-template-columns: 3fr 1fr;
-  grid-template-rows: minmax(0, 0.50fr) minmax(0, 1fr) minmax(0, 0.15fr);
+  grid-template-rows: minmax(0, 0.50fr) minmax(0, 0.70fr) minmax(0, 0.70fr) minmax(0, 0.15fr);
   grid-template-areas:
     "window1 window2"
     "window1 window3"
+    "window1 window5"
     "window4 window4";
   gap: clamp(16px, 2vw, 24px);
   box-sizing: border-box;
@@ -41,6 +42,11 @@ body {
   min-height: 0;
 }
 
+.display-window.is-carousel {
+  border: none;
+  padding: 0;
+}
+
 .window-1 {
   grid-area: window1;
 }
@@ -58,11 +64,30 @@ body {
   padding: clamp(10px, 1.4vw, 16px) clamp(16px, 2vw, 24px);
 }
 
+.window-5 {
+  grid-area: window5;
+}
+
+.window-2,
+.window-3 {
+  padding: clamp(1px, 0.2vw, 3px);
+}
+
+.window-2 {
+  padding: 0;
+}
+
+.window-5 {
+  padding-top: clamp(4px, 1vw, 12px);
+}
+
 .display-carousel {
   width: 100%;
   height: 100%;
   display: grid;
   place-items: center;
+  border-radius: inherit;
+  overflow: hidden;
 }
 
 .display-carousel img {
@@ -70,13 +95,19 @@ body {
   height: 100%;
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  border-radius: inherit;
 }
 
 .display-current {
   text-align: center;
   font-size: var(--display-number-size, 4rem);
   font-weight: 700;
+}
+
+.display-current-number {
+  margin-bottom: 0;
+  line-height: 0.92;
 }
 
 .display-current .display-current-label {
@@ -88,7 +119,7 @@ body {
 }
 
 .display-current-operator {
-  margin-top: 12px;
+  margin-top: 1px;
   font-size: clamp(1rem, 2.2vw, 1.6rem);
   opacity: 0.85;
 }
@@ -113,10 +144,10 @@ body {
 }
 
 .display-history-list li {
-  background: rgba(30, 41, 59, 0.7);
+  background: var(--display-history-bg, rgba(205, 143, 61, 0.7));
   border-radius: 12px;
   padding: 10px 14px;
-  font-size: clamp(1rem, 2.2vw, 1.5rem);
+  font-size: calc(var(--display-history-size, clamp(1rem, 2.2vw, 1.5rem)) * 0.85);
 }
 
 .display-ticker {
@@ -129,8 +160,8 @@ body {
   display: inline-block;
   padding-left: 100%;
   padding-right: 100%;
-  animation: tickerScroll 16s linear infinite;
-  font-size: clamp(1rem, 2.4vw, 1.6rem);
+  animation: tickerScroll var(--display-ticker-speed, 16s) linear infinite;
+  font-size: var(--display-ticker-size, clamp(1rem, 2.4vw, 1.6rem));
 }
 
 @keyframes tickerScroll {
@@ -193,6 +224,7 @@ body {
       "window1"
       "window2"
       "window3"
+      "window5"
       "window4";
   }
 }
